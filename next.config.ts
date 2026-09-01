@@ -5,7 +5,11 @@ const nextConfig: NextConfig = {
     unoptimized: true,
   },
   async rewrites() {
-    return [{ source: "/api/:path*", destination: `${process.env.BACKEND_URL || "http://localhost:4000"}/api/:path*` }];
+    const backend = process.env.BACKEND_URL || "http://localhost:4000";
+    return [
+      { source: "/api/:path*", destination: `${backend}/api/:path*` },
+      { source: "/uploads/:path*", destination: `${backend}/uploads/:path*` },
+    ];
   },
 };
 

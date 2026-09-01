@@ -27,6 +27,7 @@ export default function NewProductPage() {
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [media, setMedia] = useState<Media[]>([]);
+  const [uploadingMedia, setUploadingMedia] = useState(false);
   const [lensCompatibility, setLensCompatibility] = useState<string[]>([]);
   const [lensInput, setLensInput] = useState("");
   const [variants, setVariants] = useState<VariantOption[]>([]);
@@ -74,7 +75,7 @@ export default function NewProductPage() {
       lensCompatibility: data.getAll("lensCompatibility").map(String), variants: variants.map(({ name, values }) => ({ name, values })),
       status: statusOverride ?? status, genders: data.getAll("gender").map(String), categories: data.getAll("category").map(String),
       subcategories: data.getAll("subCategory").map(String), collections: data.getAll("collections").map(String), brands: data.getAll("brands").map(String),
-      tags: String(data.get("tags") || "").split(",").map((tag) => tag.trim()).filter(Boolean), media: media.map((item, index) => ({ name: item.name, primary: index === 0 })),
+      tags: String(data.get("tags") || "").split(",").map((tag) => tag.trim()).filter(Boolean), media: media.map((item, index) => ({ name: item.name, url: item.url, primary: index === 0 })),
     };
     setSaving(true);
     try {
@@ -86,14 +87,24 @@ export default function NewProductPage() {
     } catch (error) { showAuthToast({ message: error instanceof Error ? error.message : "Could not save product.", type: "error" }); }
     finally { setSaving(false); }
   };
-  const addMedia = (files: FileList | null) =>
-    files &&
-    setMedia((current) => [
-      ...current,
-      ...Array.from(files)
-        .slice(0, 8 - current.length)
-        .map((file) => ({ name: file.name, url: URL.createObjectURL(file) })),
-    ]);
+  const addMedia = async (files: FileList | null) => {
+    if (!files?.length || uploadingMedia) return;
+    const candidates = Array.from(files).slice(0, 8 - media.length);
+    const selectedFiles = candidates.filter((file) => file.size <= 2 * 1024 * 1024);
+    if (selectedFiles.length !== candidates.length) showAuthToast({ message: "Images larger than 2 MB were not uploaded.", type: "error" });
+    if (!selectedFiles.length) return;
+    const uploadData = new FormData();
+    selectedFiles.forEach((file) => uploadData.append("images", file));
+    setUploadingMedia(true);
+    try {
+      const response = await fetch("/api/admin/uploads/products", { method: "POST", body: uploadData });
+      const result = await response.json() as { media?: Media[]; error?: string };
+      if (!response.ok || !result.media) throw new Error(result.error || "Could not upload images.");
+      setMedia((current) => [...current, ...result.media!].slice(0, 8));
+      showAuthToast({ message: `${result.media.length} image${result.media.length === 1 ? "" : "s"} uploaded.`, type: "success" });
+    } catch (error) { showAuthToast({ message: error instanceof Error ? error.message : "Could not upload images.", type: "error" }); }
+    finally { setUploadingMedia(false); }
+  };
   const removeMedia = (url: string) => {
     URL.revokeObjectURL(url);
     setMedia((current) => current.filter((item) => item.url !== url));
@@ -258,7 +269,7 @@ export default function NewProductPage() {
                     type="file"
                     accept="image/png,image/jpeg,image/webp,image/avif"
                     multiple
-                    disabled={media.length >= 8}
+                    disabled={media.length >= 8 || uploadingMedia}
                     onChange={(event) => {
                       addMedia(event.target.files);
                       event.target.value = "";
@@ -268,7 +279,9 @@ export default function NewProductPage() {
                     <ImagePlus size={24} />
                   </span>
                   <strong>
-                    {media.length >= 8 ? (
+                    {uploadingMedia ? (
+                      "Uploading images..."
+                    ) : media.length >= 8 ? (
                       "Maximum 8 images added"
                     ) : (
                       <>
@@ -276,7 +289,7 @@ export default function NewProductPage() {
                       </>
                     )}
                   </strong>
-                  <small>PNG, JPG, WEBP or AVIF · Up to 8 images</small>
+                  <small>PNG, JPG, WEBP or AVIF · Up to 8 images · Maximum 2 MB each</small>
                 </label>
                 <div className="np-media-tip">
                   <span>i</span>

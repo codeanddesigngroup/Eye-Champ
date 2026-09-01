@@ -35,6 +35,7 @@ The frontend runs at `http://localhost:3000` and Express runs at `http://localho
 - `GET /api/admin/products` — list products
 - `GET /api/admin/products/:id` — get a product
 - `POST /api/admin/products` — create a product
+- `POST /api/admin/uploads/products` — upload product images
 
 The frontend proxies `/api/*` to Express, allowing the authentication cookie to remain HTTP-only and same-origin.
 
