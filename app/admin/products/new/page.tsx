@@ -31,6 +31,7 @@ export default function NewProductPage() {
   const [lensCompatibility, setLensCompatibility] = useState<string[]>([]);
   const [lensInput, setLensInput] = useState("");
   const [variants, setVariants] = useState<VariantOption[]>([]);
+  const [variantMedia, setVariantMedia] = useState<Record<string, Media[]>>({});
   const [categoryOptions, setCategoryOptions] = useState<CategoryOption[]>([]);
   const [selectedMainCategories, setSelectedMainCategories] = useState<string[]>([]);
   const [selectedSubCategories, setSelectedSubCategories] = useState<string[]>([]);
@@ -72,7 +73,7 @@ export default function NewProductPage() {
       shape: String(data.get("shape") || ""), material: String(data.get("material") || ""), rim: String(data.get("rim") || ""), fit: String(data.get("fit") || ""),
       weight: String(data.get("weight") || ""), feature: String(data.get("feature") || ""),
       measurements: { lensWidth: data.get("lens-width"), bridge: data.get("bridge"), templeLength: data.get("temple-length"), lensHeight: data.get("lens-height") },
-      lensCompatibility: data.getAll("lensCompatibility").map(String), variants: variants.map(({ name, values }) => ({ name, values })),
+      lensCompatibility: data.getAll("lensCompatibility").map(String), variants: variants.map(({ id, name, values }) => ({ name, values, mediaByValue: Object.fromEntries(values.map((value) => [value, variantMedia[`${id}:${value}`] ?? []])) })),
       status: statusOverride ?? status, genders: data.getAll("gender").map(String), categories: data.getAll("category").map(String),
       subcategories: data.getAll("subCategory").map(String), collections: data.getAll("collections").map(String), brands: data.getAll("brands").map(String),
       tags: String(data.get("tags") || "").split(",").map((tag) => tag.trim()).filter(Boolean), media: media.map((item, index) => ({ name: item.name, url: item.url, primary: index === 0 })),
@@ -142,7 +143,7 @@ export default function NewProductPage() {
         return { ...option, values: [...option.values, value], input: "" };
       })
     );
-  const removeVariantValue = (id: number, value: string) =>
+  const removeVariantValue = (id: number, value: string) => {
     setVariants((current) =>
       current.map((option) =>
         option.id === id
@@ -153,6 +154,22 @@ export default function NewProductPage() {
           : option
       )
     );
+    setVariantMedia((current) => { const next = { ...current }; delete next[`${id}:${value}`]; return next; });
+  };
+  const addVariantMedia = async (id: number, value: string, files: FileList | null) => {
+    const key = `${id}:${value}`, current = variantMedia[key] ?? [];
+    if (!files?.length || current.length >= 4) return;
+    const selectedFiles = Array.from(files).slice(0, 4 - current.length).filter((file) => file.size <= 2 * 1024 * 1024);
+    if (!selectedFiles.length) return showAuthToast({ message: "Color images must be 2 MB or smaller.", type: "error" });
+    const uploadData = new FormData(); selectedFiles.forEach((file) => uploadData.append("images", file));
+    try {
+      const response = await fetch("/api/admin/uploads/products", { method: "POST", body: uploadData });
+      const result = await response.json() as { media?: Media[]; error?: string };
+      if (!response.ok || !result.media) throw new Error(result.error || "Could not upload color images.");
+      setVariantMedia((existing) => ({ ...existing, [key]: [...(existing[key] ?? []), ...result.media!].slice(0, 4) }));
+      showAuthToast({ message: `Images uploaded for ${value}.`, type: "success" });
+    } catch (error) { showAuthToast({ message: error instanceof Error ? error.message : "Could not upload color images.", type: "error" }); }
+  };
   const addVariant = () =>
     setVariants((current) => [
       ...current,
@@ -565,6 +582,15 @@ export default function NewProductPage() {
                     >
                       <Trash2 size={17} />
                     </button>
+                    {option.name === "Frame color" && option.values.length > 0 && <div className="np-variant-media">
+                      <strong>Images by color</strong>
+                      {option.values.map((value) => { const key = `${option.id}:${value}`, images = variantMedia[key] ?? []; return <div className="np-color-media-row" key={value}>
+                        <span className="np-color-name"><i style={{background:colorFor(value)}}/>{value}</span>
+                        <div className="np-color-images">{images.map((item) => <span key={item.url}><Image src={item.url} alt={`${value} product`} width={54} height={42} unoptimized/><button type="button" onClick={() => setVariantMedia((current) => ({...current,[key]:(current[key]??[]).filter((image) => image.url !== item.url)}))} aria-label={`Remove ${item.name}`}><X size={11}/></button></span>)}</div>
+                        <label className="np-color-upload"><input type="file" accept="image/png,image/jpeg,image/webp,image/avif" multiple disabled={images.length>=4} onChange={(event)=>{addVariantMedia(option.id,value,event.target.files);event.target.value=""}}/><ImagePlus size={14}/>{images.length>=4?"4 images added":"Add images"}</label>
+                      </div>})}
+                      <small>Up to 4 images per color, maximum 2 MB each.</small>
+                    </div>}
                   </div>
                 ))}
                 {variants.length === 0 && (
