@@ -5,10 +5,13 @@ import Image from "next/image";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminTopbar from "@/components/admin/AdminTopbar";
 import { ArrowLeft, ImagePlus, Package, Trash2, X } from "lucide-react";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { showAuthToast } from "@/components/AuthToast";
 import "./new-product.css";
 
 type Media = { name: string; url: string };
+type CategoryOption = { id: string; name: string; parentId: string | null };
+type NamedOption = { name: string };
 type VariantOption = {
   id: number;
   name: string;
@@ -26,6 +29,34 @@ export default function NewProductPage() {
   const [lensCompatibility, setLensCompatibility] = useState<string[]>([]);
   const [lensInput, setLensInput] = useState("");
   const [variants, setVariants] = useState<VariantOption[]>([]);
+  const [categoryOptions, setCategoryOptions] = useState<CategoryOption[]>([]);
+  const [selectedMainCategories, setSelectedMainCategories] = useState<string[]>([]);
+  const [selectedSubCategories, setSelectedSubCategories] = useState<string[]>([]);
+  const [collectionOptions, setCollectionOptions] = useState<string[]>([]);
+  const [brandOptions, setBrandOptions] = useState<string[]>([]);
+
+  useEffect(() => {
+    fetch("/api/admin/categories", { cache: "no-store" })
+      .then(async (response) => {
+        const result = await response.json() as { categories?: CategoryOption[]; error?: string };
+        if (!response.ok) throw new Error(result.error);
+        setCategoryOptions(result.categories ?? []);
+      })
+      .catch(() => showAuthToast({ message: "Could not load product categories.", type: "error" }));
+  }, []);
+
+  useEffect(() => {
+    Promise.all([
+      fetch("/api/admin/collections", { cache: "no-store" }),
+      fetch("/api/admin/brands", { cache: "no-store" }),
+    ]).then(async ([collectionsResponse, brandsResponse]) => {
+      const collectionsResult = await collectionsResponse.json() as { collections?: NamedOption[]; error?: string };
+      const brandsResult = await brandsResponse.json() as { brands?: NamedOption[]; error?: string };
+      if (!collectionsResponse.ok || !brandsResponse.ok) throw new Error(collectionsResult.error || brandsResult.error);
+      setCollectionOptions((collectionsResult.collections ?? []).map((collection) => collection.name));
+      setBrandOptions((brandsResult.brands ?? []).map((brand) => brand.name));
+    }).catch(() => showAuthToast({ message: "Could not load collections or brands.", type: "error" }));
+  }, []);
 
   const save = () => {
     setSaved(true);
@@ -540,60 +571,36 @@ export default function NewProductPage() {
                   name="gender"
                   values={["Men", "Women"]}
                 />
+                
                 <MultiCheck
                   label="Category"
                   name="category"
-                  values={[
-                    "Eyeglasses",
-                    "Sunglasses",
-                    "Lenses",
-                    "Sports"
-                  ]}
+                  values={categoryOptions.filter((category) => category.parentId === null).map((category) => category.name)}
+                  selectedValues={selectedMainCategories}
+                  onSelectedValuesChange={(values) => { setSelectedMainCategories(values); setSelectedSubCategories([]); }}
                 />
 
                 <MultiCheck
                   label="Sub category"
                   name="subCategory"
-                  values={[
-                    "Men",
-                    "Women",
-                    "Kids",
-                    "Premium",
-                    "Transition",
-                    "Polarized",
-                    "Powered",
-                    "Transparent lenses",
-                    "Coloured lenses",
-                    "Daily disposable lenses",
-                  ]}
+                  values={categoryOptions.filter((category) => {
+                    const selectedParentIds = categoryOptions.filter((parent) => parent.parentId === null && selectedMainCategories.includes(parent.name)).map((parent) => parent.id);
+                    return category.parentId !== null && selectedParentIds.includes(category.parentId);
+                  }).map((category) => category.name)}
+                  selectedValues={selectedSubCategories}
+                  onSelectedValuesChange={setSelectedSubCategories}
                 />
 
                 <MultiCheck
                   label="Collections"
                   name="collections"
-                  values={[
-                    "New arrivals",
-                    "Best sellers",
-                    "Under 5000",
-                    "Top Rated",
-                  ]}
+                  values={collectionOptions}
                 />
 
                  <MultiCheck
                   label="Brands"
                   name="brands"
-                  values={[
-                    "Ray-Ban",
-                    "Cartier",
-                    "Montblanc",
-                    "Tom Ford",
-                    "Moscot",
-                    "Oakley",
-                    "Prada",
-                    "Emporio Armani",
-                    "Versace",
-                    "Gucci"
-                  ]}
+                  values={brandOptions}
                 />
                 <Field label="Tags">
                   <input name="tags" placeholder="Vintage, lightweight..." />
@@ -669,18 +676,28 @@ function MultiCheck({
   label,
   name,
   values,
+  selectedValues,
+  onSelectedValuesChange,
 }: {
   label: string;
   name: string;
   values: string[];
+  selectedValues?: string[];
+  onSelectedValuesChange?: (values: string[]) => void;
 }) {
   return (
     <fieldset className="np-multicheck">
       <legend>{label}</legend>
       <div>
-        {values.map((value) => (
+        {values.length === 0 ? <small>No options available.</small> : values.map((value) => (
           <label key={value}>
-            <input type="checkbox" name={name} value={value} />
+            <input
+              type="checkbox"
+              name={name}
+              value={value}
+              checked={selectedValues?.includes(value)}
+              onChange={onSelectedValuesChange ? (event) => onSelectedValuesChange(event.target.checked ? [...(selectedValues ?? []), value] : (selectedValues ?? []).filter((item) => item !== value)) : undefined}
+            />
             <span>{value}</span>
           </label>
         ))}
