@@ -90,7 +90,7 @@ export default function NewProductPage() {
   };
   const addMedia = async (files: FileList | null) => {
     if (!files?.length || uploadingMedia) return;
-    const candidates = Array.from(files).slice(0, 8 - media.length);
+    const candidates = Array.from(files).slice(0, 4 - media.length);
     const selectedFiles = candidates.filter((file) => file.size <= 2 * 1024 * 1024);
     if (selectedFiles.length !== candidates.length) showAuthToast({ message: "Images larger than 2 MB were not uploaded.", type: "error" });
     if (!selectedFiles.length) return;
@@ -101,7 +101,7 @@ export default function NewProductPage() {
       const response = await fetch("/api/admin/uploads/products", { method: "POST", body: uploadData });
       const result = await response.json() as { media?: Media[]; error?: string };
       if (!response.ok || !result.media) throw new Error(result.error || "Could not upload images.");
-      setMedia((current) => [...current, ...result.media!].slice(0, 8));
+      setMedia((current) => [...current, ...result.media!].slice(0, 4));
       showAuthToast({ message: `${result.media.length} image${result.media.length === 1 ? "" : "s"} uploaded.`, type: "success" });
     } catch (error) { showAuthToast({ message: error instanceof Error ? error.message : "Could not upload images.", type: "error" }); }
     finally { setUploadingMedia(false); }
@@ -256,7 +256,7 @@ export default function NewProductPage() {
                   number="02"
                   title="Product media"
                   subtitle="Add front, side, angle, folded, and case views."
-                  aside={`${media.length} / 8 images`}
+                  aside={`${media.length} / 4 images`}
                 />
                 {media.length > 0 && (
                   <div className="np-media-grid">
@@ -286,7 +286,7 @@ export default function NewProductPage() {
                     type="file"
                     accept="image/png,image/jpeg,image/webp,image/avif"
                     multiple
-                    disabled={media.length >= 8 || uploadingMedia}
+                    disabled={media.length >= 4 || uploadingMedia}
                     onChange={(event) => {
                       addMedia(event.target.files);
                       event.target.value = "";
@@ -298,15 +298,15 @@ export default function NewProductPage() {
                   <strong>
                     {uploadingMedia ? (
                       "Uploading images..."
-                    ) : media.length >= 8 ? (
-                      "Maximum 8 images added"
+                    ) : media.length >= 4 ? (
+                      "Maximum 4 images added"
                     ) : (
                       <>
                         Drop images here or <u>browse files</u>
                       </>
                     )}
                   </strong>
-                  <small>PNG, JPG, WEBP or AVIF · Up to 8 images · Maximum 2 MB each</small>
+                  <small>PNG, JPG, WEBP or AVIF · Up to 4 images · Maximum 2 MB each</small>
                 </label>
                 <div className="np-media-tip">
                   <span>i</span>

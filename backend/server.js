@@ -37,7 +37,7 @@ app.use((_request, response) => response.status(404).json({ error: "Route not fo
 app.use((error, _request, response, _next) => {
   console.error(error);
   if (error.code === "LIMIT_FILE_SIZE") return response.status(400).json({ error: "Each image must be 2 MB or smaller." });
-  if (error.code === "LIMIT_FILE_COUNT" || error.code === "LIMIT_UNEXPECTED_FILE") return response.status(400).json({ error: "Upload no more than 8 images." });
+  if (error.code === "LIMIT_FILE_COUNT" || error.code === "LIMIT_UNEXPECTED_FILE") return response.status(400).json({ error: "Upload no more than 4 images." });
   response.status(500).json({ error: "Internal server error." });
 });
 
