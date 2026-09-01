@@ -59,3 +59,23 @@ CREATE TABLE IF NOT EXISTS brands (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+CREATE TABLE IF NOT EXISTS products (
+  id BIGSERIAL PRIMARY KEY,
+  title VARCHAR(200) NOT NULL,
+  slug VARCHAR(220) NOT NULL UNIQUE,
+  description TEXT NOT NULL DEFAULT '',
+  price NUMERIC(12,2) NOT NULL CHECK (price >= 0),
+  compare_price NUMERIC(12,2), cost NUMERIC(12,2), taxable BOOLEAN NOT NULL DEFAULT TRUE,
+  sku VARCHAR(120) UNIQUE, barcode VARCHAR(160), track_quantity BOOLEAN NOT NULL DEFAULT TRUE,
+  quantity INTEGER NOT NULL DEFAULT 0 CHECK (quantity >= 0), continue_selling BOOLEAN NOT NULL DEFAULT FALSE,
+  shape VARCHAR(80), material VARCHAR(80), rim VARCHAR(80), fit VARCHAR(80), weight NUMERIC(10,2),
+  special_feature VARCHAR(180), measurements JSONB NOT NULL DEFAULT '{}'::jsonb,
+  lens_compatibility JSONB NOT NULL DEFAULT '[]'::jsonb, variants JSONB NOT NULL DEFAULT '[]'::jsonb,
+  status VARCHAR(20) NOT NULL DEFAULT 'Draft' CHECK (status IN ('Active','Draft','Archived')),
+  genders JSONB NOT NULL DEFAULT '[]'::jsonb, categories JSONB NOT NULL DEFAULT '[]'::jsonb,
+  subcategories JSONB NOT NULL DEFAULT '[]'::jsonb, collections JSONB NOT NULL DEFAULT '[]'::jsonb,
+  brands JSONB NOT NULL DEFAULT '[]'::jsonb, tags JSONB NOT NULL DEFAULT '[]'::jsonb,
+  media JSONB NOT NULL DEFAULT '[]'::jsonb,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);

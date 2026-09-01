@@ -32,6 +32,9 @@ The frontend runs at `http://localhost:3000` and Express runs at `http://localho
 - `PATCH /api/admin/brands/:id` — update a brand
 - `PATCH /api/admin/brands` — bulk-update brands
 - `DELETE /api/admin/brands` — bulk-delete brands
+- `GET /api/admin/products` — list products
+- `GET /api/admin/products/:id` — get a product
+- `POST /api/admin/products` — create a product
 
 The frontend proxies `/api/*` to Express, allowing the authentication cookie to remain HTTP-only and same-origin.
 

@@ -25,6 +25,7 @@ export default function NewProductPage() {
   const [title, setTitle] = useState("");
   const [price, setPrice] = useState("");
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [media, setMedia] = useState<Media[]>([]);
   const [lensCompatibility, setLensCompatibility] = useState<string[]>([]);
   const [lensInput, setLensInput] = useState("");
@@ -58,9 +59,32 @@ export default function NewProductPage() {
     }).catch(() => showAuthToast({ message: "Could not load collections or brands.", type: "error" }));
   }, []);
 
-  const save = () => {
-    setSaved(true);
-    window.setTimeout(() => setSaved(false), 2400);
+  const save = async (statusOverride?: "Draft") => {
+    const form = document.getElementById("new-product-form") as HTMLFormElement | null;
+    if (!form || saving || !form.reportValidity()) return;
+    const data = new FormData(form);
+    const payload = {
+      title: String(data.get("title") || ""), description: String(data.get("description") || ""),
+      price: String(data.get("price") || ""), comparePrice: String(data.get("comparePrice") || ""), cost: String(data.get("cost") || ""),
+      taxable: data.has("taxable"), sku: String(data.get("sku") || ""), barcode: String(data.get("barcode") || ""),
+      trackQuantity: data.has("trackQuantity"), quantity: String(data.get("quantity") || "0"), continueSelling: data.has("continueSelling"),
+      shape: String(data.get("shape") || ""), material: String(data.get("material") || ""), rim: String(data.get("rim") || ""), fit: String(data.get("fit") || ""),
+      weight: String(data.get("weight") || ""), feature: String(data.get("feature") || ""),
+      measurements: { lensWidth: data.get("lens-width"), bridge: data.get("bridge"), templeLength: data.get("temple-length"), lensHeight: data.get("lens-height") },
+      lensCompatibility: data.getAll("lensCompatibility").map(String), variants: variants.map(({ name, values }) => ({ name, values })),
+      status: statusOverride ?? status, genders: data.getAll("gender").map(String), categories: data.getAll("category").map(String),
+      subcategories: data.getAll("subCategory").map(String), collections: data.getAll("collections").map(String), brands: data.getAll("brands").map(String),
+      tags: String(data.get("tags") || "").split(",").map((tag) => tag.trim()).filter(Boolean), media: media.map((item, index) => ({ name: item.name, primary: index === 0 })),
+    };
+    setSaving(true);
+    try {
+      const response = await fetch("/api/admin/products", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+      const result = await response.json() as { product?: { id: string }; error?: string };
+      if (!response.ok) throw new Error(result.error || "Could not save product.");
+      setSaved(true); window.setTimeout(() => setSaved(false), 2400);
+      showAuthToast({ message: statusOverride === "Draft" ? "Product saved as draft." : "Product added successfully.", type: "success" });
+    } catch (error) { showAuthToast({ message: error instanceof Error ? error.message : "Could not save product.", type: "error" }); }
+    finally { setSaving(false); }
   };
   const addMedia = (files: FileList | null) =>
     files &&
@@ -140,10 +164,10 @@ export default function NewProductPage() {
             </div>
             <div>
               <Link href="/admin/products">Discard</Link>
-              <button type="button" className="np-draft" onClick={save}>
-                Save as draft
+              <button type="button" className="np-draft" onClick={() => save("Draft")} disabled={saving}>
+                {saving ? "Saving..." : "Save as draft"}
               </button>
-              <button type="submit" form="new-product-form" className="np-save">
+              <button type="submit" form="new-product-form" className="np-save" disabled={saving}>
                 Save product
               </button>
             </div>

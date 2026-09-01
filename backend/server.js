@@ -9,6 +9,7 @@ import { adminAuthRouter } from "./routes/admin-auth.js";
 import { categoriesRouter } from "./routes/categories.js";
 import { collectionsRouter } from "./routes/collections.js";
 import { brandsRouter } from "./routes/brands.js";
+import { productsRouter } from "./routes/products.js";
 
 const app = express();
 const port = Number(process.env.BACKEND_PORT || 4000);
@@ -27,6 +28,7 @@ app.use("/api/admin", adminAuthRouter);
 app.use("/api/admin/categories", categoriesRouter);
 app.use("/api/admin/collections", collectionsRouter);
 app.use("/api/admin/brands", brandsRouter);
+app.use("/api/admin/products", productsRouter);
 app.use((_request, response) => response.status(404).json({ error: "Route not found." }));
 app.use((error, _request, response, _next) => {
   console.error(error);
