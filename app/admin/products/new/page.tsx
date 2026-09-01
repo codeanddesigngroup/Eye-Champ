@@ -148,9 +148,9 @@ export default function NewProductPage() {
       current.map((option) =>
         option.id === id
           ? {
-              ...option,
-              values: option.values.filter((item) => item !== value),
-            }
+            ...option,
+            values: option.values.filter((item) => item !== value),
+          }
           : option
       )
     );
@@ -392,6 +392,7 @@ export default function NewProductPage() {
                     label="Frame shape"
                     name="shape"
                     values={[
+                      "Select shape",
                       "Square",
                       "Rectangle",
                       "Round",
@@ -403,17 +404,17 @@ export default function NewProductPage() {
                   <Select
                     label="Frame material"
                     name="material"
-                    values={["Plastic", "Metal", "Mix material", "Acetate"]}
+                    values={["Select material", "Plastic", "Metal", "Mix material", "Acetate"]}
                   />
                   <Select
                     label="Rim"
                     name="rim"
-                    values={["Full Rim", "Half Rim", "Rimless"]}
+                    values={["Select rim", "Full Rim", "Half Rim", "Rimless"]}
                   />
                   <Select
                     label="Fit / width"
                     name="fit"
-                    values={["Large", "Medium", "Narrow", "Extra wide"]}
+                    values={["Select width", "Large", "Medium", "Narrow", "Extra wide"]}
                   />
                   <Field label="Frame weight">
                     <div className="np-money">
@@ -430,7 +431,6 @@ export default function NewProductPage() {
                   </Field>
                 </div>
                 <div className="np-measurements">
-                  <div className="np-glasses-icon">⌁</div>
                   {[
                     ["Lens width", "52"],
                     ["Bridge", "19"],
@@ -584,11 +584,13 @@ export default function NewProductPage() {
                     </button>
                     {option.name === "Frame color" && option.values.length > 0 && <div className="np-variant-media">
                       <strong>Images by color</strong>
-                      {option.values.map((value) => { const key = `${option.id}:${value}`, images = variantMedia[key] ?? []; return <div className="np-color-media-row" key={value}>
-                        <span className="np-color-name"><i style={{background:colorFor(value)}}/>{value}</span>
-                        <div className="np-color-images">{images.map((item) => <span key={item.url}><Image src={item.url} alt={`${value} product`} width={54} height={42} unoptimized/><button type="button" onClick={() => setVariantMedia((current) => ({...current,[key]:(current[key]??[]).filter((image) => image.url !== item.url)}))} aria-label={`Remove ${item.name}`}><X size={11}/></button></span>)}</div>
-                        <label className="np-color-upload"><input type="file" accept="image/png,image/jpeg,image/webp,image/avif" multiple disabled={images.length>=4} onChange={(event)=>{addVariantMedia(option.id,value,event.target.files);event.target.value=""}}/><ImagePlus size={14}/>{images.length>=4?"4 images added":"Add images"}</label>
-                      </div>})}
+                      {option.values.map((value) => {
+                        const key = `${option.id}:${value}`, images = variantMedia[key] ?? []; return <div className="np-color-media-row" key={value}>
+                          <span className="np-color-name"><i style={{ background: colorFor(value) }} />{value}</span>
+                          <div className="np-color-images">{images.map((item) => <span key={item.url}><Image src={item.url} alt={`${value} product`} width={54} height={42} unoptimized /><button type="button" onClick={() => setVariantMedia((current) => ({ ...current, [key]: (current[key] ?? []).filter((image) => image.url !== item.url) }))} aria-label={`Remove ${item.name}`}><X size={11} /></button></span>)}</div>
+                          <label className="np-color-upload"><input type="file" accept="image/png,image/jpeg,image/webp,image/avif" multiple disabled={images.length >= 4} onChange={(event) => { addVariantMedia(option.id, value, event.target.files); event.target.value = "" }} /><ImagePlus size={14} />{images.length >= 4 ? "4 images added" : "Add images"}</label>
+                        </div>
+                      })}
                       <small>Up to 4 images per color, maximum 2 MB each.</small>
                     </div>}
                   </div>
@@ -623,8 +625,8 @@ export default function NewProductPage() {
                   {status === "Active"
                     ? "This product will be visible in your store."
                     : status === "Draft"
-                    ? "Only staff can view this product."
-                    : "This product is hidden from your store."}
+                      ? "Only staff can view this product."
+                      : "This product is hidden from your store."}
                 </div>
               </section>
               <section className="np-card">
@@ -634,7 +636,7 @@ export default function NewProductPage() {
                   name="gender"
                   values={["Men", "Women"]}
                 />
-                
+
                 <MultiCheck
                   label="Category"
                   name="category"
@@ -660,7 +662,7 @@ export default function NewProductPage() {
                   values={collectionOptions}
                 />
 
-                 <MultiCheck
+                <MultiCheck
                   label="Brands"
                   name="brands"
                   values={brandOptions}
