@@ -1407,3 +1407,7 @@ body:has(.np-admin) {
         transition: none
     }
 }
+
+.no-options{
+    font-size: 10px;
+}

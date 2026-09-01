@@ -689,7 +689,7 @@ function MultiCheck({
     <fieldset className="np-multicheck">
       <legend>{label}</legend>
       <div>
-        {values.length === 0 ? <small>No options available.</small> : values.map((value) => (
+        {values.length === 0 ? <p className="no-options">No options available.</p> : values.map((value) => (
           <label key={value}>
             <input
               type="checkbox"
