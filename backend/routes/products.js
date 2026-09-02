@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { pool } from "../db.js";
 import { requireAdmin } from "../middleware/require-admin.js";
+import sanitizeHtml from "sanitize-html";
 
 export const productsRouter = Router();
 productsRouter.use(requireAdmin);
@@ -53,7 +54,7 @@ productsRouter.post("/", async (request, response, next) => {
         $21::jsonb,$22,$23::jsonb,$24::jsonb,$25::jsonb,$26::jsonb,$27::jsonb,$28::jsonb,$29::jsonb
       ) RETURNING id::text,title,slug,sku,price::float,quantity,status,created_at AS "createdAt"
     `, [
-      body.title.trim(), slug, String(body.description ?? "").trim(), price, comparePrice, cost, body.taxable === true,
+      body.title.trim(), slug, sanitizeHtml(String(body.description ?? ""), { allowedTags: ["p","br","strong","b","em","i","ul","ol","li","div","span","font"], allowedAttributes: { "*": ["style"], font: ["color","size"] }, allowedStyles: { "*": { color: [/^#[0-9a-f]{3,8}$/i, /^rgb\(/], "text-align": [/^(left|center|right|justify)$/], "font-size": [/^[0-9.]+(px|rem|em|%)$/] } } }), price, comparePrice, cost, body.taxable === true,
       String(body.sku ?? "").trim() || null, String(body.barcode ?? "").trim() || null, body.trackQuantity === true,
       quantity, body.continueSelling === true, body.shape || null, body.material || null, body.rim || null,
       body.fit || null, weight, String(body.feature ?? "").trim() || null, JSON.stringify(measurements),
@@ -66,4 +67,13 @@ productsRouter.post("/", async (request, response, next) => {
     if (error.code === "23505") return response.status(409).json({ error: error.constraint?.includes("sku") ? "This SKU is already in use." : "A product with this title already exists." });
     next(error);
   }
+});
+
+productsRouter.delete("/", async (request, response, next) => {
+  try {
+    const { ids } = request.body ?? {};
+    if (!Array.isArray(ids) || !ids.length) return response.status(400).json({ error: "Product IDs are required." });
+    const result = await pool.query("DELETE FROM products WHERE id=ANY($1::bigint[])", [ids]);
+    response.json({ deleted: result.rowCount });
+  } catch (error) { next(error); }
 });

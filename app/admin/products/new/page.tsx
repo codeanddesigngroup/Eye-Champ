@@ -4,8 +4,8 @@ import Link from "next/link";
 import Image from "next/image";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminTopbar from "@/components/admin/AdminTopbar";
-import { ArrowLeft, ImagePlus, Package, Trash2, X } from "lucide-react";
-import { useEffect, useState, type ReactNode } from "react";
+import { AlignCenter, AlignJustify, AlignLeft, AlignRight, ArrowLeft, Bold, ImagePlus, Italic, List, Package, Trash2, X } from "lucide-react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { showAuthToast } from "@/components/AuthToast";
 import "./new-product.css";
 
@@ -23,6 +23,7 @@ export default function NewProductPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [status, setStatus] = useState("Active");
   const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -231,22 +232,7 @@ export default function NewProductPage() {
                   <small>{title.length}/70 characters</small>
                 </Field>
                 <Field className="full" label="Description">
-                  <div className="np-editor">
-                    <div>
-                      <button type="button">
-                        <b>B</b>
-                      </button>
-                      <button type="button">
-                        <i>I</i>
-                      </button>
-                      <button type="button">☷</button>
-                      <button type="button">↗</button>
-                    </div>
-                    <textarea
-                      name="description"
-                      placeholder="Describe the frame style, fit, and standout features..."
-                    />
-                  </div>
+                  <RichTextEditor value={description} onChange={setDescription}/>
                   <small>This appears in the Description tab.</small>
                 </Field>
               </section>
@@ -678,6 +664,26 @@ export default function NewProductPage() {
       </section>
     </main>
   );
+}
+
+function RichTextEditor({value,onChange}:{value:string;onChange:(value:string)=>void}){
+  const editorRef=useRef<HTMLDivElement>(null),selectionRef=useRef<Range|null>(null);
+  const rememberSelection=()=>{const selection=window.getSelection();if(selection?.rangeCount&&editorRef.current?.contains(selection.anchorNode))selectionRef.current=selection.getRangeAt(0).cloneRange()};
+  const restoreSelection=()=>{const selection=window.getSelection();if(selectionRef.current&&selection){selection.removeAllRanges();selection.addRange(selectionRef.current)}};
+  const command=(name:string,commandValue?:string)=>{restoreSelection();document.execCommand(name,false,commandValue);editorRef.current?.focus();onChange(editorRef.current?.innerHTML??"");rememberSelection()};
+  const button=(label:string,icon:ReactNode,name:string)=><button type="button" title={label} aria-label={label} onMouseDown={(event)=>{event.preventDefault();command(name)}}>{icon}</button>;
+  return <div className="np-rich-editor">
+    <div className="np-rich-toolbar">
+      {button("Bold",<Bold size={15}/>,"bold")}{button("Italic",<Italic size={15}/>,"italic")}{button("Bulleted list",<List size={15}/>,"insertUnorderedList")}
+      <span/>
+      <label title="Text size"><select aria-label="Text size" defaultValue="3" onChange={(event)=>command("fontSize",event.target.value)}><option value="2">Small</option><option value="3">Normal</option><option value="4">Large</option><option value="5">Heading</option></select></label>
+      <label className="np-text-color" title="Text color"><input aria-label="Text color" type="color" defaultValue="#173039" onChange={(event)=>command("foreColor",event.target.value)}/></label>
+      <span/>
+      {button("Align left",<AlignLeft size={15}/>,"justifyLeft")}{button("Align center",<AlignCenter size={15}/>,"justifyCenter")}{button("Align right",<AlignRight size={15}/>,"justifyRight")}{button("Justify",<AlignJustify size={15}/>,"justifyFull")}
+    </div>
+    <div ref={editorRef} className="np-rich-content" contentEditable suppressContentEditableWarning data-placeholder="Describe the frame style, fit, and standout features..." onInput={(event)=>onChange(event.currentTarget.innerHTML)} onMouseUp={rememberSelection} onKeyUp={rememberSelection} onBlur={rememberSelection}/>
+    <input type="hidden" name="description" value={value}/>
+  </div>
 }
 
 function CardTitle({
