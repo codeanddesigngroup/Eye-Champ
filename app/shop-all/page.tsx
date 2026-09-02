@@ -8,6 +8,21 @@ type Media = { name?: string; url: string; primary?: boolean };
 type Variant = { name: string; values: string[]; mediaByValue?: Record<string, Media[]> };
 type Product = { id: string; title: string; slug: string; price: number; quantity: number; shape: string | null; categories: string[]; brands: string[]; media: Media[]; variants: Variant[]; createdAt: string };
 
+function frameColor(value: string) {
+  const normalized = value.toLowerCase().trim();
+  const colors: Record<string, string> = {
+    black: "#111111", white: "#ffffff", blue: "#2158a6", navy: "#172d55", brown: "#795036",
+    clear: "#eef4f4", transparent: "#eef4f4", gray: "#80878a", grey: "#80878a", silver: "#aeb7ba",
+    red: "#ae4040", green: "#427055", pink: "#dc86a5", purple: "#744f91", orange: "#dc7b35",
+    yellow: "#e5c642", gold: "#b79a53", cream: "#eee1bd", "rose gold": "#b98276",
+    tortoise: "radial-gradient(circle at 70% 25%,#edb02d 0 18%,#2a1708 23% 48%,#aa6819 52%)",
+    tortoiseshell: "radial-gradient(circle at 70% 25%,#edb02d 0 18%,#2a1708 23% 48%,#aa6819 52%)",
+    rainbow: "conic-gradient(#e44,#ec3,#4a6,#39d,#85c,#e44)", multicolor: "conic-gradient(#e44,#ec3,#4a6,#39d,#85c,#e44)",
+  };
+  if (/^(#[0-9a-f]{3,8}|rgb(a)?\(|hsl(a)?\()/i.test(normalized)) return value;
+  return colors[normalized] ?? normalized;
+}
+
 const groups = [
   ["Gender", ["Men", "Women"]],
   ["Price", ["Under 1000", "Under 2000", "Under 3000", "Above 5000"]],
@@ -27,7 +42,7 @@ function Card({ product, i }: { product: Product; i: number }) {
   const [selectedColor, setSelectedColor] = useState(colors[0] ?? "");
   const colorMedia = selectedColor ? frameColors?.mediaByValue?.[selectedColor] : undefined;
   const image = colorMedia?.[0]?.url || product.media?.find(item => item.primary)?.url || product.media?.[0]?.url || "/images/Browline.webp";
-  return <article className="plp-card"><div className="plp-photo">{i % 3 !== 1 && <span className="plp-badge">New</span>}<button className="plp-heart" onClick={() => setLiked(!liked)} aria-label="Save frame"><Heart fill={liked ? "#053f44" : "none"} /></button><img src={image} alt={product.title} /></div><div className="plp-card-line"><b>Rs {Number(product.price).toFixed(2)}</b><span><Star fill="currentColor" /> New</span></div><p>{product.title}</p>{product.quantity > 0 ? <strong>{product.quantity} in stock</strong> : <strong>Out of stock</strong>}{colors.length > 0 && <div className="plp-swatches" aria-label="Frame colors">{colors.map(color => <button type="button" key={color} className={`color-choice ${color.toLowerCase().replaceAll(" ", "-")} ${selectedColor === color ? "selected" : ""}`} onClick={() => setSelectedColor(color)} aria-label={`Select ${color} color`} aria-pressed={selectedColor === color} />)}{colors.length > 4 && <button type="button" className="more-colors" aria-label={`Show ${colors.length - 4} more colors`}>+{colors.length - 4}</button>}</div>}</article>;
+  return <article className="plp-card"><div className="plp-photo">{i % 3 !== 1 && <span className="plp-badge">New</span>}<button className="plp-heart" onClick={() => setLiked(!liked)} aria-label="Save frame"><Heart fill={liked ? "#053f44" : "none"} /></button><img src={image} alt={product.title} /></div><div className="plp-card-line"><b>Rs {Number(product.price).toFixed(2)}</b><span><Star fill="currentColor" /> New</span></div><p>{product.title}</p>{product.quantity > 0 ? <strong>{product.quantity} in stock</strong> : <strong>Out of stock</strong>}{colors.length > 0 && <div className="plp-swatches" aria-label="Frame colors">{colors.slice(0, 4).map(color => <button type="button" key={color} className={`color-choice ${selectedColor === color ? "selected" : ""}`} style={{background:frameColor(color)}} onClick={() => setSelectedColor(color)} aria-label={`Select ${color} color`} title={color} aria-pressed={selectedColor === color} />)}{colors.length > 4 && <button type="button" className="more-colors" aria-label={`Show ${colors.length - 4} more colors`}>+{colors.length - 4}</button>}</div>}</article>;
 }
 function ShapeIcon({ shape }: { shape: string }) {
   const files: Record<string, string> = {
