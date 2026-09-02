@@ -8,6 +8,7 @@ export default function Navbar() {
     const [menu, setMenu] = useState(false);
     const [query, setQuery] = useState("");
     const [cartCount, setCartCount] = useState(0);
+    const [categories, setCategories] = useState<Array<{id:string;name:string;slug:string;parentId:string|null}>>([]);
     useEffect(() => {
         const updateCartCount = () => {
             const cart = JSON.parse(localStorage.getItem("eye-champ-cart") ?? "[]") as Array<{ quantity?: number }>;
@@ -18,6 +19,8 @@ export default function Navbar() {
         window.addEventListener("eye-champ-cart-updated", updateCartCount);
         return () => { window.removeEventListener("storage", updateCartCount); window.removeEventListener("eye-champ-cart-updated", updateCartCount); };
     }, []);
+    useEffect(() => { fetch("/api/products/categories/navigation").then(response => response.ok ? response.json() : Promise.reject()).then((result:{categories?:Array<{id:string;name:string;slug:string;parentId:string|null}>}) => setCategories(result.categories ?? [])).catch(() => setCategories([])) }, []);
+    const mainCategories = categories.filter(category => category.parentId === null);
     return (
         <>
             <header className="site-header shell">
@@ -35,45 +38,13 @@ export default function Navbar() {
             </header>
 
             <nav className="main-nav" aria-label="Shop categories">
-                <div className="mega-trigger">
-                    <a className="mega-link" href="/shop-all">Eyeglasses</a>
-                    <section className="mega-menu" aria-label="Eyeglasses menu">
-                        <div className="mega-inner">
-                            <div className="mega-column"><b>Eyeglasses</b>{["All eyeglasses", "Men eyeglasses", "Women eyeglasses", "Kids eyeglasses", "New arrivals", "Under 5000", "Premium eyeglasses", "Transition eyeglasses"].map(x => <Link href="/shop-all" key={x}>{x}</Link>)}</div>
-                            <MegaMenuSlider />
-                        </div>
-                    </section>
-                </div>
-                <div className="mega-trigger">
-                    <a className="mega-link" href="/shop-all">Sunglasses</a>
-                    <section className="mega-menu" aria-label="Sunglasses menu">
-                        <div className="mega-inner">
-                            <div className="mega-column"><b>Sunglasses</b>{["All sunglasses", "Men sunglasses", "Women sunglasses", "Kids sunglasses", "New arrivals", "Under 5000", "Premium sunglasses", "Polarized sunglasses", "Powered sunglasses"].map(x => <Link href="/shop-all" key={x}>{x}</Link>)}</div>
-                            <MegaMenuSlider />
-                        </div>
-                    </section>
-                </div>
-                <div className="mega-trigger">
-                    <a className="mega-link" href="#lenses">Lenses</a>
-                    <section className="mega-menu" aria-label="Lenses menu">
-                        <div className="mega-inner">
-                            <div className="mega-column">
-                                <b>Transparent lenses</b>{["Brand", "Brand"].map(x => <Link href="/shop-all" key={x}>{x}</Link>)}
-                                <b>Coloured lenses</b>{["Brand", "Brand"].map(x => <Link href="/shop-all" key={x}>{x}</Link>)}
-                                <b>Daily disposable lenses</b>
-                            </div>
-                            <MegaMenuSlider />
-                        </div>
-                    </section>
-                </div>
-                <div className="mega-trigger">
-                    <a className="mega-link" href="#sports">Sports</a>
-                    <section className="mega-menu" aria-label="Sports menu">
-                        <div className="mega-inner">
-                            <MegaMenuSlider fullWidth />
-                        </div>
-                    </section>
-                </div>
+                {mainCategories.map(main => { const children=categories.filter(category=>category.parentId===main.id); return <div className="mega-trigger" key={main.id}>
+                    <Link className="mega-link" href={`/${main.slug}/all`}>{main.name}</Link>
+                    <section className="mega-menu" aria-label={`${main.name} menu`}><div className="mega-inner">
+                        <div className="mega-column"><b>{main.name}</b><Link href={`/${main.slug}/all`}>All {main.name.toLowerCase()}</Link>{children.map(child=><Link href={`/${main.slug}/${child.slug}`} key={child.id}>{child.name}</Link>)}</div>
+                        <MegaMenuSlider />
+                    </div></section>
+                </div>})}
                 <div className="mega-trigger">
                     <a className="mega-link mega-trending" href="#trending-now">✨ Trending Now</a>
                     <section className="mega-menu" aria-label="Trending Now menu">

@@ -27,6 +27,7 @@ const groups = [
   ["Gender", ["Men", "Women"]],
   ["Price", ["Under 1000", "Under 2000", "Under 3000", "Above 5000"]],
   ["Material", ["Plastic", "Metal", "Mix material", "Acetate"]],
+  ["Collections", ["Under 5000", "New Arrivals", "Best Sellers", "Top Rated"]],
   ["Shape", ["Square", "Rectangle", "Round", "Cat eye", "Browline", "Aviator"]],
   ["Rim", ["Full rim", "Half rim", "Rimless"]],
   ["Brand", ["Ray-Ban", "Cartier", "Montblanc", "Tom Ford", "Moscot", "Oakley", "Prada", "Emporio Armani", "Versace", "Gucci"]],
@@ -70,17 +71,17 @@ function FilterGroup({ title, items, shape, toggle }: { title: string; items: re
 }
 function GridIcon({ size }: { size: 2 | 3 }) { return <span className={`grid-icon grid-icon-${size}`}>{Array.from({ length: size * size }, (_, i) => <i key={i} />)}</span> }
 
-export default function ShopAll() {
+export default function ShopAll({categorySlug="",subcategorySlug="",catalogTitle="The A-List Collection"}:{categorySlug?:string;subcategorySlug?:string;catalogTitle?:string}) {
   const [filtersOpen, setFiltersOpen] = useState(true), [sort, setSort] = useState("Relevance"), [shape, setShape] = useState<string[]>([]), [faq, setFaq] = useState<number | null>(null), [density, setDensity] = useState<"roomy" | "compact">("compact");
   const [products, setProducts] = useState<Product[]>([]), [loading, setLoading] = useState(true), [loadError, setLoadError] = useState("");
-  useEffect(() => { fetch("/api/products", { cache: "no-store" }).then(async response => { const result = await response.json() as { products?: Product[]; error?: string }; if (!response.ok) throw new Error(result.error); setProducts(result.products ?? []) }).catch(error => setLoadError(error instanceof Error ? error.message : "Could not load products.")).finally(() => setLoading(false)) }, []);
+  useEffect(() => { const query=categorySlug?`?category=${encodeURIComponent(categorySlug)}&subcategory=${encodeURIComponent(subcategorySlug)}`:""; fetch(`/api/products${query}`, { cache: "no-store" }).then(async response => { const result = await response.json() as { products?: Product[]; error?: string }; if (!response.ok) throw new Error(result.error); setProducts(result.products ?? []) }).catch(error => setLoadError(error instanceof Error ? error.message : "Could not load products.")).finally(() => setLoading(false)) }, [categorySlug,subcategorySlug]);
   const visible = useMemo(() => { const list = shape.length ? products.filter(product => product.shape && shape.includes(product.shape)) : [...products]; if (sort === "Price Low to High") list.sort((a, b) => Number(a.price) - Number(b.price)); if (sort === "Price High to Low") list.sort((a, b) => Number(b.price) - Number(a.price)); if (sort === "New Arrivals") list.sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt)); return list }, [products, shape, sort]);
   const toggle = (x: string) => setShape(s => s.includes(x) ? s.filter(v => v !== x) : [...s, x]);
   return <main className="plp">
     <section className="plp-hero">
       <div>
         <small>BEST SELLERS</small>
-        <h1>The A-List Collection</h1>
+        <h1>{catalogTitle}</h1>
         <p>Featuring fan favorites and breakout hits.</p>
       </div>
     </section>
