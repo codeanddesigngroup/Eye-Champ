@@ -582,7 +582,21 @@ function RichTextEditor({value,onChange}:{value:string;onChange:(value:string)=>
   const rememberSelection=()=>{const selection=window.getSelection();if(selection?.rangeCount&&editorRef.current?.contains(selection.anchorNode))selectionRef.current=selection.getRangeAt(0).cloneRange()};
   const restoreSelection=()=>{const selection=window.getSelection();if(selectionRef.current&&selection){selection.removeAllRanges();selection.addRange(selectionRef.current)}};
   const command=(name:string,commandValue?:string)=>{restoreSelection();document.execCommand(name,false,commandValue);editorRef.current?.focus();onChange(editorRef.current?.innerHTML??"");rememberSelection()};
+  const align=(alignment:"left"|"center"|"right"|"justify")=>{
+    restoreSelection();
+    const editor=editorRef.current,range=selectionRef.current;
+    if(!editor||!range)return;
+    const blocks=Array.from(editor.querySelectorAll<HTMLElement>("p,div,li,h1,h2,h3,h4,h5,h6")).filter(block=>range.intersectsNode(block));
+    if(blocks.length){blocks.forEach(block=>{block.style.textAlign=alignment})}else{
+      const node=range.commonAncestorContainer.nodeType===Node.TEXT_NODE?range.commonAncestorContainer.parentElement:range.commonAncestorContainer as HTMLElement;
+      const block=node?.closest<HTMLElement>("p,div,li,h1,h2,h3,h4,h5,h6");
+      if(block&&editor.contains(block))block.style.textAlign=alignment;
+      else document.execCommand(`justify${alignment==="justify"?"Full":alignment[0].toUpperCase()+alignment.slice(1)}`);
+    }
+    editor.focus();onChange(editor.innerHTML);rememberSelection();
+  };
   const button=(label:string,icon:ReactNode,name:string)=><button type="button" title={label} aria-label={label} onMouseDown={(event)=>{event.preventDefault();command(name)}}>{icon}</button>;
+  const alignButton=(label:string,icon:ReactNode,alignment:"left"|"center"|"right"|"justify")=><button type="button" title={label} aria-label={label} onMouseDown={(event)=>{event.preventDefault();align(alignment)}}>{icon}</button>;
   return <div className="np-rich-editor">
     <div className="np-rich-toolbar">
       {button("Bold",<Bold size={15}/>,"bold")}{button("Italic",<Italic size={15}/>,"italic")}{button("Bulleted list",<List size={15}/>,"insertUnorderedList")}
@@ -590,7 +604,7 @@ function RichTextEditor({value,onChange}:{value:string;onChange:(value:string)=>
       <label title="Text size"><select aria-label="Text size" defaultValue="3" onChange={(event)=>command("fontSize",event.target.value)}><option value="2">Small</option><option value="3">Normal</option><option value="4">Large</option><option value="5">Heading</option></select></label>
       <label className="np-text-color" title="Text color"><input aria-label="Text color" type="color" defaultValue="#173039" onChange={(event)=>command("foreColor",event.target.value)}/></label>
       <span/>
-      {button("Align left",<AlignLeft size={15}/>,"justifyLeft")}{button("Align center",<AlignCenter size={15}/>,"justifyCenter")}{button("Align right",<AlignRight size={15}/>,"justifyRight")}{button("Justify",<AlignJustify size={15}/>,"justifyFull")}
+      {alignButton("Align left",<AlignLeft size={15}/>,"left")}{alignButton("Align center",<AlignCenter size={15}/>,"center")}{alignButton("Align right",<AlignRight size={15}/>,"right")}{alignButton("Justify",<AlignJustify size={15}/>,"justify")}
     </div>
     <div ref={editorRef} className="np-rich-content" contentEditable suppressContentEditableWarning data-placeholder="Describe the frame style, fit, and standout features..." onInput={(event)=>onChange(event.currentTarget.innerHTML)} onMouseUp={rememberSelection} onKeyUp={rememberSelection} onBlur={rememberSelection}/>
     <input type="hidden" name="description" value={value}/>
