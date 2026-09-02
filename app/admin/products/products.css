@@ -732,3 +732,6 @@
 .pc-grid .pc-stock {
     white-space: nowrap
 }
+
+.pc-edit-link { display: inline-grid; place-items: center; color: #60757c }
+.pc-edit-link:hover { color: #0d6666 }

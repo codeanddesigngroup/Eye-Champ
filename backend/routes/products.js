@@ -27,6 +27,32 @@ productsRouter.get("/:id", async (request, response, next) => {
   } catch (error) { next(error); }
 });
 
+productsRouter.patch("/:id", async (request, response, next) => {
+  try {
+    const body = request.body ?? {};
+    const title = String(body.title ?? "").trim(), price = Number(body.price), quantity = Number(body.quantity);
+    if (!title) return response.status(400).json({ error: "Product title is required." });
+    if (!Number.isFinite(price) || price < 0) return response.status(400).json({ error: "A valid product price is required." });
+    if (!Number.isInteger(quantity) || quantity < 0) return response.status(400).json({ error: "Quantity must be a non-negative whole number." });
+    if (!validStatus.has(body.status)) return response.status(400).json({ error: "Invalid product status." });
+    const description = sanitizeHtml(String(body.description ?? ""), { allowedTags: ["p","br","strong","b","em","i","ul","ol","li","div","span","font"], allowedAttributes: { "*": ["style", "align"], font: ["color","size"] }, allowedStyles: { "*": { color: [/^#[0-9a-f]{3,8}$/i, /^rgb\(/], "text-align": [/^(left|center|right|justify)$/], "font-size": [/^[0-9.]+(px|rem|em|%)$/] } } });
+    const { rows } = await pool.query(`UPDATE products SET title=$1,slug=$2,description=$3,price=$4,quantity=$5,status=$6,sku=$7,
+      compare_price=$8,cost=$9,taxable=$10,barcode=$11,track_quantity=$12,continue_selling=$13,shape=$14,material=$15,rim=$16,fit=$17,
+      weight=$18,special_feature=$19,measurements=$20::jsonb,lens_compatibility=$21::jsonb,variants=$22::jsonb,genders=$23::jsonb,
+      categories=$24::jsonb,subcategories=$25::jsonb,collections=$26::jsonb,brands=$27::jsonb,tags=$28::jsonb,media=$29::jsonb,updated_at=NOW()
+      WHERE id=$30 RETURNING id::text,title,slug,price::float,quantity,status`, [title,slugify(title),description,price,quantity,body.status,String(body.sku??"").trim()||null,
+      numberOrNull(body.comparePrice),numberOrNull(body.cost),body.taxable===true,String(body.barcode??"").trim()||null,body.trackQuantity===true,body.continueSelling===true,
+      body.shape||null,body.material||null,body.rim||null,body.fit||null,numberOrNull(body.weight),String(body.feature??"").trim()||null,JSON.stringify(body.measurements??{}),
+      JSON.stringify(array(body.lensCompatibility)),JSON.stringify(body.variants??[]),JSON.stringify(array(body.genders)),JSON.stringify(array(body.categories)),JSON.stringify(array(body.subcategories)),
+      JSON.stringify(array(body.collections)),JSON.stringify(array(body.brands)),JSON.stringify(array(body.tags)),JSON.stringify(body.media??[]),request.params.id]);
+    if (!rows[0]) return response.status(404).json({ error: "Product not found." });
+    response.json({ product: rows[0] });
+  } catch (error) {
+    if (error.code === "23505") return response.status(409).json({ error: error.constraint?.includes("sku") ? "This SKU is already in use." : "A product with this title already exists." });
+    next(error);
+  }
+});
+
 productsRouter.post("/", async (request, response, next) => {
   try {
     const body = request.body ?? {};

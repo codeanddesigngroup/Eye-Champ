@@ -19,7 +19,7 @@ type VariantOption = {
   input: string;
 };
 
-export default function NewProductPage() {
+export default function NewProductPage({ editId }: { editId?: string } = {}) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [status, setStatus] = useState("Active");
   const [title, setTitle] = useState("");
@@ -35,6 +35,34 @@ export default function NewProductPage() {
   const [selectedSubCategories, setSelectedSubCategories] = useState<string[]>([]);
   const [collectionOptions, setCollectionOptions] = useState<string[]>([]);
   const [brandOptions, setBrandOptions] = useState<string[]>([]);
+  const [editProduct, setEditProduct] = useState<Record<string, unknown> | null>(null);
+
+  useEffect(() => {
+    if (!editId) return;
+    fetch(`/api/admin/products/${editId}`, { cache: "no-store" }).then(async response => {
+      const result = await response.json() as { product?: Record<string, unknown>; error?: string };
+      if (!response.ok || !result.product) throw new Error(result.error || "Could not load product.");
+      const product = result.product;
+      setEditProduct(product);
+      setTitle(String(product.title ?? "")); setPrice(String(product.price ?? "")); setStatus(String(product.status ?? "Draft"));
+      setLensCompatibility((product.lens_compatibility as string[]) ?? []);
+      setSelectedMainCategories((product.categories as string[]) ?? []); setSelectedSubCategories((product.subcategories as string[]) ?? []);
+      const loaded = ((product.variants as Array<{name:string;values:string[];mediaByValue?:Record<string,Media[]>}>) ?? []).map((variant, index) => ({ id: index + 1, name: variant.name, values: variant.values, input: "", mediaByValue: variant.mediaByValue }));
+      setVariants(loaded); setVariantMedia(Object.fromEntries(loaded.flatMap(variant => variant.values.map(value => [`${variant.id}:${value}`, variant.mediaByValue?.[value] ?? []]))));
+    }).catch(error => showAuthToast({ message: error instanceof Error ? error.message : "Could not load product.", type: "error" }));
+  }, [editId]);
+
+  useEffect(() => {
+    if (!editProduct) return;
+    const form = document.getElementById("new-product-form") as HTMLFormElement | null;
+    if (!form) return;
+    const measurements = (editProduct.measurements as Record<string, unknown>) ?? {};
+    const values: Record<string, unknown> = { comparePrice: editProduct.compare_price, cost: editProduct.cost, sku: editProduct.sku, barcode: editProduct.barcode, quantity: editProduct.quantity, shape: editProduct.shape, material: editProduct.material, rim: editProduct.rim, fit: editProduct.fit, weight: editProduct.weight, feature: editProduct.special_feature, tags: ((editProduct.tags as string[]) ?? []).join(", "), "lens-width": measurements.lensWidth, bridge: measurements.bridge, "temple-length": measurements.templeLength, "lens-height": measurements.lensHeight };
+    Object.entries(values).forEach(([name, value]) => { const field = form.elements.namedItem(name) as HTMLInputElement | HTMLSelectElement | null; if (field && value != null) field.value = String(value) });
+    const checkedNames: Record<string, boolean> = { taxable: Boolean(editProduct.taxable), trackQuantity: Boolean(editProduct.track_quantity), continueSelling: Boolean(editProduct.continue_selling) };
+    Object.entries(checkedNames).forEach(([name, checked]) => { const field=form.elements.namedItem(name) as HTMLInputElement|null;if(field)field.checked=checked });
+    (["gender","collections","brands"] as const).forEach(name => { const selected=(editProduct[name === "gender" ? "genders" : name] as string[]) ?? []; form.querySelectorAll<HTMLInputElement>(`input[name="${name}"]`).forEach(input => { input.checked=selected.includes(input.value) }) });
+  }, [editProduct, collectionOptions, brandOptions]);
 
   useEffect(() => {
     fetch("/api/admin/categories", { cache: "no-store" })
@@ -79,7 +107,7 @@ export default function NewProductPage() {
     };
     setSaving(true);
     try {
-      const response = await fetch("/api/admin/products", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+      const response = await fetch(editId ? `/api/admin/products/${editId}` : "/api/admin/products", { method: editId ? "PATCH" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
       const result = await response.json() as { product?: { id: string }; error?: string };
       if (!response.ok) throw new Error(result.error || "Could not save product.");
       setSaved(true); window.setTimeout(() => setSaved(false), 2400);
@@ -164,7 +192,7 @@ export default function NewProductPage() {
               <Link href="/admin/products">
                 <ArrowLeft size={16} /> Products
               </Link>
-              <h1>Add new product</h1>
+              <h1>{editId ? "Edit product" : "Add new product"}</h1>
               <p>Create a frame using the details shown on the product page.</p>
             </div>
             <div>
@@ -173,7 +201,7 @@ export default function NewProductPage() {
                 {saving ? "Saving..." : "Save as draft"}
               </button>
               <button type="submit" form="new-product-form" className="np-save" disabled={saving}>
-                Save product
+                {editId ? "Save changes" : "Save product"}
               </button>
             </div>
           </div>
@@ -209,7 +237,7 @@ export default function NewProductPage() {
                 </Field>
                 <div className="np-field full">
                   <span>Description</span>
-                  <RichTextEditor />
+                  <RichTextEditor initialValue={String(editProduct?.description ?? "")} />
                   <small>This appears in the Description tab.</small>
                 </div>
               </section>
@@ -577,8 +605,9 @@ export default function NewProductPage() {
   );
 }
 
-function RichTextEditor(){
+function RichTextEditor({initialValue=""}:{initialValue?:string}){
   const editorRef=useRef<HTMLDivElement>(null),hiddenInputRef=useRef<HTMLInputElement>(null),selectionRef=useRef<Range|null>(null);
+  useEffect(()=>{if(editorRef.current&&initialValue){editorRef.current.innerHTML=initialValue;if(hiddenInputRef.current)hiddenInputRef.current.value=initialValue}},[initialValue]);
   const rememberSelection=()=>{const selection=window.getSelection();if(selection?.rangeCount&&editorRef.current?.contains(selection.anchorNode))selectionRef.current=selection.getRangeAt(0).cloneRange()};
   const restoreSelection=()=>{const selection=window.getSelection(),editor=editorRef.current;if(!selection||!editor)return false;editor.focus();if(selectionRef.current){selection.removeAllRanges();selection.addRange(selectionRef.current);return true}const range=document.createRange();range.selectNodeContents(editor);range.collapse(false);selection.removeAllRanges();selection.addRange(range);return true};
   const sync=()=>{if(hiddenInputRef.current)hiddenInputRef.current.value=editorRef.current?.innerHTML??"";rememberSelection()};
