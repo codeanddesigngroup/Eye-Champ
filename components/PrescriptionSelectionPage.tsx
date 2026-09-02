@@ -7,6 +7,8 @@ import { Camera, Check, ChevronLeft, ClipboardPenLine, FileText, Info, Pause, Pl
 import { Fragment, useEffect, useRef, useState } from "react";
 
 type Panel = "prescription" | "upload" | "manual";
+type LensProduct={productId?:string;name:string;frameColor:string;image:string;framePrice:number;lensColors?:string[];returnUrl?:string};
+const lensColorValue=(value:string)=>({black:"#000000",brown:"#594400",green:"#105e18",blue:"#7395cf",yellow:"#fff06a",red:"#cd5050",gray:"#808080",grey:"#808080",pink:"#db86a4",purple:"#76529a",orange:"#dd7b35",clear:"#eef4f4",gold:"#b79a53",silver:"#aeb7ba"} as Record<string,string>)[value.toLowerCase()]??(/^#[0-9a-f]{6}$/i.test(value)?value:"#808080");
 
 export default function PrescriptionSelectionPage() {
   const router = useRouter();
@@ -26,6 +28,9 @@ export default function PrescriptionSelectionPage() {
   const [lensConfigured, setLensConfigured] = useState(false);
   const [transitionLoading, setTransitionLoading] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [product,setProduct]=useState<LensProduct>({name:"Celine CL40248U",frameColor:"Black",image:"/images/product/1.avif",framePrice:15000,returnUrl:"/product"});
+
+  useEffect(()=>{try{const saved=sessionStorage.getItem("eye-champ-lens-product");if(saved){const loaded=JSON.parse(saved) as LensProduct;setProduct(loaded);if(loaded.lensColors?.length)setTintColor(loaded.lensColors[0])}}catch{}},[]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -72,7 +77,7 @@ export default function PrescriptionSelectionPage() {
     const lensPrices = { basic: 1500, medium: 2500, gradient: 2500, polarized: 6500 } as Record<string, number>;
     const colorNames = { "#000000": "Black", "#594400": "Brown", "#105e18": "Green", "#7395cf": "Blue", "#fff06a": "Yellow", "#cd5050": "Red" } as Record<string, string>;
     const cart = JSON.parse(localStorage.getItem("eye-champ-cart") ?? "[]") as Array<Record<string, unknown>>;
-    cart.push({ id: `${Date.now()}`, name: "Celine CL40248U", frameColor: "Black", image: "/images/product/1.avif", framePrice: 15000, lens: lensNames[selectedLens], lensPrice: lensPrices[selectedLens], tintStrength, tintColor, colorName: colorNames[tintColor] ?? tintColor, quantity: 1, prescription: { sphereRight: "+0.00", sphereLeft: "+0.00", cylinderRight: "+0.00", cylinderLeft: "+0.00", pd: "62" } });
+    cart.push({ id: `${product.productId??Date.now()}:${product.frameColor}:${selectedLens}:${Date.now()}`, productId:product.productId, name:product.name, frameColor:product.frameColor, image:product.image, framePrice:product.framePrice, lens: lensNames[selectedLens], lensPrice: lensPrices[selectedLens], tintStrength, tintColor, colorName: colorNames[tintColor] ?? tintColor, quantity: 1, prescription: { sphereRight: "+0.00", sphereLeft: "+0.00", cylinderRight: "+0.00", cylinderLeft: "+0.00", pd: "62" } });
     localStorage.setItem("eye-champ-cart", JSON.stringify(cart));
     window.dispatchEvent(new Event("eye-champ-cart-updated"));
     setLensConfigured(true);
@@ -84,10 +89,11 @@ export default function PrescriptionSelectionPage() {
     <div className="usage-topline" />
     <div className="usage-layout">
       <section className="usage-product">
-        <Link href="/product" className="usage-back">Back to Product Page</Link>
-        <div className="usage-product-image"><Image src="/images/product/1.avif" alt="Celine CL40248U black eyeglasses" width={1000} height={460} priority /></div>
-        <h1>Celine CL40248U</h1>
-        <strong>Rs 15,000</strong>
+        <Link href={product.returnUrl||"/product"} className="usage-back">Back to Product Page</Link>
+        <div className="usage-product-image"><Image src={product.image} alt={`${product.name} ${product.frameColor}`} width={1000} height={460} priority unoptimized /></div>
+        <h1>{product.name}</h1>
+        <p>{product.frameColor}</p>
+        <strong>Rs {Number(product.framePrice).toLocaleString()}</strong>
       </section>
 
       <section className="usage-form">
@@ -145,14 +151,14 @@ export default function PrescriptionSelectionPage() {
             </button>
             <div className={`lens-customization-shell ${selectedLens === option.id ? "expanded" : ""}`} aria-hidden={selectedLens !== option.id} inert={selectedLens !== option.id ? true : undefined}><div className="lens-customization">
               <fieldset><legend>Tint Strength:</legend><div>{[{ id: "dark", label: "Dark (80%)" }, { id: "medium", label: "Medium (50%)" }, { id: "light", label: "Light (20%)" }].map(strength => <label key={strength.id}><input type="radio" name="tint-strength" checked={tintStrength === strength.id} onChange={() => { setTintStrength(strength.id); setLensConfigured(false); }} /> {strength.label}</label>)}</div></fieldset>
-              <fieldset><legend>Tint Color</legend><div className="tint-swatches">{["#000000", "#594400", "#105e18", "#7395cf", "#fff06a", "#cd5050"].map(color => <button type="button" aria-label={`Select tint color ${color}`} aria-pressed={tintColor === color} className={tintColor === color ? "selected" : ""} style={{ backgroundColor: color }} key={color} onClick={() => { setTintColor(color); setLensConfigured(false); }} />)}</div></fieldset>
-              <div className="custom-tint"><label htmlFor={`custom-tint-${option.id}`}>Customize Color:</label><input id={`custom-tint-${option.id}`} type="color" value={tintColor} onChange={event => { setTintColor(event.target.value); setLensConfigured(false); }} /></div>
+              <fieldset><legend>Tint Color</legend><div className="tint-swatches">{(product.lensColors?.length?product.lensColors:["#000000", "#594400", "#105e18", "#7395cf", "#fff06a", "#cd5050"]).map(color => <button type="button" title={color} aria-label={`Select tint color ${color}`} aria-pressed={tintColor === color} className={tintColor === color ? "selected" : ""} style={{ backgroundColor: lensColorValue(color) }} key={color} onClick={() => { setTintColor(color); setLensConfigured(false); }} />)}</div></fieldset>
+              <div className="custom-tint"><label htmlFor={`custom-tint-${option.id}`}>Customize Color:</label><input id={`custom-tint-${option.id}`} type="color" value={lensColorValue(tintColor)} onChange={event => { setTintColor(event.target.value); setLensConfigured(false); }} /></div>
               <button type="button" className="lens-config-confirm" disabled={transitionLoading} onClick={() => { setLensConfigured(false); changeStep("review"); }}>Confirm</button>
             </div></div>
           </Fragment>)}
         </div> : <div className="lens-review">
           <small className="lens-review-type">Sunglasses</small>
-          <div className="lens-review-product"><span>Celine CL40248U | Black</span><b>Rs 15,000</b></div>
+          <div className="lens-review-product"><span>{product.name} | {product.frameColor}</span><b>Rs {Number(product.framePrice).toLocaleString()}</b></div>
           <h3>Your prescription</h3>
           <div className="prescription-summary" role="table" aria-label="Prescription summary">
             <div className="summary-row summary-head" role="row"><span /><b>SPH</b><b>CYL</b><b>Axis</b><b>ADD</b><b>PD</b></div>
@@ -163,7 +169,7 @@ export default function PrescriptionSelectionPage() {
           <dl className="lens-review-details">
             <dt>{({ basic: "Basic Lens", medium: "Medium lens", gradient: "Gradient lens", polarized: "Polarized Lens" } as Record<string, string>)[selectedLens ?? ""]}</dt><dd>Rs {(({ basic: 1500, medium: 2500, gradient: 2500, polarized: 6500 } as Record<string, number>)[selectedLens ?? ""] ?? 0).toLocaleString()}</dd>
             <dt>Color</dt><dd>{({ "#000000": "Black", "#594400": "Brown", "#105e18": "Green", "#7395cf": "Blue", "#fff06a": "Yellow", "#cd5050": "Red" } as Record<string, string>)[tintColor] ?? tintColor}</dd>
-            <dt>Subtotal</dt><dd>Rs {(15000 + (({ basic: 1500, medium: 2500, gradient: 2500, polarized: 6500 } as Record<string, number>)[selectedLens ?? ""] ?? 0)).toLocaleString()}</dd>
+            <dt>Subtotal</dt><dd>Rs {(product.framePrice + (({ basic: 1500, medium: 2500, gradient: 2500, polarized: 6500 } as Record<string, number>)[selectedLens ?? ""] ?? 0)).toLocaleString()}</dd>
           </dl>
           <div className="lens-review-note"><b>Note:</b><span>We will take 50% advance payment for this order as your lenses are custom made. Place your order our representative will contact you for further details.</span></div>
           <button type="button" className="lens-add-cart" disabled={transitionLoading} onClick={addToCart}>{lensConfigured ? <><Check /> Added to cart</> : "Confirm & add to cart"}</button>
@@ -171,7 +177,7 @@ export default function PrescriptionSelectionPage() {
       </section>
     </div>
 
-    {step !== "review" && <footer className="usage-subtotal">Subtotal : <b>{step === "lenses" && selectedLens ? `${(15000 + (({ basic: 1500, medium: 2500, gradient: 2500, polarized: 6500 } as Record<string, number>)[selectedLens] ?? 0)).toLocaleString()} (15,000+${(({ basic: 1500, medium: 2500, gradient: 2500, polarized: 6500 } as Record<string, number>)[selectedLens] ?? 0).toLocaleString()})` : "15,000"}</b></footer>}
+    {step !== "review" && <footer className="usage-subtotal">Subtotal : <b>{step === "lenses" && selectedLens ? `${(product.framePrice + (({ basic: 1500, medium: 2500, gradient: 2500, polarized: 6500 } as Record<string, number>)[selectedLens] ?? 0)).toLocaleString()} (${product.framePrice.toLocaleString()}+${(({ basic: 1500, medium: 2500, gradient: 2500, polarized: 6500 } as Record<string, number>)[selectedLens] ?? 0).toLocaleString()})` : product.framePrice.toLocaleString()}</b></footer>}
 
     {guideOpen && <div className="usage-guide-overlay" role="presentation">
       <div className="usage-guide" role="dialog" aria-modal="true" aria-label="Audio guidance">

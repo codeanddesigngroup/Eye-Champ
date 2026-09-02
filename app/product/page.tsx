@@ -35,6 +35,7 @@ export default function ProductPage({databaseProduct}:{databaseProduct?:Database
     const slideProducts = (direction: number) => direction < 0 ? productSlider.current?.slidePrev() : productSlider.current?.slideNext();
     const sortedReviews = [...reviews].sort((a, b) => sortOrder === "Highest rating" ? b[0] - a[0] : sortOrder === "Lowest rating" ? a[0] - b[0] : sortOrder === "Most helpful" ? b[7] - a[7] : 0);
     const frameVariant=databaseProduct?.variants.find(variant=>variant.name.toLowerCase()==="frame color"),frameColors=frameVariant?.values??[];
+    const lensColors=databaseProduct?.variants.find(variant=>variant.name.toLowerCase()==="lens color")?.values??[];
     const productSizes=databaseProduct?.variants.find(variant=>variant.name.toLowerCase()==="size")?.values??[];
     const selectedFrameColor=frameColors[color]??"";
     const databaseImages=(selectedFrameColor?frameVariant?.mediaByValue?.[selectedFrameColor]:undefined)??databaseProduct?.media??[];
@@ -68,7 +69,7 @@ export default function ProductPage({databaseProduct}:{databaseProduct?:Database
                         {/* <b className="size-pill">Large</b> */}
                         <p><b>Color:</b> {selectedFrameColor||"Tortoiseshell"}</p><div className="swatches">{(frameColors.length?frameColors:["tortoise","black","blue"]).map((c, i) => <button key={c} onClick={() => setColor(i)} style={databaseProduct?{background:c}:undefined} className={`${databaseProduct?"":c} ${color === i ? "selected" : ""}`} aria-label={c} />)}</div></div>
                     <BuyNowButton productId={databaseProduct?.id} name={databaseProduct?.title} frameColor={selectedFrameColor||undefined} image={databaseImage(0)} framePrice={databaseProduct?.price} />
-                    <SelectLensesButton />
+                    <SelectLensesButton product={databaseProduct?{productId:databaseProduct.id,name:databaseProduct.title,frameColor:selectedFrameColor||"Default",image:databaseImage(0)||"/images/Browline.webp",framePrice:Number(databaseProduct.price),lensColors}:undefined} />
                     <div className="pay-card">Pay over time with PayPal, Affirm or Afterpay. &nbsp;<u>Learn More</u><br />Use your insurance or FSA/HSA benefits. &nbsp;<u>Learn more</u></div>
                     <div className="includes"><h3>ZENNI WOW PRICE INCLUDES:</h3><p>✓ High-quality frame<br />✓ Basic prescription lenses*<br />✓ Anti-scratch coating<br />✓ UV protection</p><i>*multifocal or readers lenses start at additional cost</i></div>
                     <div className="bought">

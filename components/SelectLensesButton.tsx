@@ -3,14 +3,17 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export default function SelectLensesButton() {
+export type LensProduct = { productId?:string; name:string; frameColor:string; image:string; framePrice:number; lensColors?:string[]; returnUrl?:string };
+export default function SelectLensesButton({product}:{product?:LensProduct}) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
   const openLensSelection = () => {
     if (loading) return;
+    const productPath=window.location.pathname;
+    if(product)sessionStorage.setItem("eye-champ-lens-product",JSON.stringify({...product,returnUrl:productPath}));
     setLoading(true);
-    window.setTimeout(() => router.push("/product/select-lenses"), 850);
+    window.setTimeout(() => router.push(product ? `${productPath}/select-lenses` : "/product/select-lenses"), 850);
   };
 
   return <>

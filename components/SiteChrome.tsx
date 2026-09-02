@@ -10,7 +10,7 @@ import Topbar from "./Topbar";
 
 export default function SiteChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isLensSelection = pathname.startsWith("/product/select-lenses");
+  const isLensSelection = pathname === "/product/select-lenses" || pathname.endsWith("/select-lenses");
 
   return <>
     {!isLensSelection && <><Topbar /><Navbar /></>}
