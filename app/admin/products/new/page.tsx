@@ -27,8 +27,6 @@ export default function NewProductPage() {
   const [price, setPrice] = useState("");
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [media, setMedia] = useState<Media[]>([]);
-  const [uploadingMedia, setUploadingMedia] = useState(false);
   const [lensCompatibility, setLensCompatibility] = useState<string[]>([]);
   const [lensInput, setLensInput] = useState("");
   const [variants, setVariants] = useState<VariantOption[]>([]);
@@ -77,7 +75,8 @@ export default function NewProductPage() {
       lensCompatibility: data.getAll("lensCompatibility").map(String), variants: variants.map(({ id, name, values }) => ({ name, values, mediaByValue: Object.fromEntries(values.map((value) => [value, variantMedia[`${id}:${value}`] ?? []])) })),
       status: statusOverride ?? status, genders: data.getAll("gender").map(String), categories: data.getAll("category").map(String),
       subcategories: data.getAll("subCategory").map(String), collections: data.getAll("collections").map(String), brands: data.getAll("brands").map(String),
-      tags: String(data.get("tags") || "").split(",").map((tag) => tag.trim()).filter(Boolean), media: media.map((item, index) => ({ name: item.name, url: item.url, primary: index === 0 })),
+      tags: String(data.get("tags") || "").split(",").map((tag) => tag.trim()).filter(Boolean),
+      media: Object.values(variantMedia).flat().slice(0, 1).map(item => ({ name: item.name, url: item.url, primary: true })),
     };
     setSaving(true);
     try {
@@ -88,28 +87,6 @@ export default function NewProductPage() {
       showAuthToast({ message: statusOverride === "Draft" ? "Product saved as draft." : "Product added successfully.", type: "success" });
     } catch (error) { showAuthToast({ message: error instanceof Error ? error.message : "Could not save product.", type: "error" }); }
     finally { setSaving(false); }
-  };
-  const addMedia = async (files: FileList | null) => {
-    if (!files?.length || uploadingMedia) return;
-    const candidates = Array.from(files).slice(0, 4 - media.length);
-    const selectedFiles = candidates.filter((file) => file.size <= 2 * 1024 * 1024);
-    if (selectedFiles.length !== candidates.length) showAuthToast({ message: "Images larger than 2 MB were not uploaded.", type: "error" });
-    if (!selectedFiles.length) return;
-    const uploadData = new FormData();
-    selectedFiles.forEach((file) => uploadData.append("images", file));
-    setUploadingMedia(true);
-    try {
-      const response = await fetch("/api/admin/uploads/products", { method: "POST", body: uploadData });
-      const result = await response.json() as { media?: Media[]; error?: string };
-      if (!response.ok || !result.media) throw new Error(result.error || "Could not upload images.");
-      setMedia((current) => [...current, ...result.media!].slice(0, 4));
-      showAuthToast({ message: `${result.media.length} image${result.media.length === 1 ? "" : "s"} uploaded.`, type: "success" });
-    } catch (error) { showAuthToast({ message: error instanceof Error ? error.message : "Could not upload images.", type: "error" }); }
-    finally { setUploadingMedia(false); }
-  };
-  const removeMedia = (url: string) => {
-    URL.revokeObjectURL(url);
-    setMedia((current) => current.filter((item) => item.url !== url));
   };
   const addLensCompatibility = () => {
     const value = lensInput.trim();
@@ -240,72 +217,6 @@ export default function NewProductPage() {
               <section className="np-card">
                 <CardTitle
                   number="02"
-                  title="Product media"
-                  subtitle="Add front, side, angle, folded, and case views."
-                  aside={`${media.length} / 4 images`}
-                />
-                {media.length > 0 && (
-                  <div className="np-media-grid">
-                    {media.map((item, index) => (
-                      <div key={item.url}>
-                        <Image
-                          src={item.url}
-                          alt={`${item.name} preview`}
-                          width={180}
-                          height={105}
-                          unoptimized
-                        />
-                        <span>{index ? `View ${index + 1}` : "Primary"}</span>
-                        <button
-                          type="button"
-                          onClick={() => removeMedia(item.url)}
-                          aria-label={`Remove ${item.name}`}
-                        >
-                          <X size={14} />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                <label className="np-dropzone">
-                  <input
-                    type="file"
-                    accept="image/png,image/jpeg,image/webp,image/avif"
-                    multiple
-                    disabled={media.length >= 4 || uploadingMedia}
-                    onChange={(event) => {
-                      addMedia(event.target.files);
-                      event.target.value = "";
-                    }}
-                  />
-                  <span>
-                    <ImagePlus size={24} />
-                  </span>
-                  <strong>
-                    {uploadingMedia ? (
-                      "Uploading images..."
-                    ) : media.length >= 4 ? (
-                      "Maximum 4 images added"
-                    ) : (
-                      <>
-                        Drop images here or <u>browse files</u>
-                      </>
-                    )}
-                  </strong>
-                  <small>PNG, JPG, WEBP or AVIF · Up to 4 images · Maximum 2 MB each</small>
-                </label>
-                <div className="np-media-tip">
-                  <span>i</span>
-                  <p>
-                    <strong>Image tip</strong> Keep the glasses centered on a
-                    neutral background. The first image becomes the front view.
-                  </p>
-                </div>
-              </section>
-
-              <section className="np-card">
-                <CardTitle
-                  number="03"
                   title="Pricing"
                   subtitle="Set the product page’s starting price and cost."
                 />
@@ -329,7 +240,7 @@ export default function NewProductPage() {
 
               <section className="np-card">
                 <CardTitle
-                  number="04"
+                  number="03"
                   title="Inventory & shipping"
                   subtitle="Track stock and configure fulfillment details."
                 />
@@ -369,7 +280,7 @@ export default function NewProductPage() {
 
               <section className="np-card">
                 <CardTitle
-                  number="05"
+                  number="04"
                   title="Frame specifications"
                   subtitle="These details populate the Features section on /product."
                 />
@@ -485,7 +396,7 @@ export default function NewProductPage() {
 
               <section className="np-card np-variants">
                 <CardTitle
-                  number="06"
+                  number="05"
                   title="Colors & variants"
                   subtitle="Add colors, sizes, or other options customers can select."
                   aside={
