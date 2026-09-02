@@ -371,6 +371,7 @@
 }
 
 .plp-swatches .color-choice{padding:0;cursor:pointer;transition:transform .15s,box-shadow .15s}
+.plp-card{position:relative}.plp-card-link{position:absolute;z-index:1;inset:0}.plp-card button,.plp-card .plp-swatches{position:relative;z-index:2}
 .plp-swatches .color-choice.black{background:#111}.plp-swatches .color-choice.clear{background:#d8edf3}.plp-swatches .color-choice.blue{background:#164c9d}.plp-swatches .color-choice.brown{background:#805f48}.plp-swatches .color-choice.tortoise{background:radial-gradient(circle at 70% 25%,#f2a42c 0 20%,#261608 24% 55%,#a8671a 58%)}
 .plp-swatches .color-choice:hover{transform:scale(1.08)}
 .plp-swatches .color-choice.selected{box-shadow:0 0 0 2px #fff,0 0 0 4px #111}

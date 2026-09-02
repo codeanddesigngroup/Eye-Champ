@@ -20,19 +20,24 @@ const productAssets: Record<string, { src: string; width: number; height: number
 };
 const products = [["Rs 599.00", "4.7", "586", "front"], ["Rs 599.00", "4.6", "224", "side"], ["Rs 599.00", "4.5", "1961", "sun"], ["Rs 599.00", "4.5", "417", "angle"], ["Rs 599.00", "4.5", "221", "front"], ["Rs 599.00", "4.8", "312", "angle"], ["Rs 599.00", "4.6", "148", "side"], ["Rs 599.00", "4.9", "93", "sun"]];
 const reviews = [[5, "starseed03", "Great quality", "4 days ago", "I got them delivered earlier that expected. The frame was sturdy and of good quality.", "True to Size", "High", 0], [5, "Reviewer1948161032", "Great pair of glasses", "7 days ago", "The experience was great! The glasses are much better quality than the ones I usually get at Costco, and they were less expensive. I’m very happy with my purchase!", "True to Size", "Average", 0], [3, "Olivia", "Not true to color", "7 days ago", "I really love the size and shape of these frames, but if you’re someone who can’t wear really dark frames then these aren’t for you! I still like them overall.", "True to Size", "High", 1], [1, "craigbruckner", "Big ugly frames", "12 days ago", "These frames are way too big for my face. My wife laughed when she saw them. Oh well, I can wear them when I work outside as safety glasses.", "Loose", "Low", 0]] as const;
-function ProductImage({ view, className = "" }: { view: string, className?: string }) {
+export type DatabaseProduct = { id:string; title:string; slug:string; description:string; price:number; quantity:number; shape:string|null; material:string|null; rim:string|null; fit:string|null; weight:number|null; specialFeature:string|null; measurements:Record<string,string>; lensCompatibility:string[]; genders:string[]; categories:string[]; subcategories:string[]; collections:string[]; brands:string[]; media:Array<{name?:string;url:string;primary?:boolean}>; variants:Array<{name:string;values:string[];mediaByValue?:Record<string,Array<{name?:string;url:string}>>}> };
+function ProductImage({ view, className = "", src }: { view: string, className?: string, src?:string }) {
     const asset = productAssets[view] ?? productAssets.front;
-    return <div className={`sprite product-asset ${className}`}><Image key={asset.src} src={asset.src} width={asset.width} height={asset.height} alt={`${view} view of tortoiseshell glasses`} unoptimized /></div>
+    return <div className={`sprite product-asset ${className}`}><Image key={src??asset.src} src={src??asset.src} width={asset.width} height={asset.height} alt={`${view} product view`} unoptimized /></div>
 }
 function Rating({ value = 5 }: { value?: number }) { return <span className="stars">{[1, 2, 3, 4, 5].map(i => <Star key={i} fill={i <= value ? "currentColor" : "#c7d2d5"} color={i <= value ? "currentColor" : "#c7d2d5"} />)}</span> }
 
-export default function ProductPage() {
+export default function ProductPage({databaseProduct}:{databaseProduct?:DatabaseProduct}={}) {
     const productSlider = useRef<SwiperInstance | null>(null);
     const photoSlider = useRef<SwiperInstance | null>(null);
     const gallerySlider = useRef<SwiperInstance | null>(null);
     const [view, setView] = useState("front"), [liked, setLiked] = useState(false), [tab, setTab] = useState("Features"), [color, setColor] = useState(0), [photosOnly, setPhotosOnly] = useState(false), [sideView, setSideView] = useState(false), [sortOpen, setSortOpen] = useState(false), [sortOrder, setSortOrder] = useState("Newest"), [reviewsOpen, setReviewsOpen] = useState(true);
     const slideProducts = (direction: number) => direction < 0 ? productSlider.current?.slidePrev() : productSlider.current?.slideNext();
     const sortedReviews = [...reviews].sort((a, b) => sortOrder === "Highest rating" ? b[0] - a[0] : sortOrder === "Lowest rating" ? a[0] - b[0] : sortOrder === "Most helpful" ? b[7] - a[7] : 0);
+    const frameVariant=databaseProduct?.variants.find(variant=>variant.name.toLowerCase()==="frame color"),frameColors=frameVariant?.values??[];
+    const selectedFrameColor=frameColors[color]??"";
+    const databaseImages=(selectedFrameColor?frameVariant?.mediaByValue?.[selectedFrameColor]:undefined)??databaseProduct?.media??[];
+    const databaseImage=(index:number)=>databaseImages[index%Math.max(databaseImages.length,1)]?.url;
     return (
         <main className="pdp productDetails">
             <section className="product-hero wrap">
@@ -41,26 +46,26 @@ export default function ProductPage() {
                         <Heart fill={liked ? "#0b6068" : "none"} />
                     </button>
                     <button type="button" className="gallery-arrow left" onClick={() => gallerySlider.current?.slidePrev()}><ChevronLeft /></button>
-                    <Swiper className="gallery-main" loop speed={450} onSwiper={swiper => { gallerySlider.current = swiper }} onSlideChange={swiper => setView(views[swiper.realIndex])}>{views.map(v => <SwiperSlide key={v}><ProductImage view={v} /></SwiperSlide>)}</Swiper>
+                    <Swiper className="gallery-main" loop speed={450} onSwiper={swiper => { gallerySlider.current = swiper }} onSlideChange={swiper => setView(views[swiper.realIndex])}>{views.map((v,index) => <SwiperSlide key={v}><ProductImage view={v} src={databaseImage(index)} /></SwiperSlide>)}</Swiper>
                     <button type="button" className="gallery-arrow right" onClick={() => gallerySlider.current?.slideNext()}><ChevronRight /></button>
                     <div className="gallery-tools"><button>360°</button><button>▰</button></div>
                     <div className="thumbnails">
-                        {views.slice(0, 4).map(v => <button type="button" aria-label={`Show ${v} view`} className={view === v ? "active" : ""} key={v} onClick={() => gallerySlider.current?.slideToLoop(views.indexOf(v))}><ProductImage view={v} /></button>)}
+                        {views.slice(0, 4).map((v,index) => <button type="button" aria-label={`Show ${v} view`} className={view === v ? "active" : ""} key={v} onClick={() => gallerySlider.current?.slideToLoop(views.indexOf(v))}><ProductImage view={v} src={databaseImage(index)} /></button>)}
                     </div>
                 </div>
                 <div className="product-info-panel">
-                    <h1>Tortoiseshell Square Glasses</h1>
+                    <h1>{databaseProduct?.title??"Tortoiseshell Square Glasses"}</h1>
                     <div className="title-row">
                         <div>
                             <small>Starting at</small>
-                            <div className="price">Rs 599.00</div>
+                            <div className="price">Rs {Number(databaseProduct?.price??599).toFixed(2)}</div>
                         </div>
                         <a className="score" href="#reviews"><Star fill="currentColor" /> <b>4.7</b> <u>221 reviews</u></a>
                     </div>
                     <div className="options-card">
                         <div className="size-line"><b>Size:</b> large (52 □ 19 - 143)</div>
                         {/* <b className="size-pill">Large</b> */}
-                        <p><b>Color:</b> Tortoiseshell</p><div className="swatches">{["tortoise", "black", "blue"].map((c, i) => <button key={c} onClick={() => setColor(i)} className={`${c} ${color === i ? "selected" : ""}`} aria-label={c} />)}</div></div>
+                        <p><b>Color:</b> {selectedFrameColor||"Tortoiseshell"}</p><div className="swatches">{(frameColors.length?frameColors:["tortoise","black","blue"]).map((c, i) => <button key={c} onClick={() => setColor(i)} style={databaseProduct?{background:c}:undefined} className={`${databaseProduct?"":c} ${color === i ? "selected" : ""}`} aria-label={c} />)}</div></div>
                     <BuyNowButton />
                     <SelectLensesButton />
                     <div className="pay-card">Pay over time with PayPal, Affirm or Afterpay. &nbsp;<u>Learn More</u><br />Use your insurance or FSA/HSA benefits. &nbsp;<u>Learn more</u></div>
@@ -77,11 +82,11 @@ export default function ProductPage() {
                     {["Features", "Description"].map(t => <button key={t} className={tab === t ? "active" : ""} onClick={() => setTab(t)}>{t}</button>)}
                 </div>
                 {tab === "Features" && <div className="feature-content wrap">
-                    <div className="frame-design"><h3>Frame design</h3><dl><dt>Shape</dt><dd><u>Square</u></dd><dt>Feature</dt><dd><u>Spring Hinges, Universal Bridge Fit</u></dd><dt>Rim</dt><dd><u>Full Rim</u></dd><dt>Material</dt><dd><u>Acetate</u></dd><dt>Weight</dt><dd>(23 grams / 0.8 ounces)</dd></dl></div>
+                    <div className="frame-design"><h3>Frame design</h3><dl><dt>Shape</dt><dd><u>{databaseProduct?.shape??"Square"}</u></dd><dt>Feature</dt><dd><u>{databaseProduct?.specialFeature??"Spring Hinges, Universal Bridge Fit"}</u></dd><dt>Rim</dt><dd><u>{databaseProduct?.rim??"Full Rim"}</u></dd><dt>Material</dt><dd><u>{databaseProduct?.material??"Acetate"}</u></dd><dt>Weight</dt><dd>{databaseProduct?.weight?`${databaseProduct.weight} grams`:"(23 grams / 0.8 ounces)"}</dd></dl></div>
                     <div className="lens-list"><h3>Lens compatibility</h3>{["Sunglasses", "EyeQLenz™", "Transitions®", "Specialty lenses", "Blokz® blue-light blocking"].map(item => <p key={item}><span>✓</span><b>{item}</b></p>)}</div>
                     <div className="special-list"><h3>What makes it special</h3><div><span>✓</span><p><b>Zenni Promise</b><br />Experience high quality frames at our most affordable prices.</p></div><div><span>✓</span><p><b>Made for all faces</b><br />Designed to accommodate many face shapes and sizes.</p></div><div><span>✓</span><p><b>Luxury Crafted</b><br />Handcrafted acetate delivers vibrant, fade-resistant colors with hypoallergenic durability.</p></div></div>
                 </div>}
-                {tab === "Description" && <div className="detail-content wrap"><div><b>Design:</b><p>Discover timeless sophistication with these full rim square glasses, meticulously crafted from premium acetate to showcase a sleek design and impeccable craftsmanship.</p><b>Fit:</b><p>These glasses feature spring hinges and a universal bridge fit, ensuring superior comfort and a secure fit for everyday wear.</p><b>Recommendation:</b><p>These glasses offer a sophisticated and classic style, perfect for both men and women. With their square frame shape, they are ideal for individuals with heart and oval face shapes.</p></div><ProductImage view="angle" /></div>}
+                {tab === "Description" && <div className="detail-content wrap"><div>{databaseProduct?<div dangerouslySetInnerHTML={{__html:databaseProduct.description||"<p>No description provided.</p>"}}/>:<><b>Design:</b><p>Discover timeless sophistication with these full rim square glasses, meticulously crafted from premium acetate to showcase a sleek design and impeccable craftsmanship.</p><b>Fit:</b><p>These glasses feature spring hinges and a universal bridge fit, ensuring superior comfort and a secure fit for everyday wear.</p><b>Recommendation:</b><p>These glasses offer a sophisticated and classic style, perfect for both men and women. With their square frame shape, they are ideal for individuals with heart and oval face shapes.</p></>}</div><ProductImage view="angle" src={databaseImage(2)} /></div>}
             </section>
 
             <section className="recommend">
