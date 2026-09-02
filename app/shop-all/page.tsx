@@ -12,12 +12,12 @@ const products = [
 ] as const;
 
 const groups = [
-  ["Gender", ["Women", "Men"]],
-  ["Price", ["$6.95", "Under $10", "Under $20", "Under $30", "Above $30"]],
+  ["Gender", ["Men", "Women"]],
+  ["Price", ["Under 1000", "Under 2000", "Under 3000", "Above 5000"]],
   ["Material", ["Plastic", "Metal", "Mix material", "Acetate"]],
-  ["Shape", ["Square", "Cat-Eye", "Round", "Rectangle", "Aviator", "Browline", "Geometric", "Oval", "Heart", "Wrap-Around", "Full Rim", "Half Rim", "Rimless"]],
+  ["Shape", ["Square", "Rectangle", "Round", "Cat eye", "Browline", "Aviator"]],
   ["Rim", ["Full rim", "Half rim", "Rimless"]],
-  ["Brand", ["Ray-Ban", "Prada", "Tom Ford"]],
+  ["Brand", ["Ray-Ban", "Cartier", "Montblanc", "Tom Ford", "Moscot", "Oakley", "Prada", "Emporio Armani", "Versace", "Gucci"]],
   ["Color", ["Black", "Pink", "Clear", "Blue", "Tortoiseshell", "Purple", "Green", "Red", "Rainbow", "Gold", "Brown", "White", "Pattern", "Cream", "Multicolor", "Orange", "Gray", "Yellow", "Silver", "Rose Gold"]],
 ] as const;
 
@@ -31,7 +31,7 @@ function Card({ p, i }: { p: typeof products[number]; i: number }) {
 }
 function ShapeIcon({ shape }: { shape: string }) {
   const files: Record<string, string> = {
-    Square: "square-shape.svg", "Cat-Eye": "catEye-shape.svg", Round: "round-shape.svg",
+    Square: "square-shape.svg", "Cat eye": "catEye-shape.svg", Round: "round-shape.svg",
     Rectangle: "rectangle-shape.svg", Aviator: "aviator-shape.svg", Browline: "browline-shape.svg",
     Geometric: "geometric-shape.svg", Oval: "oval-shape.svg", Heart: "heart-shape.svg",
     "Wrap-Around": "Sports-Shield-Wraparound.svg", "Full Rim": "fullRim.svg",
