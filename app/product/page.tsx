@@ -66,7 +66,7 @@ export default function ProductPage({databaseProduct}:{databaseProduct?:Database
                         <div className="size-line"><b>Size:</b> large (52 □ 19 - 143)</div>
                         {/* <b className="size-pill">Large</b> */}
                         <p><b>Color:</b> {selectedFrameColor||"Tortoiseshell"}</p><div className="swatches">{(frameColors.length?frameColors:["tortoise","black","blue"]).map((c, i) => <button key={c} onClick={() => setColor(i)} style={databaseProduct?{background:c}:undefined} className={`${databaseProduct?"":c} ${color === i ? "selected" : ""}`} aria-label={c} />)}</div></div>
-                    <BuyNowButton />
+                    <BuyNowButton productId={databaseProduct?.id} name={databaseProduct?.title} frameColor={selectedFrameColor||undefined} image={databaseImage(0)} framePrice={databaseProduct?.price} />
                     <SelectLensesButton />
                     <div className="pay-card">Pay over time with PayPal, Affirm or Afterpay. &nbsp;<u>Learn More</u><br />Use your insurance or FSA/HSA benefits. &nbsp;<u>Learn more</u></div>
                     <div className="includes"><h3>ZENNI WOW PRICE INCLUDES:</h3><p>✓ High-quality frame<br />✓ Basic prescription lenses*<br />✓ Anti-scratch coating<br />✓ UV protection</p><i>*multifocal or readers lenses start at additional cost</i></div>

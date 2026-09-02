@@ -3,14 +3,25 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export default function BuyNowButton() {
+type BuyNowButtonProps = {
+  productId?: string;
+  name?: string;
+  frameColor?: string;
+  image?: string;
+  framePrice?: number;
+};
+
+export default function BuyNowButton({ productId, name = "Celine CL40248U", frameColor = "Black", image = "/images/product/1.avif", framePrice = 15000 }: BuyNowButtonProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
   const buyNow = () => {
     if (loading) return;
     const cart = JSON.parse(localStorage.getItem("eye-champ-cart") ?? "[]") as Array<Record<string, unknown>>;
-    cart.push({ id: `${Date.now()}`, name: "Celine CL40248U", frameColor: "Black", image: "/images/product/1.avif", framePrice: 15000, lens: "", lensPrice: 0, tintStrength: "", tintColor: "", colorName: "", quantity: 1 });
+    const cartId = productId ? `${productId}:${frameColor}` : `${Date.now()}`;
+    const existing = cart.find(item => item.id === cartId);
+    if (existing) existing.quantity = Number(existing.quantity ?? 1) + 1;
+    else cart.push({ id: cartId, productId, name, frameColor, image, framePrice, lens: "", lensPrice: 0, tintStrength: "", tintColor: "", colorName: "", quantity: 1 });
     localStorage.setItem("eye-champ-cart", JSON.stringify(cart));
     window.dispatchEvent(new Event("eye-champ-cart-updated"));
     setLoading(true);
