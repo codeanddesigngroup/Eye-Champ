@@ -2,12 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Heart, SlidersHorizontal, Star } from "lucide-react";
-import ProductFilters from "@/components/ProductFilters";
+import ProductFilters, { type ProductFilterSelection, type ProductFilterTitle } from "@/components/ProductFilters";
 import "./shop-all.css";
 
 type Media = { name?: string; url: string; primary?: boolean };
 type Variant = { name: string; values: string[]; mediaByValue?: Record<string, Media[]> };
-type Product = { id: string; title: string; slug: string; price: number; quantity: number; shape: string | null; categories: string[]; brands: string[]; media: Media[]; variants: Variant[]; createdAt: string };
+type Product = { id: string; title: string; slug: string; price: number; quantity: number; shape: string | null; material: string | null; rim: string | null; genders: string[]; categories: string[]; collections: string[]; brands: string[]; media: Media[]; variants: Variant[]; createdAt: string };
 
 function frameColor(value: string) {
   const normalized = value.toLowerCase().trim();
@@ -38,11 +38,28 @@ function Card({ product, i }: { product: Product; i: number }) {
 function GridIcon({ size }: { size: 2 | 3 }) { return <span className={`grid-icon grid-icon-${size}`}>{Array.from({ length: size * size }, (_, i) => <i key={i} />)}</span> }
 
 export default function ShopAll({categorySlug="",subcategorySlug="",catalogTitle="The A-List Collection"}:{categorySlug?:string;subcategorySlug?:string;catalogTitle?:string}) {
-  const [filtersOpen, setFiltersOpen] = useState(true), [sort, setSort] = useState("Relevance"), [shape, setShape] = useState<string[]>([]), [faq, setFaq] = useState<number | null>(null), [density, setDensity] = useState<"roomy" | "compact">("compact");
+  const [filtersOpen, setFiltersOpen] = useState(true), [sort, setSort] = useState("Relevance"), [filters, setFilters] = useState<ProductFilterSelection>({}), [faq, setFaq] = useState<number | null>(null), [density, setDensity] = useState<"roomy" | "compact">("compact");
   const [products, setProducts] = useState<Product[]>([]), [loading, setLoading] = useState(true), [loadError, setLoadError] = useState("");
   useEffect(() => { const query=categorySlug?`?category=${encodeURIComponent(categorySlug)}&subcategory=${encodeURIComponent(subcategorySlug)}`:""; fetch(`/api/products${query}`, { cache: "no-store" }).then(async response => { const result = await response.json() as { products?: Product[]; error?: string }; if (!response.ok) throw new Error(result.error); setProducts(result.products ?? []) }).catch(error => setLoadError(error instanceof Error ? error.message : "Could not load products.")).finally(() => setLoading(false)) }, [categorySlug,subcategorySlug]);
-  const visible = useMemo(() => { const list = shape.length ? products.filter(product => product.shape && shape.includes(product.shape)) : [...products]; if (sort === "Price Low to High") list.sort((a, b) => Number(a.price) - Number(b.price)); if (sort === "Price High to Low") list.sort((a, b) => Number(b.price) - Number(a.price)); if (sort === "New Arrivals") list.sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt)); return list }, [products, shape, sort]);
-  const toggle = (x: string) => setShape(s => s.includes(x) ? s.filter(v => v !== x) : [...s, x]);
+  const visible = useMemo(() => {
+    const matches=(values:string[]|undefined,value:string|null|undefined)=>!values?.length||(value?values.some(item=>item.toLowerCase()===value.toLowerCase()):false);
+    const matchesAny=(selected:string[]|undefined,values:string[])=>!selected?.length||selected.some(item=>values.some(value=>value.toLowerCase()===item.toLowerCase()));
+    const inCollection=(product:Product,name:string)=>(product.collections??[]).some(collection=>collection.toLowerCase()===name.toLowerCase());
+    const catalogPosition=new Map(products.map((product,index)=>[product.id,index]));
+    const list=products.filter(product=>{
+      const price=Number(product.price);
+      const priceMatch=!filters.Price?.length||filters.Price.some(range=>range==="Under 1000"?price<1000:range==="Under 2000"?price<2000:range==="Under 3000"?price<3000:range==="Above 5000"?price>5000:false);
+      const frameColors=product.variants.find(variant=>variant.name.toLowerCase().includes("frame")&&variant.name.toLowerCase().includes("color"))?.values??[];
+      return priceMatch&&matchesAny(filters.Gender,product.genders??[])&&matches(filters.Material,product.material)&&matchesAny(filters.Collections,product.collections??[])&&matches(filters.Shape,product.shape)&&matches(filters.Rim,product.rim)&&matchesAny(filters.Brand,product.brands??[])&&matchesAny(filters.Color,frameColors);
+    });
+    if(sort==="Relevance")list.sort((a,b)=>Number(b.quantity>0)-Number(a.quantity>0)||(catalogPosition.get(a.id)??0)-(catalogPosition.get(b.id)??0));
+    if(sort==="Price Low to High")list.sort((a,b)=>Number(a.price)-Number(b.price));
+    if(sort==="Price High to Low")list.sort((a,b)=>Number(b.price)-Number(a.price));
+    if(sort==="New Arrivals")list.sort((a,b)=>Number(inCollection(b,"New Arrivals"))-Number(inCollection(a,"New Arrivals"))||Date.parse(b.createdAt)-Date.parse(a.createdAt));
+    if(sort==="Top Rated")list.sort((a,b)=>Number(inCollection(b,"Top Rated"))-Number(inCollection(a,"Top Rated"))||Number(b.quantity)-Number(a.quantity)||Date.parse(b.createdAt)-Date.parse(a.createdAt));
+    return list;
+  },[products,filters,sort]);
+  const toggleFilter=(group:ProductFilterTitle,value:string)=>setFilters(current=>{const values=current[group]??[];return {...current,[group]:values.includes(value)?values.filter(item=>item!==value):[...values,value]}});
   return <main className="plp">
     <section className="plp-hero">
       <div>
@@ -67,7 +84,7 @@ export default function ShopAll({categorySlug="",subcategorySlug="",catalogTitle
     </section>
 
     <div className={`plp-body ${filtersOpen ? "" : "filters-hidden"}`}>
-      {filtersOpen && <ProductFilters selectedShapes={shape} onToggleShape={toggle} onHide={() => setFiltersOpen(false)} />}
+      {filtersOpen && <ProductFilters selected={filters} onToggle={toggleFilter} onHide={() => setFiltersOpen(false)} />}
 
       <section className={`plp-grid ${density}`}>
         {loading && <p>Loading products...</p>}

@@ -18,8 +18,8 @@ storefrontProductsRouter.get("/", async (request, response, next) => {
         subcategoryName = subcategoryRows[0].name;
       }
     }
-    const { rows } = await pool.query(`SELECT id::text, title, slug, price::float, quantity, shape,
-      categories, brands, media, variants, created_at AS "createdAt"
+    const { rows } = await pool.query(`SELECT id::text, title, slug, price::float, quantity, shape, material, rim,
+      genders, categories, collections, brands, media, variants, created_at AS "createdAt"
       FROM products WHERE status = 'Active'
       AND ($1 = '' OR categories ? $1)
       AND ($2 = '' OR subcategories ? $2)

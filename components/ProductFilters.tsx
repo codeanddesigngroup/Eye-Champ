@@ -1,9 +1,7 @@
 "use client";
 
 import { ChevronDown, SlidersHorizontal } from "lucide-react";
-import { useState } from "react";
-
-const groups = [
+export const productFilterGroups = [
   ["Gender", ["Men", "Women"]],
   ["Price", ["Under 1000", "Under 2000", "Under 3000", "Above 5000"]],
   ["Material", ["Plastic", "Metal", "Mix material", "Acetate"]],
@@ -14,32 +12,30 @@ const groups = [
   ["Color", ["Black", "Pink", "Clear", "Blue", "Tortoiseshell", "Purple", "Green", "Red", "Rainbow", "Gold", "Brown", "White", "Pattern", "Cream", "Multicolor", "Orange", "Gray", "Yellow", "Silver", "Rose Gold"]],
 ] as const;
 
+export type ProductFilterTitle = typeof productFilterGroups[number][0];
+export type ProductFilterSelection = Partial<Record<ProductFilterTitle, string[]>>;
+
 type ProductFiltersProps = {
-  selectedShapes: string[];
-  onToggleShape: (shape: string) => void;
+  selected: ProductFilterSelection;
+  onToggle: (group: ProductFilterTitle, value: string) => void;
   onHide: () => void;
 };
 
-export default function ProductFilters({ selectedShapes, onToggleShape, onHide }: ProductFiltersProps) {
+export default function ProductFilters({ selected, onToggle, onHide }: ProductFiltersProps) {
   return <aside className="filters open">
     <div className="filters-title">
       <h2>Filters</h2>
       <button className="hide-filters" onClick={onHide}><SlidersHorizontal /><span>Hide Filters</span></button>
     </div>
-    {groups.map(([title, items]) => <FilterGroup key={title} title={title} items={items} selectedShapes={selectedShapes} onToggleShape={onToggleShape} />)}
+    {productFilterGroups.map(([title, items]) => <FilterGroup key={title} title={title} items={items} selected={selected[title] ?? []} onToggle={value => onToggle(title, value)} />)}
   </aside>;
 }
 
-function FilterGroup({ title, items, selectedShapes, onToggleShape }: { title: string; items: readonly string[]; selectedShapes: string[]; onToggleShape: (shape: string) => void }) {
-  const [selected, setSelected] = useState<string[]>([]);
-  const choose = (item: string) => {
-    if (title === "Shape") onToggleShape(item);
-    else setSelected(current => current.includes(item) ? current.filter(value => value !== item) : [...current, item]);
-  };
+function FilterGroup({ title, items, selected, onToggle }: { title: ProductFilterTitle; items: readonly string[]; selected: string[]; onToggle: (value: string) => void }) {
   return <details open={title === "Shape" || title === "Color" ? true : undefined}>
     <summary><span>{title}</span><ChevronDown /></summary>
     <div>{items.map(item => <label key={item}>
-      <input type="checkbox" checked={title === "Shape" ? selectedShapes.includes(item) : selected.includes(item)} onChange={() => choose(item)} />
+      <input type="checkbox" checked={selected.includes(item)} onChange={() => onToggle(item)} />
       {title === "Shape" && <ShapeIcon shape={item} />}
       {title === "Color" && <ColorDot color={item} />}
       <span>{item}</span>
