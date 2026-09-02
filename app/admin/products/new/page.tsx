@@ -23,7 +23,6 @@ export default function NewProductPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [status, setStatus] = useState("Active");
   const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -208,10 +207,11 @@ export default function NewProductPage() {
                   />
                   <small>{title.length}/70 characters</small>
                 </Field>
-                <Field className="full" label="Description">
-                  <RichTextEditor value={description} onChange={setDescription}/>
+                <div className="np-field full">
+                  <span>Description</span>
+                  <RichTextEditor />
                   <small>This appears in the Description tab.</small>
-                </Field>
+                </div>
               </section>
 
               <section className="np-card">
@@ -577,37 +577,25 @@ export default function NewProductPage() {
   );
 }
 
-function RichTextEditor({value,onChange}:{value:string;onChange:(value:string)=>void}){
-  const editorRef=useRef<HTMLDivElement>(null),selectionRef=useRef<Range|null>(null);
+function RichTextEditor(){
+  const editorRef=useRef<HTMLDivElement>(null),hiddenInputRef=useRef<HTMLInputElement>(null),selectionRef=useRef<Range|null>(null);
   const rememberSelection=()=>{const selection=window.getSelection();if(selection?.rangeCount&&editorRef.current?.contains(selection.anchorNode))selectionRef.current=selection.getRangeAt(0).cloneRange()};
-  const restoreSelection=()=>{const selection=window.getSelection();if(selectionRef.current&&selection){selection.removeAllRanges();selection.addRange(selectionRef.current)}};
-  const command=(name:string,commandValue?:string)=>{restoreSelection();document.execCommand(name,false,commandValue);editorRef.current?.focus();onChange(editorRef.current?.innerHTML??"");rememberSelection()};
-  const align=(alignment:"left"|"center"|"right"|"justify")=>{
-    restoreSelection();
-    const editor=editorRef.current,range=selectionRef.current;
-    if(!editor||!range)return;
-    const blocks=Array.from(editor.querySelectorAll<HTMLElement>("p,div,li,h1,h2,h3,h4,h5,h6")).filter(block=>range.intersectsNode(block));
-    if(blocks.length){blocks.forEach(block=>{block.style.textAlign=alignment})}else{
-      const node=range.commonAncestorContainer.nodeType===Node.TEXT_NODE?range.commonAncestorContainer.parentElement:range.commonAncestorContainer as HTMLElement;
-      const block=node?.closest<HTMLElement>("p,div,li,h1,h2,h3,h4,h5,h6");
-      if(block&&editor.contains(block))block.style.textAlign=alignment;
-      else document.execCommand(`justify${alignment==="justify"?"Full":alignment[0].toUpperCase()+alignment.slice(1)}`);
-    }
-    editor.focus();onChange(editor.innerHTML);rememberSelection();
-  };
+  const restoreSelection=()=>{const selection=window.getSelection(),editor=editorRef.current;if(!selection||!editor)return false;editor.focus();if(selectionRef.current){selection.removeAllRanges();selection.addRange(selectionRef.current);return true}const range=document.createRange();range.selectNodeContents(editor);range.collapse(false);selection.removeAllRanges();selection.addRange(range);return true};
+  const sync=()=>{if(hiddenInputRef.current)hiddenInputRef.current.value=editorRef.current?.innerHTML??"";rememberSelection()};
+  const command=(name:string,commandValue?:string)=>{if(!restoreSelection())return;document.execCommand(name,false,commandValue);sync()};
   const button=(label:string,icon:ReactNode,name:string)=><button type="button" title={label} aria-label={label} onMouseDown={(event)=>{event.preventDefault();command(name)}}>{icon}</button>;
-  const alignButton=(label:string,icon:ReactNode,alignment:"left"|"center"|"right"|"justify")=><button type="button" title={label} aria-label={label} onMouseDown={(event)=>{event.preventDefault();align(alignment)}}>{icon}</button>;
+  const alignButton=(label:string,icon:ReactNode,commandName:string)=><button type="button" title={label} aria-label={label} onMouseDown={(event)=>{event.preventDefault();command(commandName)}}>{icon}</button>;
   return <div className="np-rich-editor">
     <div className="np-rich-toolbar">
       {button("Bold",<Bold size={15}/>,"bold")}{button("Italic",<Italic size={15}/>,"italic")}{button("Bulleted list",<List size={15}/>,"insertUnorderedList")}
       <span/>
-      <label title="Text size"><select aria-label="Text size" defaultValue="3" onChange={(event)=>command("fontSize",event.target.value)}><option value="2">Small</option><option value="3">Normal</option><option value="4">Large</option><option value="5">Heading</option></select></label>
-      <label className="np-text-color" title="Text color"><input aria-label="Text color" type="color" defaultValue="#173039" onChange={(event)=>command("foreColor",event.target.value)}/></label>
+      <label title="Text size"><select aria-label="Text size" defaultValue="3" onMouseDown={rememberSelection} onChange={(event)=>command("fontSize",event.target.value)}><option value="2">Small</option><option value="3">Normal</option><option value="4">Large</option><option value="5">Heading</option></select></label>
+      <label className="np-text-color" title="Text color"><input aria-label="Text color" type="color" defaultValue="#173039" onMouseDown={rememberSelection} onChange={(event)=>command("foreColor",event.target.value)}/></label>
       <span/>
-      {alignButton("Align left",<AlignLeft size={15}/>,"left")}{alignButton("Align center",<AlignCenter size={15}/>,"center")}{alignButton("Align right",<AlignRight size={15}/>,"right")}{alignButton("Justify",<AlignJustify size={15}/>,"justify")}
+      {alignButton("Align left",<AlignLeft size={15}/>,"justifyLeft")}{alignButton("Align center",<AlignCenter size={15}/>,"justifyCenter")}{alignButton("Align right",<AlignRight size={15}/>,"justifyRight")}{alignButton("Justify",<AlignJustify size={15}/>,"justifyFull")}
     </div>
-    <div ref={editorRef} className="np-rich-content" contentEditable suppressContentEditableWarning data-placeholder="Describe the frame style, fit, and standout features..." onInput={(event)=>onChange(event.currentTarget.innerHTML)} onMouseUp={rememberSelection} onKeyUp={rememberSelection} onBlur={rememberSelection}/>
-    <input type="hidden" name="description" value={value}/>
+    <div ref={editorRef} className="np-rich-content" role="textbox" aria-multiline="true" tabIndex={0} contentEditable suppressContentEditableWarning data-placeholder="Describe the frame style, fit, and standout features..." onInput={sync} onFocus={rememberSelection} onMouseUp={rememberSelection} onKeyUp={rememberSelection} onBlur={()=>{sync();rememberSelection()}}/>
+    <input ref={hiddenInputRef} type="hidden" name="description" defaultValue=""/>
   </div>
 }
 

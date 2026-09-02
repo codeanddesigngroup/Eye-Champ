@@ -35,6 +35,7 @@ export default function ProductPage({databaseProduct}:{databaseProduct?:Database
     const slideProducts = (direction: number) => direction < 0 ? productSlider.current?.slidePrev() : productSlider.current?.slideNext();
     const sortedReviews = [...reviews].sort((a, b) => sortOrder === "Highest rating" ? b[0] - a[0] : sortOrder === "Lowest rating" ? a[0] - b[0] : sortOrder === "Most helpful" ? b[7] - a[7] : 0);
     const frameVariant=databaseProduct?.variants.find(variant=>variant.name.toLowerCase()==="frame color"),frameColors=frameVariant?.values??[];
+    const productSizes=databaseProduct?.variants.find(variant=>variant.name.toLowerCase()==="size")?.values??[];
     const selectedFrameColor=frameColors[color]??"";
     const databaseImages=(selectedFrameColor?frameVariant?.mediaByValue?.[selectedFrameColor]:undefined)??databaseProduct?.media??[];
     const databaseImage=(index:number)=>databaseImages[index%Math.max(databaseImages.length,1)]?.url;
@@ -63,7 +64,7 @@ export default function ProductPage({databaseProduct}:{databaseProduct?:Database
                         <a className="score" href="#reviews"><Star fill="currentColor" /> <b>4.7</b> <u>221 reviews</u></a>
                     </div>
                     <div className="options-card">
-                        <div className="size-line"><b>Size:</b> large (52 □ 19 - 143)</div>
+                        <div className="size-line"><b>Size:</b> {databaseProduct?(productSizes.join(", ")||"Not specified"):"large (52 □ 19 - 143)"}</div>
                         {/* <b className="size-pill">Large</b> */}
                         <p><b>Color:</b> {selectedFrameColor||"Tortoiseshell"}</p><div className="swatches">{(frameColors.length?frameColors:["tortoise","black","blue"]).map((c, i) => <button key={c} onClick={() => setColor(i)} style={databaseProduct?{background:c}:undefined} className={`${databaseProduct?"":c} ${color === i ? "selected" : ""}`} aria-label={c} />)}</div></div>
                     <BuyNowButton productId={databaseProduct?.id} name={databaseProduct?.title} frameColor={selectedFrameColor||undefined} image={databaseImage(0)} framePrice={databaseProduct?.price} />

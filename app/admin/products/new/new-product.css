@@ -613,7 +613,8 @@ body:has(.np-admin) {
 .np-field input:focus,
 .np-field select:focus,
 .np-status select:focus,
-.np-editor:focus-within {
+.np-editor:focus-within,
+.np-rich-editor:focus-within {
     border-color: #0d6666;
     box-shadow: 0 0 0 2px #0d66661a
 }
