@@ -26,7 +26,6 @@ export default function PrescriptionSelectionPage() {
   const [audioDuration, setAudioDuration] = useState(0);
   const [step, setStep] = useState<"prescription" | "lenses" | "review">("prescription");
   const [selectedLens, setSelectedLens] = useState<string | null>("basic");
-  const [tintStrength, setTintStrength] = useState("dark");
   const [tintColor, setTintColor] = useState("#000000");
   const [lensConfigured, setLensConfigured] = useState(false);
   const [transitionLoading, setTransitionLoading] = useState(false);
@@ -68,6 +67,7 @@ export default function PrescriptionSelectionPage() {
   const updateEye=(eye:"right"|"left",field:keyof EyePrescription,value:string)=>{setPrescription(current=>({...current,[eye]:{...current[eye],[field]:value}}));setPrescriptionEntered(true);setValidationError(false)};
   const showPower=(value:string)=>value==="0.00"?"+0.00":value;
   const showOptional=(value:string)=>!value||value==="n/a"?"--":value;
+  const lensPreviewStyle=undefined;
   const changeStep = (nextStep: "prescription" | "lenses" | "review") => {
     if (transitionLoading) return;
     setTransitionLoading(true);
@@ -83,7 +83,7 @@ export default function PrescriptionSelectionPage() {
     const lensPrices = { basic: 1500, medium: 2500, gradient: 2500, polarized: 6500 } as Record<string, number>;
     const colorNames = { "#000000": "Black", "#594400": "Brown", "#105e18": "Green", "#7395cf": "Blue", "#fff06a": "Yellow", "#cd5050": "Red" } as Record<string, string>;
     const cart = JSON.parse(localStorage.getItem("eye-champ-cart") ?? "[]") as Array<Record<string, unknown>>;
-    cart.push({ id: `${product.productId??Date.now()}:${product.frameColor}:${selectedLens}:${Date.now()}`, productId:product.productId, name:product.name, frameColor:product.frameColor, image:product.image, framePrice:product.framePrice, lens: lensNames[selectedLens], lensPrice: lensPrices[selectedLens], tintStrength, tintColor, colorName: colorNames[tintColor] ?? tintColor, quantity: 1, prescription });
+    cart.push({ id: `${product.productId??Date.now()}:${product.frameColor}:${selectedLens}:${Date.now()}`, productId:product.productId, name:product.name, frameColor:product.frameColor, image:product.image, framePrice:product.framePrice, lens: lensNames[selectedLens], lensPrice: lensPrices[selectedLens], tintColor, colorName: colorNames[tintColor] ?? tintColor, quantity: 1, prescription });
     localStorage.setItem("eye-champ-cart", JSON.stringify(cart));
     window.dispatchEvent(new Event("eye-champ-cart-updated"));
     setLensConfigured(true);
@@ -96,7 +96,7 @@ export default function PrescriptionSelectionPage() {
     <div className="usage-layout">
       <section className="usage-product">
         <Link href={product.returnUrl||"/product"} className="usage-back">Back to Product Page</Link>
-        <div className="usage-product-image"><Image src={product.image} alt={`${product.name} ${product.frameColor}`} width={1000} height={460} priority unoptimized /></div>
+        <div className="usage-product-image"><div className="lens-preview-stage"><Image src={product.image} alt={`${product.name} ${product.frameColor}`} width={1000} height={460} priority unoptimized />{step!=="prescription"&&selectedLens&&<svg className={`live-lens-tint ${selectedLens}`} style={lensPreviewStyle} viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="live-tint-gradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="var(--lens-tint)" stopOpacity="0.88"/><stop offset="0.46" stopColor="var(--lens-tint)"/><stop offset="1" stopColor="var(--lens-tint)" stopOpacity="0.82"/></linearGradient><linearGradient id="live-tint-shine" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#fff" stopOpacity="0.24"/><stop offset="0.22" stopColor="#fff" stopOpacity="0.07"/><stop offset="0.5" stopColor="#fff" stopOpacity="0"/></linearGradient></defs><path className="lens-fill left" d="M14.2 17 C18.5 8.5 37.5 7.5 43.8 15.5 C46 18.5 46.5 23 46.2 29 L44.8 65 C44.3 79 38.4 88 27.8 88.7 C18.5 89.2 13.4 83.5 12.2 72 L10.7 31 C10.4 24 11.5 20 14.2 17 Z"/><path className="lens-fill right" d="M85.8 17 C81.5 8.5 62.5 7.5 56.2 15.5 C54 18.5 53.5 23 53.8 29 L55.2 65 C55.7 79 61.6 88 72.2 88.7 C81.5 89.2 86.6 83.5 87.8 72 L89.3 31 C89.6 24 88.5 20 85.8 17 Z"/><path className="lens-shine left" d="M14.2 17 C18.5 8.5 37.5 7.5 43.8 15.5 C46 18.5 46.5 23 46.2 29 L44.8 65 C44.3 79 38.4 88 27.8 88.7 C18.5 89.2 13.4 83.5 12.2 72 L10.7 31 C10.4 24 11.5 20 14.2 17 Z"/><path className="lens-shine right" d="M85.8 17 C81.5 8.5 62.5 7.5 56.2 15.5 C54 18.5 53.5 23 53.8 29 L55.2 65 C55.7 79 61.6 88 72.2 88.7 C81.5 89.2 86.6 83.5 87.8 72 L89.3 31 C89.6 24 88.5 20 85.8 17 Z"/></svg>}</div></div>
         <h1>{product.name}</h1>
         <p>{product.frameColor}</p>
         <strong>Rs {Number(product.framePrice).toLocaleString()}</strong>
@@ -147,8 +147,8 @@ export default function PrescriptionSelectionPage() {
         {validationError && <p className="usage-validation-error" role="alert">Please enter your prescription, upload an image, or write your eyesight number before continuing.</p>}
         <button type="button" className="usage-confirm" disabled={transitionLoading} onClick={() => { if (!prescriptionEntered && !fileName && !eyesightNote.trim()) { setValidationError(true); return; } setPlaying(false); setElapsed(0); changeStep("lenses"); }}>Confirm</button></> : step === "lenses" ? <div className="lens-type-list">
           {[
-            { id: "basic", name: "Basic Lens", price: 1500, text: "Choose from these classic colors to make your own sunglasses in dark, medium or light tone." },
-            { id: "medium", name: "Medium lens", price: 2500, text: "Choose from these cool tint or customise lens color according to your demand." },
+            { id: "basic", name: "Basic Lens", price: 1500, text: "A classic tinted lens designed for comfortable everyday use." },
+            { id: "medium", name: "Medium lens", price: 2500, text: "A comfortable upgraded lens for daily sun protection." },
             { id: "gradient", name: "Gradient lens", price: 2500, text: "Combine fashion with function with trendy gradient lenses that go from dark on the top to light on the bottom." },
             { id: "polarized", name: "Polarized Lens", price: 6500, text: "Polarized lenses reduce extra bright light glares and hazy vision. An option that offers superior clarity and eye protection." },
           ].map(option => <Fragment key={option.id}><button type="button" aria-expanded={selectedLens === option.id} className={`lens-type-card ${selectedLens === option.id ? "selected" : ""}`} onClick={() => { setSelectedLens(current => current === option.id ? null : option.id); setLensConfigured(false); }}>
@@ -156,9 +156,7 @@ export default function PrescriptionSelectionPage() {
               <span><b>{option.name} <strong>Rs {option.price}</strong> <Info /></b><small>{option.text}</small></span>
             </button>
             <div className={`lens-customization-shell ${selectedLens === option.id ? "expanded" : ""}`} aria-hidden={selectedLens !== option.id} inert={selectedLens !== option.id ? true : undefined}><div className="lens-customization">
-              <fieldset><legend>Tint Strength:</legend><div>{[{ id: "dark", label: "Dark (80%)" }, { id: "medium", label: "Medium (50%)" }, { id: "light", label: "Light (20%)" }].map(strength => <label key={strength.id}><input type="radio" name="tint-strength" checked={tintStrength === strength.id} onChange={() => { setTintStrength(strength.id); setLensConfigured(false); }} /> {strength.label}</label>)}</div></fieldset>
               <fieldset><legend>Tint Color</legend><div className="tint-swatches">{(product.lensColors?.length?product.lensColors:["#000000", "#594400", "#105e18", "#7395cf", "#fff06a", "#cd5050"]).map(color => <button type="button" title={color} aria-label={`Select tint color ${color}`} aria-pressed={tintColor === color} className={tintColor === color ? "selected" : ""} style={{ backgroundColor: lensColorValue(color) }} key={color} onClick={() => { setTintColor(color); setLensConfigured(false); }} />)}</div></fieldset>
-              <div className="custom-tint"><label htmlFor={`custom-tint-${option.id}`}>Customize Color:</label><input id={`custom-tint-${option.id}`} type="color" value={lensColorValue(tintColor)} onChange={event => { setTintColor(event.target.value); setLensConfigured(false); }} /></div>
               <button type="button" className="lens-config-confirm" disabled={transitionLoading} onClick={() => { setLensConfigured(false); changeStep("review"); }}>Confirm</button>
             </div></div>
           </Fragment>)}

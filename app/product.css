@@ -585,6 +585,131 @@
     object-fit: contain;
 }
 
+.lens-preview-stage {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    place-items: center;
+    width: 100%;
+}
+
+.lens-preview-stage>img {
+    position: relative;
+    z-index: 2;
+}
+
+.live-lens-tint {
+    position: absolute;
+    z-index: 3;
+    top: 8%;
+    left: 9%;
+    width: 82%;
+    height: 86%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 9%;
+    pointer-events: none;
+    mix-blend-mode: multiply;
+}
+
+.live-lens-tint span {
+    display: block;
+    background: var(--lens-tint);
+    opacity: var(--lens-opacity);
+    position: relative;
+    overflow: hidden;
+    border-radius: 24% 24% 37% 37% / 18% 18% 40% 40%;
+    clip-path: inset(2% 0 2% 0 round 24% 24% 37% 37% / 18% 18% 40% 40%);
+    box-shadow: inset 0 0 24px #0004, inset 0 2px 5px #fff3;
+    filter: saturate(1.18);
+}
+
+.live-lens-tint span::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(145deg, #fff3 0%, #fff1 24%, transparent 46%, #00000012 100%);
+    mix-blend-mode: screen;
+}
+
+.live-lens-tint.gradient span {
+    background: linear-gradient(to bottom, var(--lens-tint) 0%, var(--lens-tint) 42%, transparent 100%);
+    opacity: min(1, calc(var(--lens-opacity) + .12));
+}
+
+.live-lens-tint.polarized span {
+    background: linear-gradient(145deg, color-mix(in srgb, var(--lens-tint), white 16%) 0 12%, var(--lens-tint) 40% 100%);
+    box-shadow: inset 0 0 30px #0005, inset 12px 10px 14px #fff2;
+}
+
+/* Live preview uses traced lens contours instead of generic rounded boxes. */
+svg.live-lens-tint {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+    overflow: hidden;
+    background: var(--lens-tint);
+    opacity: var(--image-tint-opacity);
+    filter: saturate(1.08);
+    mix-blend-mode: var(--image-tint-blend);
+}
+
+/* Full-product tint mode: individual lens masks are intentionally disabled. */
+svg.live-lens-tint path,
+svg.live-lens-tint defs {
+    display: none;
+}
+
+svg.live-lens-tint .lens-fill {
+    fill: url(#live-tint-gradient);
+    opacity: var(--lens-opacity);
+    stroke: color-mix(in srgb, var(--lens-tint), black 22%);
+    stroke-width: .18;
+    filter: drop-shadow(0 .5px .6px rgb(0 0 0 / 12%));
+    mix-blend-mode: multiply;
+}
+
+svg.live-lens-tint.gradient .lens-fill {
+    fill: url(#live-tint-gradient);
+    opacity: min(1, calc(var(--lens-opacity) + .12));
+}
+
+svg.live-lens-tint.polarized .lens-fill {
+    opacity: min(1, calc(var(--lens-opacity) + .16));
+    stroke-width: .4;
+}
+
+svg.live-lens-tint .lens-shine {
+    fill: url(#live-tint-shine);
+    opacity: .22;
+    mix-blend-mode: screen;
+}
+
+svg.live-lens-tint .left {
+    transform-box: view-box;
+    transform-origin: 46.3% 16%;
+    transform: translate(var(--left-lens-x), var(--left-lens-y)) scale(var(--left-lens-width), var(--left-lens-height));
+}
+
+svg.live-lens-tint .right {
+    transform-box: view-box;
+    transform-origin: 53.7% 16%;
+    transform: translate(var(--right-lens-x), var(--right-lens-y)) scale(var(--right-lens-width), var(--right-lens-height));
+}
+
+/* Product-specific full-rim contour: flat brow, tapered sides and soft lower corners. */
+svg.live-lens-tint .lens-fill.left,
+svg.live-lens-tint .lens-shine.left {
+    d: path("M 14.8 18 C 20 10.5 37.2 9.8 43.2 16.2 C 45.8 19 46.5 23.5 46.1 29.5 L 44.5 62.5 C 43.7 75.6 38 82.5 28.1 83 C 18.1 83.2 13.3 76.5 12.3 65 L 11 31 C 10.7 24.4 12 20.5 14.8 18 Z");
+}
+
+svg.live-lens-tint .lens-fill.right,
+svg.live-lens-tint .lens-shine.right {
+    d: path("M 85.2 18 C 80 10.5 62.8 9.8 56.8 16.2 C 54.2 19 53.5 23.5 53.9 29.5 L 55.5 62.5 C 56.3 75.6 62 82.5 71.9 83 C 81.9 83.2 86.7 76.5 87.7 65 L 89 31 C 89.3 24.4 88 20.5 85.2 18 Z");
+}
+
 .usage-product h1 {
     margin: 18px 0 18px;
     font-size: clamp(30px, 2.6vw, 46px);
