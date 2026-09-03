@@ -30,7 +30,8 @@ adminAuthRouter.post("/login", loginLimiter, async (request, response, next) => 
     const session = await createSession(admin.id, remember === true);
     response.cookie(SESSION_COOKIE, session.token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: process.env.COOKIE_SECURE !== "false" && process.env.NODE_ENV === "production",
+      // secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
       maxAge: session.maxAge * 1000,
