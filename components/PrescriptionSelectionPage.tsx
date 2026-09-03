@@ -8,6 +8,8 @@ import { Fragment, useEffect, useRef, useState } from "react";
 
 type Panel = "prescription" | "upload" | "manual";
 type LensProduct={productId?:string;name:string;frameColor:string;image:string;framePrice:number;lensColors?:string[];returnUrl?:string};
+type EyePrescription={sph:string;cyl:string;axis:string;add:string};
+type Prescription={right:EyePrescription;left:EyePrescription;pd:string;twoPd:boolean;pdRight:string;pdLeft:string};
 const lensColorValue=(value:string)=>({black:"#000000",brown:"#594400",green:"#105e18",blue:"#7395cf",yellow:"#fff06a",red:"#cd5050",gray:"#808080",grey:"#808080",pink:"#db86a4",purple:"#76529a",orange:"#dd7b35",clear:"#eef4f4",gold:"#b79a53",silver:"#aeb7ba"} as Record<string,string>)[value.toLowerCase()]??(/^#[0-9a-f]{6}$/i.test(value)?value:"#808080");
 
 export default function PrescriptionSelectionPage() {
@@ -16,6 +18,7 @@ export default function PrescriptionSelectionPage() {
   const [openPanel, setOpenPanel] = useState<Panel | null>("prescription");
   const [fileName, setFileName] = useState("");
   const [prescriptionEntered, setPrescriptionEntered] = useState(false);
+  const [prescription,setPrescription]=useState<Prescription>({right:{sph:"0.00",cyl:"0.00",axis:"",add:"n/a"},left:{sph:"0.00",cyl:"0.00",axis:"",add:"n/a"},pd:"62",twoPd:false,pdRight:"31",pdLeft:"31"});
   const [eyesightNote, setEyesightNote] = useState("");
   const [validationError, setValidationError] = useState(false);
   const [playing, setPlaying] = useState(false);
@@ -30,7 +33,7 @@ export default function PrescriptionSelectionPage() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [product,setProduct]=useState<LensProduct>({name:"Celine CL40248U",frameColor:"Black",image:"/images/product/1.avif",framePrice:15000,returnUrl:"/product"});
 
-  useEffect(()=>{try{const saved=sessionStorage.getItem("eye-champ-lens-product");if(saved){const loaded=JSON.parse(saved) as LensProduct;setProduct(loaded);if(loaded.lensColors?.length)setTintColor(loaded.lensColors[0])}}catch{}},[]);
+  useEffect(()=>{queueMicrotask(()=>{try{const saved=sessionStorage.getItem("eye-champ-lens-product");if(saved){const loaded=JSON.parse(saved) as LensProduct;setProduct(loaded);if(loaded.lensColors?.length)setTintColor(loaded.lensColors[0])}}catch{}})},[]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -62,6 +65,9 @@ export default function PrescriptionSelectionPage() {
   };
 
   const togglePanel = (panel: Panel) => setOpenPanel(current => current === panel ? null : panel);
+  const updateEye=(eye:"right"|"left",field:keyof EyePrescription,value:string)=>{setPrescription(current=>({...current,[eye]:{...current[eye],[field]:value}}));setPrescriptionEntered(true);setValidationError(false)};
+  const showPower=(value:string)=>value==="0.00"?"+0.00":value;
+  const showOptional=(value:string)=>!value||value==="n/a"?"--":value;
   const changeStep = (nextStep: "prescription" | "lenses" | "review") => {
     if (transitionLoading) return;
     setTransitionLoading(true);
@@ -77,7 +83,7 @@ export default function PrescriptionSelectionPage() {
     const lensPrices = { basic: 1500, medium: 2500, gradient: 2500, polarized: 6500 } as Record<string, number>;
     const colorNames = { "#000000": "Black", "#594400": "Brown", "#105e18": "Green", "#7395cf": "Blue", "#fff06a": "Yellow", "#cd5050": "Red" } as Record<string, string>;
     const cart = JSON.parse(localStorage.getItem("eye-champ-cart") ?? "[]") as Array<Record<string, unknown>>;
-    cart.push({ id: `${product.productId??Date.now()}:${product.frameColor}:${selectedLens}:${Date.now()}`, productId:product.productId, name:product.name, frameColor:product.frameColor, image:product.image, framePrice:product.framePrice, lens: lensNames[selectedLens], lensPrice: lensPrices[selectedLens], tintStrength, tintColor, colorName: colorNames[tintColor] ?? tintColor, quantity: 1, prescription: { sphereRight: "+0.00", sphereLeft: "+0.00", cylinderRight: "+0.00", cylinderLeft: "+0.00", pd: "62" } });
+    cart.push({ id: `${product.productId??Date.now()}:${product.frameColor}:${selectedLens}:${Date.now()}`, productId:product.productId, name:product.name, frameColor:product.frameColor, image:product.image, framePrice:product.framePrice, lens: lensNames[selectedLens], lensPrice: lensPrices[selectedLens], tintStrength, tintColor, colorName: colorNames[tintColor] ?? tintColor, quantity: 1, prescription });
     localStorage.setItem("eye-champ-cart", JSON.stringify(cart));
     window.dispatchEvent(new Event("eye-champ-cart-updated"));
     setLensConfigured(true);
@@ -112,17 +118,17 @@ export default function PrescriptionSelectionPage() {
             <button className="usage-accordion-head" type="button" onClick={() => togglePanel("prescription")}><ClipboardPenLine /><b>Prescription</b><span>{openPanel === "prescription" ? "−" : "+"}</span></button>
             {openPanel === "prescription" && <div className="usage-panel prescription-entry">
               <div className="prescription-head"><span /><b>Sphere (SPH)</b><b>Cylinder (CYL)</b><b>Axis</b><b>ADD</b></div>
-              {[{ code: "OD", label: "Right eye" }, { code: "OS", label: "Left eye" }].map(eye => <div className="prescription-row" key={eye.code}>
+              {[{ code: "OD", label: "Right eye",key:"right" as const }, { code: "OS", label: "Left eye",key:"left" as const }].map(eye => <div className="prescription-row" key={eye.code}>
                 <b>{eye.code}<small>({eye.label})</small></b>
-                <select aria-label={`${eye.label} sphere`} defaultValue="0.00" onChange={() => { setPrescriptionEntered(true); setValidationError(false); }}><option>0.00</option><option>-0.25</option><option>-0.50</option><option>-0.75</option><option>-1.00</option><option>+0.25</option><option>+0.50</option></select>
-                <select aria-label={`${eye.label} cylinder`} defaultValue="0.00" onChange={() => { setPrescriptionEntered(true); setValidationError(false); }}><option>0.00</option><option>-0.25</option><option>-0.50</option><option>-0.75</option><option>-1.00</option></select>
-                <input aria-label={`${eye.label} axis`} type="number" min="0" max="180" onChange={() => { setPrescriptionEntered(true); setValidationError(false); }} />
-                <select aria-label={`${eye.label} ADD`} defaultValue="n/a" onChange={() => { setPrescriptionEntered(true); setValidationError(false); }}><option>n/a</option><option>+0.75</option><option>+1.00</option><option>+1.25</option><option>+1.50</option><option>+2.00</option></select>
+                <select aria-label={`${eye.label} sphere`} value={prescription[eye.key].sph} onChange={event=>updateEye(eye.key,"sph",event.target.value)}><option>0.00</option><option>-0.25</option><option>-0.50</option><option>-0.75</option><option>-1.00</option><option>+0.25</option><option>+0.50</option></select>
+                <select aria-label={`${eye.label} cylinder`} value={prescription[eye.key].cyl} onChange={event=>updateEye(eye.key,"cyl",event.target.value)}><option>0.00</option><option>-0.25</option><option>-0.50</option><option>-0.75</option><option>-1.00</option></select>
+                <input aria-label={`${eye.label} axis`} type="number" min="0" max="180" value={prescription[eye.key].axis} onChange={event=>updateEye(eye.key,"axis",event.target.value)} />
+                <select aria-label={`${eye.label} ADD`} value={prescription[eye.key].add} onChange={event=>updateEye(eye.key,"add",event.target.value)}><option>n/a</option><option>+0.75</option><option>+1.00</option><option>+1.25</option><option>+1.50</option><option>+2.00</option></select>
               </div>)}
               <div className="prescription-pd">
                 <b>PD<small>(Pupillary Distance)</small></b>
-                <select aria-label="Pupillary distance" defaultValue="62" onChange={() => { setPrescriptionEntered(true); setValidationError(false); }}>{Array.from({ length: 41 }, (_, index) => <option key={index}>{40 + index}</option>)}</select>
-                <label><input type="checkbox" onChange={() => { setPrescriptionEntered(true); setValidationError(false); }} /> Two PD numbers</label>
+                {prescription.twoPd?<div className="prescription-dual-pd"><select aria-label="Right eye pupillary distance" value={prescription.pdRight} onChange={event=>{setPrescription(current=>({...current,pdRight:event.target.value}));setPrescriptionEntered(true)}}>{Array.from({length:21},(_,index)=><option key={index}>{20+index}</option>)}</select><select aria-label="Left eye pupillary distance" value={prescription.pdLeft} onChange={event=>{setPrescription(current=>({...current,pdLeft:event.target.value}));setPrescriptionEntered(true)}}>{Array.from({length:21},(_,index)=><option key={index}>{20+index}</option>)}</select></div>:<select aria-label="Pupillary distance" value={prescription.pd} onChange={event=>{setPrescription(current=>({...current,pd:event.target.value}));setPrescriptionEntered(true);setValidationError(false)}}>{Array.from({ length: 41 }, (_, index) => <option key={index}>{40 + index}</option>)}</select>}
+                <label><input type="checkbox" checked={prescription.twoPd} onChange={event=>{setPrescription(current=>({...current,twoPd:event.target.checked}));setPrescriptionEntered(true);setValidationError(false)}} /> Two PD numbers</label>
               </div>
             </div>}
           </article>
@@ -162,8 +168,8 @@ export default function PrescriptionSelectionPage() {
           <h3>Your prescription</h3>
           <div className="prescription-summary" role="table" aria-label="Prescription summary">
             <div className="summary-row summary-head" role="row"><span /><b>SPH</b><b>CYL</b><b>Axis</b><b>ADD</b><b>PD</b></div>
-            <div className="summary-row" role="row"><b>R</b><span>+0.00</span><span>+0.00</span><span>--</span><span>--</span><strong>62</strong></div>
-            <div className="summary-row" role="row"><b>L</b><span>+0.00</span><span>+0.00</span><span>--</span><span>--</span><strong>62</strong></div>
+            <div className="summary-row" role="row"><b>R</b><span>{showPower(prescription.right.sph)}</span><span>{showPower(prescription.right.cyl)}</span><span>{showOptional(prescription.right.axis)}</span><span>{showOptional(prescription.right.add)}</span><strong>{prescription.twoPd?prescription.pdRight:prescription.pd}</strong></div>
+            <div className="summary-row" role="row"><b>L</b><span>{showPower(prescription.left.sph)}</span><span>{showPower(prescription.left.cyl)}</span><span>{showOptional(prescription.left.axis)}</span><span>{showOptional(prescription.left.add)}</span><strong>{prescription.twoPd?prescription.pdLeft:prescription.pd}</strong></div>
           </div>
           <h3>Lens details</h3>
           <dl className="lens-review-details">
