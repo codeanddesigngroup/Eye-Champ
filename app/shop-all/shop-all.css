@@ -263,14 +263,24 @@
   position: absolute;
   z-index: 2;
   right: 9px;
+  left: auto;
   top: 8px;
+  bottom: auto;
+  justify-self: end;
+  align-self: start;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
   border: 0;
   background: transparent;
-  padding: 5px
+  padding: 5px;
+  cursor: pointer
 }
 
 .plp-heart svg {
-  width: 25px
+  width: 25px;
+  height: 25px
 }
 
 .plp-try {
@@ -326,6 +336,11 @@
   color: #087146
 }
 
+.plp-card>.plp-shape {
+  color: #4f5f62;
+  text-transform: capitalize
+}
+
 .plp-swatches {
   display: flex;
   gap: 10px;
@@ -370,12 +385,62 @@
   font-size: 8px
 }
 
-.plp-swatches .color-choice{padding:0;cursor:pointer;transition:transform .15s,box-shadow .15s}
-.plp-card{position:relative}.plp-card-link{position:absolute;z-index:1;inset:0}.plp-card button,.plp-card .plp-swatches{position:relative;z-index:2}
-.plp-swatches .color-choice.black{background:#111}.plp-swatches .color-choice.clear{background:#d8edf3}.plp-swatches .color-choice.blue{background:#164c9d}.plp-swatches .color-choice.brown{background:#805f48}.plp-swatches .color-choice.tortoise{background:radial-gradient(circle at 70% 25%,#f2a42c 0 20%,#261608 24% 55%,#a8671a 58%)}
-.plp-swatches .color-choice:hover{transform:scale(1.08)}
-.plp-swatches .color-choice.selected{box-shadow:0 0 0 2px #fff,0 0 0 4px #111}
-.plp-swatches .more-colors{display:grid;place-items:center;background:#fff;cursor:pointer}
+.plp-swatches .color-choice {
+  padding: 0;
+  cursor: pointer;
+  transition: transform .15s, box-shadow .15s
+}
+
+.plp-card {
+  position: relative
+}
+
+.plp-card-link {
+  position: absolute;
+  z-index: 1;
+  inset: 0
+}
+
+.plp-card button,
+.plp-card .plp-swatches {
+  position: relative;
+  z-index: 2
+}
+
+.plp-swatches .color-choice.black {
+  background: #111
+}
+
+.plp-swatches .color-choice.clear {
+  background: #d8edf3
+}
+
+.plp-swatches .color-choice.blue {
+  background: #164c9d
+}
+
+.plp-swatches .color-choice.brown {
+  background: #805f48
+}
+
+.plp-swatches .color-choice.tortoise {
+  background: radial-gradient(circle at 70% 25%, #f2a42c 0 20%, #261608 24% 55%, #a8671a 58%)
+}
+
+.plp-swatches .color-choice:hover {
+  transform: scale(1.08)
+}
+
+.plp-swatches .color-choice.selected {
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px #111
+}
+
+.plp-swatches .more-colors {
+  display: grid;
+  place-items: center;
+  background: #fff;
+  cursor: pointer
+}
 
 .campaign {
   grid-column: span 2;
@@ -513,7 +578,7 @@
     grid-template-rows: 55% 45%
   }
 
-  .plp-tools label{
+  .plp-tools label {
     text-align: left;
   }
 
@@ -1023,27 +1088,203 @@
 
 /* Product grid density icons shown beside the sort control. */
 @media(min-width:769px) {
-  .plp-tools{grid-template-columns:1fr auto auto;gap:18px}
-  .plp-grid.roomy{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .plp-grid.compact{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .plp-tools {
+    grid-template-columns: 1fr auto auto;
+    gap: 18px
+  }
+
+  .plp-grid.roomy {
+    grid-template-columns: repeat(2, minmax(0, 1fr))
+  }
+
+  .plp-grid.compact {
+    grid-template-columns: repeat(3, minmax(0, 1fr))
+  }
 }
 
-.grid-switch{display:flex;align-items:center;gap:10px}
-.grid-switch button{padding:2px;border:0;background:transparent;cursor:pointer;opacity:.55}
-.grid-switch button.active{opacity:1}
-.grid-icon{display:grid;gap:3px;width:30px;height:30px}
-.grid-icon-2{grid-template-columns:repeat(2,1fr)}
-.grid-icon-3{grid-template-columns:repeat(3,1fr)}
-.grid-icon i{display:block;border:1px solid #111;background:#fff}
-.grid-switch button.active .grid-icon-3 i{border-color:#7d878a;background:#7d878a}
-.grid-switch button.active .grid-icon-2 i{border-color:#111;background:#111}
-@media(max-width:768px){.grid-switch{display:none}}
+.grid-switch {
+  display: flex;
+  align-items: center;
+  gap: 10px
+}
 
-.shape-icon{width:54px;height:26px;flex:none;object-fit:contain}
-.filters details label:has(.shape-icon){gap:7px;min-height:30px}
-.filters details label:has(.shape-icon) input{margin-right:0}
+.grid-switch button {
+  padding: 2px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  opacity: .55
+}
 
-.filters details label:has(.filter-color){gap:7px;min-height:26px}
-.filters details label:has(.filter-color) input{margin-right:0}
-.filter-color{width:15px;height:15px;flex:none;border:1px solid #b3babc;border-radius:50%;background:#ddd}
-.color-black{background:#050505;border-color:#050505}.color-pink{background:#ce1590;border-color:#ce1590}.color-clear{background:#edf7fa}.color-blue{background:#143ed1;border-color:#143ed1}.color-purple{background:#8914c9;border-color:#8914c9}.color-green{background:#08bd27;border-color:#08bd27}.color-red{background:#c9111d;border-color:#c9111d}.color-gold{background:#e9ba24;border-color:#e9ba24}.color-brown{background:#8e715e;border-color:#8e715e}.color-white{background:#fff}.color-cream{background:#eee1c8;border-color:#eee1c8}.color-orange{background:#ff850b;border-color:#ff850b}.color-gray{background:#7f8587;border-color:#7f8587}.color-yellow{background:#e6b900;border-color:#e6b900}.color-rose-gold{background:linear-gradient(135deg,#eed0d3,#bd7780);border:0}.color-silver{background:linear-gradient(135deg,#f7f7f7,#888);border:0}.color-rainbow{background:conic-gradient(#f22,#ff0,#0c5,#1ad,#5139dc,#f22);border:0}.color-tortoiseshell{background:radial-gradient(circle at 70% 25%,#edb02d 0 18%,#2a1708 23% 48%,#aa6819 52% 72%,#3b210c 76%);border:0}.color-pattern{background:repeating-linear-gradient(35deg,#111 0 2px,#f4f4f4 2px 5px);border:0}.color-multicolor{background:conic-gradient(#ff6a53 0 25%,#11a58d 0 50%,#ffc52b 0 75%,#2182be 0);border:0}
+.grid-switch button.active {
+  opacity: 1
+}
+
+.grid-icon {
+  display: grid;
+  gap: 3px;
+  width: 30px;
+  height: 30px
+}
+
+.grid-icon-2 {
+  grid-template-columns: repeat(2, 1fr)
+}
+
+.grid-icon-3 {
+  grid-template-columns: repeat(3, 1fr)
+}
+
+.grid-icon i {
+  display: block;
+  border: 1px solid #111;
+  background: #fff
+}
+
+.grid-switch button.active .grid-icon-3 i {
+  border-color: #7d878a;
+  background: #7d878a
+}
+
+.grid-switch button.active .grid-icon-2 i {
+  border-color: #111;
+  background: #111
+}
+
+@media(max-width:768px) {
+  .grid-switch {
+    display: none
+  }
+}
+
+.shape-icon {
+  width: 54px;
+  height: 26px;
+  flex: none;
+  object-fit: contain
+}
+
+.filters details label:has(.shape-icon) {
+  gap: 7px;
+  min-height: 30px
+}
+
+.filters details label:has(.shape-icon) input {
+  margin-right: 0
+}
+
+.filters details label:has(.filter-color) {
+  gap: 7px;
+  min-height: 26px
+}
+
+.filters details label:has(.filter-color) input {
+  margin-right: 0
+}
+
+.filter-color {
+  width: 15px;
+  height: 15px;
+  flex: none;
+  border: 1px solid #b3babc;
+  border-radius: 50%;
+  background: #ddd
+}
+
+.color-black {
+  background: #050505;
+  border-color: #050505
+}
+
+.color-pink {
+  background: #ce1590;
+  border-color: #ce1590
+}
+
+.color-clear {
+  background: #edf7fa
+}
+
+.color-blue {
+  background: #143ed1;
+  border-color: #143ed1
+}
+
+.color-purple {
+  background: #8914c9;
+  border-color: #8914c9
+}
+
+.color-green {
+  background: #08bd27;
+  border-color: #08bd27
+}
+
+.color-red {
+  background: #c9111d;
+  border-color: #c9111d
+}
+
+.color-gold {
+  background: #e9ba24;
+  border-color: #e9ba24
+}
+
+.color-brown {
+  background: #8e715e;
+  border-color: #8e715e
+}
+
+.color-white {
+  background: #fff
+}
+
+.color-cream {
+  background: #eee1c8;
+  border-color: #eee1c8
+}
+
+.color-orange {
+  background: #ff850b;
+  border-color: #ff850b
+}
+
+.color-gray {
+  background: #7f8587;
+  border-color: #7f8587
+}
+
+.color-yellow {
+  background: #e6b900;
+  border-color: #e6b900
+}
+
+.color-rose-gold {
+  background: linear-gradient(135deg, #eed0d3, #bd7780);
+  border: 0
+}
+
+.color-silver {
+  background: linear-gradient(135deg, #f7f7f7, #888);
+  border: 0
+}
+
+.color-rainbow {
+  background: conic-gradient(#f22, #ff0, #0c5, #1ad, #5139dc, #f22);
+  border: 0
+}
+
+.color-tortoiseshell {
+  background: radial-gradient(circle at 70% 25%, #edb02d 0 18%, #2a1708 23% 48%, #aa6819 52% 72%, #3b210c 76%);
+  border: 0
+}
+
+.color-pattern {
+  background: repeating-linear-gradient(35deg, #111 0 2px, #f4f4f4 2px 5px);
+  border: 0
+}
+
+.color-multicolor {
+  background: conic-gradient(#ff6a53 0 25%, #11a58d 0 50%, #ffc52b 0 75%, #2182be 0);
+  border: 0
+}
