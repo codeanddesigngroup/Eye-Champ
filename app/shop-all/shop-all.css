@@ -240,11 +240,12 @@
   width: 88%;
   height: 60%;
   object-fit: contain;
+  transform: translateY(-24px);
   transition: transform .25s
 }
 
 .plp-card:hover .plp-photo>img {
-  transform: scale(1.05)
+  transform: translateY(-24px) scale(1.05)
 }
 
 .plp-badge {
