@@ -1,0 +1,4 @@
+.page { min-height: 400px; }
+.page h1, .page aside h2 { font-family: Impact, 'Arial Narrow', Arial, sans-serif; font-weight: 400; }
+.policyLink { text-decoration: underline; text-underline-offset: 2px; }
+@media (max-width: 800px) { .page { min-height: auto; } }

@@ -19,7 +19,7 @@ const pages = [
 const cards = [
   { title: "MY ORDERS", description: "Track your order or create a return.", label: "GO TO ORDERS", href: "/track-orders", icon: PackageSearch },
   { title: "TRACK RETURNS", description: "Find help with your returns and refunds.", label: "GO TO RETURNS", href: "/track-returns", icon: PackageCheck },
-  { title: "STORE FINDER", description: "Contact us to find a store and plan your visit.", label: "PLAN A VISIT IN STORE", href: "#contact-support", icon: Store },
+  { title: "STORE FINDER", description: "Find a store and plan your visit.", label: "PLAN A VISIT IN STORE", href: "/store-locator", icon: Store },
   { title: "PAYMENT", description: "Discover all our accepted payment methods.", label: "GO TO PAYMENTS", href: "/accepted-payment-methods", icon: CreditCard },
   { title: "PRODUCT HELP CARE AND FITTING", description: "Find your fit and how to take care of your pair.", label: "GO TO PRODUCT CARE", href: "/parts-and-service", icon: HandHeart },
   { title: "ACCESSORIES", description: "Find help with care items, accessories and more.", label: "GO TO ACCESSORIES", href: "/parts-and-service", icon: Glasses },

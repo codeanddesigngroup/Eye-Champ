@@ -1,0 +1,32 @@
+.page { padding: 44px 24px 40px; color: #303038; background: white; }
+.header { text-align: center; }
+.page h1, .page h2, .actions button, .fileButton { font-family: Impact, 'Arial Narrow', Arial, sans-serif; font-weight: 400; }
+.header h1 { font-size: 26px; margin: 0 0 20px; }
+.page p { font-size: 14px; line-height: 1.65; }
+.header p { margin: 0; }
+.form { max-width: 460px; margin: 100px auto 0; }
+.page h2 { font-size: 19px; line-height: 1.4; margin: 0 0 16px; }
+.section { margin-bottom: 60px; }
+.section p { margin: 0; }
+.lineField { display: flex; flex-direction: column; margin-top: 60px; font-size: 15px; }
+.lineField input { border: 0; border-bottom: 1px solid #777; border-radius: 0; width: 100%; height: 30px; padding: 4px 0; background: white; color: #303038; font-size: 16px; }
+.section textarea { display: block; margin-top: 40px; width: 100%; min-height: 295px; border: 1px solid #777; border-radius: 0; resize: vertical; padding: 12px; font: inherit; font-size: 14px; background: white; color: #303038; }
+.attachment { position: relative; margin-bottom: 40px; }
+.fileButton { display: inline-block; padding: 12px 25px; border: 1px solid #aaaabd; cursor: pointer; font-size: 16px; }
+.fileInput { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.fileInput:focus-visible + .fileButton { outline: 2px solid #e22; outline-offset: 4px; }
+.page .hint { font-size: 12px; margin: 10px 0 0; color: #777; overflow-wrap: anywhere; }
+.error { color: #b22; }
+.error:empty { display: none; }
+.page .notice { display: flex; align-items: flex-start; gap: 8px; font-size: 12px; margin: -35px 0 55px; }
+.notice svg { flex-shrink: 0; color: #888; }
+.actions { display: flex; flex-direction: column; align-items: flex-start; gap: 0; }
+.actions button { min-width: 220px; min-height: 42px; padding: 12px 24px; border: 0; cursor: pointer; font-size: 16px; }
+.actions button[type='submit'] { color: #333; background: #eee; }
+.actions button[type='reset'] { color: white; background: #222226; }
+.actions button:hover, .fileButton:hover { filter: brightness(.94); }
+.result { font-size: 13px; margin-top: 20px; }
+.result a { text-decoration: underline; }
+.page input:focus-visible, .page textarea:focus-visible, .page button:focus-visible, .page a:focus-visible { outline: 2px solid #e22; outline-offset: 4px; }
+.srOnly { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+@media (max-width: 600px) { .page { padding-top: 35px; }.form { margin-top: 55px; }.lineField { margin-top: 35px; }.section { margin-bottom: 40px; }.page .notice { margin-top: -15px; }.section textarea { min-height: 230px; } }

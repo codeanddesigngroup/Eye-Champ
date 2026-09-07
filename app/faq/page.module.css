@@ -1,0 +1,15 @@
+.page { min-height: 520px; padding-top: 48px; }
+.page h1, .page aside h2, .category summary { font-family: Impact, 'Arial Narrow', Arial, sans-serif; font-weight: 400; }
+.categories { padding-top: 12px; }
+.category { border-bottom: 1px solid #eee; }
+.category summary { display: flex; align-items: center; justify-content: space-between; gap: 20px; list-style: none; padding: 12px 14px 10px 0; font-size: 19px; line-height: 1.3; cursor: pointer; }
+.category summary::-webkit-details-marker { display: none; }
+.category summary:focus-visible { outline: 2px solid #e22; outline-offset: 4px; }
+.category summary svg { transition: transform .2s; flex-shrink: 0; }
+.category[open] summary svg { transform: rotate(180deg); }
+.answers { padding: 4px 0 20px; }
+.answers section { padding: 16px 0; }
+.answers h2 { font-size: 15px; margin: 0 0 8px; line-height: 1.5; }
+.answers a { display: inline-block; font-size: 12px; text-decoration: underline; margin-top: 10px; }
+@media (max-width: 800px) { .page { min-height: auto; padding-top: 28px; }.category summary { font-size: 17px; } }
+@media (prefers-reduced-motion: reduce) { .category summary svg { transition: none; } }
