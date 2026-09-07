@@ -48,7 +48,7 @@ export default function Footer() {
       </nav>
     </section>
     <section className={styles.assurances} aria-label="Shopping assurances">
-      <div><LockKeyhole aria-hidden="true" /><strong>SECURE CHECKOUT</strong></div><div><Truck aria-hidden="true" /><strong>RESPONSIBLE SHIPPING</strong></div>
+      <div><LockKeyhole aria-hidden="true" /><strong>SECURE CHECKOUT</strong></div><Link href="/shipping-information"><Truck aria-hidden="true" /><strong>RESPONSIBLE SHIPPING</strong></Link>
     </section>
     <section className={styles.security}><p><LockKeyhole aria-hidden="true" /> We guarantee every transaction is 100% secure.</p>
       <div className={styles.paymentMarks} aria-label="Accepted payment methods">{cards.map(([label, className], i) => <span className={className} key={`${label}-${i}`}>{label}</span>)}</div>

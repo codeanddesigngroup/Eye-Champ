@@ -53,7 +53,8 @@
   background: #fafafa;
 }
 
-.assurances div {
+.assurances div,
+.assurances > a {
   display: grid;
   justify-items: center;
   gap: 18px;
@@ -222,8 +223,8 @@
   color: white;
   font-size: 11px;
   font-weight: 800;
+  cursor: pointer;
 }
-
 .countryFlag {
   width: 20px;
   height: 14px;
@@ -295,7 +296,8 @@
     height: 105px;
   }
 
-  .assurances div {
+  .assurances div,
+  .assurances > a {
     gap: 10px;
     font-size: 10px;
   }
