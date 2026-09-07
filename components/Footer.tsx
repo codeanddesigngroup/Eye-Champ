@@ -3,6 +3,7 @@ import { faFacebookF, faInstagram, faPinterestP, faSpotify, faSquareFontAwesomeS
 import { LockKeyhole, Truck } from "lucide-react";
 import Link from "next/link";
 import styles from "./Footer.module.css";
+import ShippingCountry from "./ShippingCountry";
 
 const groups = [
   ["SHOP BY", "ALL SUNGLASSES", "ALL EYEGLASSES", "POLARIZED", "NEW ICONS", "SPECIAL OFFERS"],
@@ -59,7 +60,7 @@ export default function Footer() {
       </div></div>
     </div></section>
     <section className={styles.legal}>
-      <div className={styles.legalTop}><div className={styles.shipping}><span>You&apos;re shipping to:</span><button type="button"><span aria-hidden="true">🇵🇰</span> PAKISTAN</button></div><nav aria-label="Legal links"><Link href="/internet-privacy-policy">Internet privacy policy</Link><a href="#top">Sitemap</a><Link href="/terms-of-use">Terms of use</Link></nav></div>
+      <div className={styles.legalTop}><div className={styles.shipping}><span>You&apos;re shipping to:</span><ShippingCountry /></div><nav aria-label="Legal links"><Link href="/internet-privacy-policy">Internet privacy policy</Link><a href="#top">Sitemap</a><Link href="/terms-of-use">Terms of use</Link></nav></div>
       <div className={styles.disclaimer}><p>Pictures and images on this website are for illustration purposes only. No qualities or characteristics of the products depicted herein could be inferred from the relevant pictures. Certain activities undertaken by Luxottica Group S.p.A. may be licensed under US Patent No. 6,624,843. <a href="#top">Copyright ©2026 Luxottica Group S.p.A. - All Rights Reserved</a></p><p>Ray-Ban® Official Store in Czech Republic, Egypt, Hungary, Malaysia, Morocco, New Zealand, Pakistan, Philippines, Romania, South Africa, South Korea, Vietnam.</p><a href="#top">Other sites of the Group</a></div>
     </section>
   </footer>;

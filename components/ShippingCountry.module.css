@@ -1,0 +1,21 @@
+.flag { width: 20px; height: 14px; flex-shrink: 0; display: block; }
+.modal { position: fixed; inset: 0; width: min(375px, calc(100vw - 32px)); max-height: calc(100svh - 32px); overflow-y: auto; margin: auto; padding: 38px 24px 24px; border: 0; background: #fff; color: #14141b; font-family: Arial, sans-serif; font-weight: 400; text-align: left; }
+.modal::backdrop { background: rgb(0 0 0 / 53%); }
+.modal h2 { text-align: center; font-family: Impact, 'Arial Narrow', Arial, sans-serif; font-size: 24px; font-weight: 400; line-height: 1.4; margin: 0 0 28px; }
+.modal .close { position: absolute; right: 17px; top: 17px; display: grid; place-items: center; width: 30px; height: 30px; min-width: 0; padding: 0; border: 0; background: transparent; color: #111; cursor: pointer; }
+.country { display: block; width: 100%; height: 48px; padding: 0 15px; border: 1px solid #e2e2e2; border-radius: 0; font: inherit; font-size: 14px; color: #14141b; background: white; }
+.benefits { background: #f2f2f2; padding: 18px 15px; font-size: 14px; line-height: 1.5; }
+.benefits h3 { font: inherit; font-weight: 600; margin: 0 0 2px; }
+.benefits p { margin: 0; }
+.payments { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
+.payments > svg, .payments > span { width: 40px; height: 25px; flex: 1; min-width: 0; }
+.visa { color: #26347f; }.mastercard { color: #191919; }.diners { color: #1c4671; }.discover { color: #df772c; }
+.maestro { position: relative; display: block; background: white; border-radius: 3px; }
+.maestro i { position: absolute; width: 15px; height: 15px; border-radius: 50%; top: 3px; left: 7px; background: #ed173c; }
+.maestro i + i { left: 17px; background: #00a6dc; mix-blend-mode: multiply; }
+.maestro small { position: absolute; bottom: 0; left: 0; width: 100%; text-align: center; font-size: 5px; }
+.electron { background: #165b95; color: white; border-radius: 3px; text-align: center; font-weight: 800; font-size: 10px; padding-top: 2px; }
+.electron small { display: block; font-size: 6px; font-weight: 400; line-height: 1; }
+.benefits .currency { margin-top: 17px; }.currency strong { font-weight: 600; }
+.modal button:focus-visible, .country:focus-visible { outline: 2px solid #333; outline-offset: 3px; }
+.srOnly { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
