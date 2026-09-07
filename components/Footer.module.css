@@ -1,51 +1,391 @@
-.footer { color: #111; background: #f7f7f7; font-size: 12px; }
-.socialBanner { min-height: 96px; display: flex; align-items: center; justify-content: center; gap: 14px; background: #fff; color: #087984; }
-.socialBanner > strong { color: #3f3f3f; font-size: 24px; line-height: 1; }
-.socialBanner .socialMark { width: 27px; height: 27px; }
-.socialBanner nav { display: flex; align-items: center; gap: 22px; margin-left: 2px; }
-.socialBanner a { width: 25px; height: 25px; display: grid; place-items: center; color: #087984; }
-.socialBanner a svg { width: 100%; height: 100%; }
-.assurances { height: 176px; display: grid; grid-template-columns: 1fr 1fr; align-items: center; background: #fafafa; }
-.assurances div { display: grid; justify-items: center; gap: 18px; font-size: 13px; }
-.assurances svg { width: 25px; height: 25px; stroke-width: 1.2; }
-.assurances strong, .linkGroup h2, .legal nav a { font-stretch: condensed; font-weight: 800; }
-.security { min-height: 64px; padding: 0 3.8%; display: flex; align-items: center; justify-content: space-between; background: #e6e6e8; }
-.security p { display: flex; align-items: center; gap: 10px; margin: 0; }
-.security p svg { width: 17px; height: 17px; }
-.paymentMarks { display: flex; align-items: center; gap: 9px; }
-.paymentMarks span { width: 40px; height: 24px; display: grid; place-items: center; border-radius: 3px; background: white; border: 1px solid #ddd; font-size: 7px; font-weight: 900; }
-.paymentMarks .visa, .paymentMarks .electron { background: #264383; color: white; border-color: #264383; font-size: 10px; font-style: italic; }
-.paymentMarks .mastercard { color: transparent; background: radial-gradient(circle at 42% 50%, #eb001b 0 27%, transparent 28%), radial-gradient(circle at 59% 50%, #f79e1b 0 27%, white 28%); }
-.paymentMarks .maestro { color: transparent; background: radial-gradient(circle at 42% 50%, #e31837 0 27%, transparent 28%), radial-gradient(circle at 59% 50%, #0089cf 0 27%, white 28%); }
-.paymentMarks .discover { border-bottom: 3px solid #f58220; }
-.linksArea { padding: 58px 3.8% 62px; background: #f7f7f7; }
-.linkGrid { display: grid; grid-template-columns: 1fr 1.15fr 1fr .9fr 1fr 1.05fr; gap: 36px; max-width: 1540px; margin: auto; }
-.linkGroup h2 { margin: 0 0 14px; font-size: 14px; }
-.linkGroup > a { display: block; width: max-content; max-width: 100%; margin: 0 0 12px; color: #4a4a4a; font-size: 12px; }
-.linkGroup a:hover { text-decoration: underline; }
-.socials { display: flex; align-items: center; gap: 15px; }
-.socials a { width: 17px; height: 17px; display: grid; place-items: center; color: #17171a; font-size: 19px; font-weight: 800; }
-.socials svg { width: 17px; height: 17px; stroke-width: 2.2; }
-.legal { padding: 25px 3.8% 13px; background: #1d1d21; color: white; font-size: 12px; line-height: 1.45; }
-.legalTop { display: flex; align-items: center; justify-content: space-between; margin-bottom: 26px; }
-.shipping { display: flex; align-items: center; gap: 14px; font-weight: 700; }
-.shipping button { height: 41px; min-width: 121px; padding: 0 17px; display: flex; align-items: center; gap: 10px; border: 1px solid #67676c; background: transparent; color: white; font-size: 11px; font-weight: 800; }
-.shipping button span { font-size: 15px; }
-.legal nav { display: flex; gap: 22px; }
-.legal nav a { color: white; font-size: 11px; }
-.disclaimer p { margin: 0 0 2px; }
-.disclaimer a { color: white; text-decoration: underline; }
-@media (max-width: 900px) { .assurances { height: 130px; } .linkGrid { grid-template-columns: repeat(3, 1fr); } .legalTop { align-items: flex-start; gap: 22px; } }
+.footer {
+  color: #111;
+  background: #f7f7f7;
+  font-size: 12px;
+}
+
+.socialBanner {
+  min-height: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: #fff;
+  color: #087984;
+}
+
+.socialBanner>strong {
+  color: #3f3f3f;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.socialBanner .socialMark {
+  width: 27px;
+  height: 27px;
+}
+
+.socialBanner nav {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  margin-left: 2px;
+}
+
+.socialBanner a {
+  width: 25px;
+  height: 25px;
+  display: grid;
+  place-items: center;
+  color: #087984;
+}
+
+.socialBanner a svg {
+  width: 100%;
+  height: 100%;
+}
+
+.assurances {
+  height: 176px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  background: #fafafa;
+}
+
+.assurances div {
+  display: grid;
+  justify-items: center;
+  gap: 18px;
+  font-size: 13px;
+}
+
+.assurances svg {
+  width: 25px;
+  height: 25px;
+  stroke-width: 1.2;
+}
+
+.assurances strong,
+.linkGroup h2,
+.legal nav a {
+  font-stretch: condensed;
+  font-weight: 800;
+}
+
+.security {
+  min-height: 64px;
+  padding: 0 3.8%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #e6e6e8;
+}
+
+.security p {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+}
+
+.security p svg {
+  width: 17px;
+  height: 17px;
+}
+
+.paymentMarks {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.paymentMarks span {
+  width: 40px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: 3px;
+  background: white;
+  border: 1px solid #ddd;
+  font-size: 7px;
+  font-weight: 900;
+}
+
+.paymentMarks .visa,
+.paymentMarks .electron {
+  background: #264383;
+  color: white;
+  border-color: #264383;
+  font-size: 10px;
+  font-style: italic;
+}
+
+.paymentMarks .mastercard {
+  color: transparent;
+  background: radial-gradient(circle at 42% 50%, #eb001b 0 27%, transparent 28%), radial-gradient(circle at 59% 50%, #f79e1b 0 27%, white 28%);
+}
+
+.paymentMarks .maestro {
+  color: transparent;
+  background: radial-gradient(circle at 42% 50%, #e31837 0 27%, transparent 28%), radial-gradient(circle at 59% 50%, #0089cf 0 27%, white 28%);
+}
+
+.paymentMarks .discover {
+  border-bottom: 3px solid #f58220;
+}
+
+.linksArea {
+  padding: 58px 3.8% 62px;
+  background: #f7f7f7;
+}
+
+.linkGrid {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr 1fr .9fr 1fr 1.05fr;
+  gap: 36px;
+  max-width: 1540px;
+  margin: auto;
+}
+
+.linkGroup h2 {
+  margin: 0 0 14px;
+  font-size: 14px;
+}
+
+.linkGroup>a {
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  margin: 0 0 12px;
+  color: #4a4a4a;
+  font-size: 12px;
+}
+
+.linkGroup a:hover {
+  text-decoration: underline;
+}
+
+.socials {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.socials a {
+  width: 17px;
+  height: 17px;
+  display: grid;
+  place-items: center;
+  color: #17171a;
+  font-size: 19px;
+  font-weight: 800;
+}
+
+.socials svg {
+  width: 17px;
+  height: 17px;
+  stroke-width: 2.2;
+}
+
+.legal {
+  padding: 25px 3.8% 13px;
+  background: #1d1d21;
+  color: white;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.legalTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 26px;
+}
+
+.shipping {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-weight: 700;
+}
+
+.shipping button {
+  height: 41px;
+  min-width: 121px;
+  padding: 0 17px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #67676c;
+  background: transparent;
+  color: white;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.shipping button span {
+  font-size: 15px;
+}
+
+.legal nav {
+  display: flex;
+  gap: 22px;
+}
+
+.legal nav a {
+  color: white;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.disclaimer p {
+  margin: 0 0 2px;
+}
+
+.disclaimer a {
+  color: white;
+  text-decoration: underline;
+}
+
+@media (max-width: 900px) {
+  .assurances {
+    height: 130px;
+  }
+
+  .linkGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .legalTop {
+    align-items: flex-start;
+    gap: 22px;
+  }
+}
+
 @media (max-width: 600px) {
-  .socialBanner { min-height: 82px; gap: 9px; padding: 0 14px; } .socialBanner > strong { font-size: 17px; } .socialBanner .socialMark { width: 21px; height: 21px; } .socialBanner nav { gap: 13px; } .socialBanner a { width: 19px; height: 19px; }
-  .assurances { height: 105px; } .assurances div { gap: 10px; font-size: 10px; } .assurances svg { width: 21px; height: 21px; }
-  .security { padding: 15px 16px; display: grid; justify-content: center; gap: 12px; text-align: center; }
-  .paymentMarks { justify-content: center; gap: 5px; } .paymentMarks span { width: 36px; height: 21px; }
-  .linksArea { padding: 12px 16px 20px; } .linkGrid { display: block; }
-  .linkGroup { position: relative; padding: 14px 0; border-bottom: 1px solid #ddd; }
-  .linkGroup:not(.follow)::after { content: "+"; position: absolute; right: 2px; top: 10px; font-size: 20px; font-weight: 300; }
-  .linkGroup h2 { margin: 0; font-size: 11px; } .linkGroup > a { display: none; }
-  .follow { padding-top: 20px; text-align: center; border-bottom: 0; } .follow h2 { margin-bottom: 15px; } .socials { justify-content: center; }
-  .legal { padding: 22px 16px; font-size: 9px; } .legalTop { display: grid; margin-bottom: 20px; }
-  .shipping { justify-content: space-between; } .legal nav { flex-wrap: wrap; gap: 12px 18px; } .legal nav a { font-size: 9px; }
+  .socialBanner {
+    min-height: 82px;
+    gap: 9px;
+    padding: 0 14px;
+  }
+
+  .socialBanner>strong {
+    font-size: 17px;
+  }
+
+  .socialBanner .socialMark {
+    width: 21px;
+    height: 21px;
+  }
+
+  .socialBanner nav {
+    gap: 13px;
+  }
+
+  .socialBanner a {
+    width: 19px;
+    height: 19px;
+  }
+
+  .assurances {
+    height: 105px;
+  }
+
+  .assurances div {
+    gap: 10px;
+    font-size: 10px;
+  }
+
+  .assurances svg {
+    width: 21px;
+    height: 21px;
+  }
+
+  .security {
+    padding: 15px 16px;
+    display: grid;
+    justify-content: center;
+    gap: 12px;
+    text-align: center;
+  }
+
+  .paymentMarks {
+    justify-content: center;
+    gap: 5px;
+  }
+
+  .paymentMarks span {
+    width: 36px;
+    height: 21px;
+  }
+
+  .linksArea {
+    padding: 12px 16px 20px;
+  }
+
+  .linkGrid {
+    display: block;
+  }
+
+  .linkGroup {
+    position: relative;
+    padding: 14px 0;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .linkGroup:not(.follow)::after {
+    content: "+";
+    position: absolute;
+    right: 2px;
+    top: 10px;
+    font-size: 20px;
+    font-weight: 300;
+  }
+
+  .linkGroup h2 {
+    margin: 0;
+    font-size: 11px;
+  }
+
+  .linkGroup>a {
+    display: none;
+  }
+
+  .follow {
+    padding-top: 20px;
+    text-align: center;
+    border-bottom: 0;
+  }
+
+  .follow h2 {
+    margin-bottom: 15px;
+  }
+
+  .socials {
+    justify-content: center;
+  }
+
+  .legal {
+    padding: 22px 16px;
+    font-size: 9px;
+  }
+
+  .legalTop {
+    display: grid;
+    margin-bottom: 20px;
+  }
+
+  .shipping {
+    justify-content: space-between;
+  }
+
+  .legal nav {
+    flex-wrap: wrap;
+    gap: 12px 18px;
+  }
+
+  .legal nav a {
+    font-size: 9px;
+  }
 }

@@ -1,0 +1,65 @@
+.page { background: white; color: #303038; }
+.page h2, .heroButton, .submit, .previous, .next { font-family: Impact, 'Arial Narrow', Arial, sans-serif; font-weight: 400; }
+.page h2 { font-size: clamp(19px, 1.55vw, 28px); line-height: 1.4; margin: 0 0 16px; }
+.page p { font-size: 14px; line-height: 1.7; }
+.page a:focus-visible, .page button:focus-visible, .page input:focus-visible, .page select:focus-visible { outline: 2px solid #d22; outline-offset: 4px; }
+.art { width: 100%; background-image: url('/images/the-ones/reference.png'); background-repeat: no-repeat; }
+.hero { position: relative; }
+.heroButton { position: absolute; left: 46.1%; top: 58.3%; width: 7.8%; min-height: 5.7%; display: grid; place-items: center; background: white; color: #222; font-size: clamp(8px, .8vw, 15px); }
+.heroButton:hover { background: #eee; }
+.intro { text-align: center; padding: 80px 24px; }
+.intro p { margin: 0; }
+.carousel { position: relative; padding: 65px 11.7% 80px; overflow: hidden; transition: background-color .5s; box-shadow: inset 0 0 35px #fff9; }
+.event { position: relative; background: radial-gradient(ellipse at top, #be947a, #32170c); color: white; animation: reveal .45s both; }
+.eventImage { position: relative; aspect-ratio: 727 / 214; overflow: hidden; }
+.eventImage > .art { position: absolute; inset: 0; }
+.eventImage img { object-fit: cover; }
+.eventCopy { text-align: center; padding: 20px 22% 35px; min-height: 160px; }
+.eventCopy h2 { color: white; margin-bottom: 14px; }
+.eventCopy p { margin: 0; }
+.eventCopy a { display: inline-block; font-size: 12px; text-decoration: underline; margin-top: 15px; }
+.sideCard { position: absolute; left: -12%; top: 65px; bottom: 100px; width: 22%; background: linear-gradient(120deg, #344c4e, #739094); }
+.sideRight { left: auto; right: -12%; background: linear-gradient(120deg, #8798aa, #253749); }
+.previous, .next { position: absolute; top: 48%; background: none; border: 0; color: white; font-size: 14px; text-decoration: underline; cursor: pointer; padding: 12px 5px; }
+.previous { left: 10%; }.next { right: 10%; }
+.dots { position: absolute; bottom: 40px; display: flex; left: 50%; transform: translateX(-50%); }
+.dots button { border: 0; border-top: 2px solid #ffffff50; width: 55px; height: 16px; background: none; cursor: pointer; }
+.dots button[aria-pressed='true'] { border-color: #222; }
+.signup { padding: 80px 24px 25px; scroll-margin-top: 30px; }
+.signup header { text-align: center; }
+.signup header p { margin: 0 0 22px; }
+.form { max-width: 460px; margin: 90px auto 0; font-size: 14px; }
+.lineField { display: flex; flex-direction: column; margin-bottom: 48px; }
+.lineField input { border: 0; border-bottom: 1px solid #777; border-radius: 0; width: 100%; height: 24px; background: white; }
+.form fieldset { border: 0; padding: 0; margin: 0 0 45px; }
+.form legend { font-size: 12px; margin-bottom: 15px; }
+.birth > div { display: flex; justify-content: space-between; gap: 30px; }
+.birth label { flex: 1; min-width: 0; }
+.birth select { width: 100%; border: 0; border-bottom: 1px solid #777; border-radius: 0; background: white; color: #555; padding: 5px 0; }
+.gender label { display: flex; align-items: center; gap: 17px; margin: 18px 0; font-family: Impact, 'Arial Narrow', sans-serif; font-size: 13px; }
+.gender input, .consent input { accent-color: #222; width: 17px; height: 17px; flex-shrink: 0; }
+.consent { display: flex; align-items: flex-start; gap: 12px; font-size: 12px; line-height: 1.6; }
+.consent a { text-decoration: underline; }
+.form .privacy { font-size: 12px; line-height: 1.8; color: #777; margin: 25px 0 20px; scroll-margin-top: 50px; }
+.submit { display: block; margin: 0 auto; background: #222226; color: white; border: 0; padding: 12px 25px; cursor: pointer; }
+.message { text-align: center; color: #8c3023; }
+.srOnly { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+@keyframes reveal { from { opacity: .4; transform: translateX(15px); } to { opacity: 1; transform: none; } }
+@media (max-width: 650px) {
+  .hero { min-height: 360px; overflow: hidden; }
+  .hero > .art { width: 800px; position: relative; left: 50%; transform: translateX(-50%); }
+  .heroButton { top: 211px; left: calc(50% - 33px); width: 66px; min-height: 24px; font-size: 10px; }
+  .intro, .signup { padding-top: 45px; }
+  .intro { padding-bottom: 45px; }
+  .carousel { padding: 30px 8% 60px; }
+  .eventCopy { padding: 18px 20px 25px; min-height: 210px; }
+  .eventCopy p { font-size: 12px; }
+  .eventImage { aspect-ratio: 727 / 300; }
+  .previous { left: 0; }.next { right: 0; }
+  .previous, .next { font-size: 10px; }
+  .sideCard { display: none; }
+  .dots { bottom: 20px; }
+  .form { margin-top: 55px; }
+  .signup header br { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .event { animation: none; }.carousel { transition: none; } }

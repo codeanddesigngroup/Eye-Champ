@@ -1,0 +1,47 @@
+.page { color: #303038; background: white; padding-top: 45px; }
+.page h1, .page h2, .page h3, .button, .card a { font-family: Impact, 'Arial Narrow', Arial, sans-serif; font-weight: 400; }
+.page h1, .page h2 { font-size: clamp(22px, 1.7vw, 30px); line-height: 1.4; margin: 0 0 20px; }
+.page p { font-size: 14px; line-height: 1.7; margin: 0; }
+.intro, .sectionIntro, .contact { text-align: center; padding-inline: 24px; }
+.search { display: flex; align-items: flex-end; gap: 30px; max-width: 640px; margin: 50px auto 0; }
+.search input { min-width: 0; flex: 1; border: 0; border-bottom: 1px solid #888; border-radius: 0; height: 40px; color: #333; background: white; font-size: 15px; }
+.button { display: inline-flex; align-items: center; justify-content: center; border: 0; background: #202024; color: white; min-height: 40px; padding: 10px 25px; font-size: 15px; cursor: pointer; }
+.button:hover { background: #45454b; }
+.page a:focus-visible, .page button:focus-visible, .page input:focus-visible { outline: 2px solid #e22; outline-offset: 4px; }
+.results { max-width: 640px; margin: 25px auto 0; text-align: left; border: 1px solid #ddd; padding: 20px; }
+.results > a { display: block; border-top: 1px solid #eee; padding: 16px 0 6px; margin-top: 12px; font-size: 14px; }
+.results span { display: block; color: #666; font-size: 13px; margin-top: 6px; }
+.results a:hover strong { text-decoration: underline; }
+.sectionIntro { padding-top: 120px; padding-bottom: 45px; }
+.grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.card { display: flex; flex-direction: column; align-items: center; text-align: center; background: #f2f2f2; padding: 48px 25px; min-height: 300px; }
+.card > svg { width: 64px; height: 64px; margin-bottom: 25px; }
+.card h3 { font-size: 16px; margin: 0 0 20px; }
+.card p { margin-bottom: 25px; }
+.card a { text-decoration: underline; text-underline-offset: 3px; font-size: 15px; margin-top: auto; }
+.helpPages .sectionIntro { padding-top: 50px; }
+.accordions { max-width: 1090px; margin: 0 auto; padding: 0 24px; }
+.accordion { border: 1px solid #e0e0e5; margin-bottom: 16px; }
+.accordion h3 { margin: 0; font-size: 17px; }
+.accordion h3 button { display: flex; align-items: center; justify-content: space-between; gap: 15px; width: 100%; text-align: left; border: 0; background: white; padding: 13px 17px; cursor: pointer; color: #303038; }
+.accordion h3 span { font-family: Arial, sans-serif; color: #777; font-size: 26px; line-height: 1; font-weight: 300; }
+.accordion [role='region'] { padding: 0 20px 14px; }
+.accordion a { display: block; padding: 10px 0; color: #777; font-size: 14px; }
+.accordion a:hover { color: #222; text-decoration: underline; }
+.contact { padding-top: 70px; padding-bottom: 50px; scroll-margin-top: 40px; }
+.contact .button { margin-top: 30px; }
+.srOnly { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+@media (max-width: 700px) {
+  .page { padding-top: 35px; }
+  .page br { display: none; }
+  .search { gap: 15px; margin-top: 30px; }
+  .button { padding-inline: 18px; }
+  .sectionIntro { padding-top: 60px; padding-bottom: 30px; }
+  .grid { grid-template-columns: 1fr 1fr; gap: 6px; }
+  .card { padding: 30px 15px; min-height: 290px; }
+  .card > svg { width: 50px; height: 50px; }
+  .card p { font-size: 12px; }
+  .card h3, .card a { font-size: 14px; }
+  .contact { padding-top: 45px; }
+}
+@media (max-width: 380px) { .grid { grid-template-columns: 1fr; } }
