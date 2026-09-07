@@ -1,0 +1,5 @@
+.page { min-height: 670px; }
+.contact { color: #707078; text-decoration: underline; text-underline-offset: 2px; }
+@media (max-width: 800px) {
+  .page { min-height: auto; }
+}

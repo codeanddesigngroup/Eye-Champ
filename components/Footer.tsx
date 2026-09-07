@@ -1,6 +1,7 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFacebookF, faInstagram, faPinterestP, faSpotify, faSquareFontAwesomeStroke, faThreads, faTiktok, faTwitter, faXTwitter, faYoutube } from "@fortawesome/free-brands-svg-icons";
 import { LockKeyhole, Truck } from "lucide-react";
+import Link from "next/link";
 import styles from "./Footer.module.css";
 
 const groups = [
@@ -9,6 +10,18 @@ const groups = [
   ["ABOUT US", "OUR ICONS HISTORY", "RAY-BAN RED", "THE ONES", "ONESIGHT"], ["DO IT IN PERSON", "STORE LOCATOR"],
   ["HOW CAN WE HELP?", "GET SUPPORT", "TRACK ORDERS", "TRACK RETURNS", "FAQ", "REPORT A FAKE"],
 ];
+const shopByLinks: Record<string, string> = {
+  "SIZE GUIDE": "/size-guide",
+  "ACCEPTED PAYMENT METHODS": "/accepted-payment-methods",
+  "PARTS & SERVICE": "/parts-and-service",
+  "SHIPPING INFORMATION": "/shipping-information",
+  "CANCEL OR RETURN AN ORDER": "/cancel-or-return-an-order",
+  "ALL SUNGLASSES": "/sunglasses/all",
+  "ALL EYEGLASSES": "/eyeglasses/all",
+  "POLARIZED": "/sunglasses/polarized-sunglasses",
+  "NEW ICONS": "/shop-all",
+  "SPECIAL OFFERS": "/shop-all",
+};
 const cards = [["VISA", styles.visa], ["●●", styles.mastercard], ["Diners", styles.diners], ["DISCOVER", styles.discover], ["●●", styles.maestro], ["VISA", styles.electron]];
 
 export default function Footer() {
@@ -31,7 +44,7 @@ export default function Footer() {
       <div className={styles.paymentMarks} aria-label="Accepted payment methods">{cards.map(([label, className], i) => <span className={className} key={`${label}-${i}`}>{label}</span>)}</div>
     </section>
     <section className={styles.linksArea}><div className={styles.linkGrid}>
-      {groups.map(([heading, ...links]) => <div className={styles.linkGroup} key={heading}><h2>{heading}</h2>{links.map(label => <a href="#top" key={label}>{label}</a>)}</div>)}
+      {groups.map(([heading, ...links]) => <div className={styles.linkGroup} key={heading}><h2>{heading}</h2>{links.map(label => shopByLinks[label] ? <Link href={shopByLinks[label]} key={label}>{label}</Link> : <a href="#top" key={label}>{label}</a>)}</div>)}
       <div className={`${styles.linkGroup} ${styles.follow}`}><h2>FOLLOW US</h2><div className={styles.socials}>
         <a href="#top" aria-label="Instagram"><FontAwesomeIcon icon={faInstagram} /></a><a href="#top" aria-label="TikTok"><FontAwesomeIcon icon={faTiktok} /></a><a href="#top" aria-label="YouTube"><FontAwesomeIcon icon={faYoutube} /></a><a href="#top" aria-label="X"><FontAwesomeIcon icon={faXTwitter} /></a><a href="#top" aria-label="Facebook"><FontAwesomeIcon icon={faFacebookF} /></a><a href="#top" aria-label="Threads"><FontAwesomeIcon icon={faThreads} /></a><a href="#top" aria-label="Spotify"><FontAwesomeIcon icon={faSpotify} /></a><a href="#top" aria-label="Pinterest"><FontAwesomeIcon icon={faPinterestP} /></a>
       </div></div>

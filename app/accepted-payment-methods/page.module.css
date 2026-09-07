@@ -1,0 +1,34 @@
+.page { width: min(100% - 112px, 1552px); margin: 0 auto; padding: 48px 0 96px; display: grid; grid-template-columns: 346px minmax(0, 640px); gap: 48px; color: #303038; }
+.page h1, .page h2 { font-family: "Arial Narrow", Arial, sans-serif; font-weight: 800; line-height: 1.4; }
+.sidebar h2 { font-size: 16px; margin: 44px 0 14px; }
+.back { display: inline-flex; color: #666; }
+.sidebar nav { display: flex; flex-direction: column; }
+.sidebar nav a { border-bottom: 1px solid #e1e1e5; padding: 14px 0; font-size: 12px; color: #777; }
+.sidebar nav a[aria-current] { color: #222; }
+.page a:hover { text-decoration: underline; }
+.page a:focus-visible, .page button:focus-visible { outline: 2px solid #e32636; outline-offset: 4px; }
+.breadcrumb { font-size: 12px; line-height: 1.6; margin-bottom: 54px; }
+.breadcrumb a { color: #777; }
+.article h1 { font-size: 24px; margin: 0 0 34px; }
+.article p, .table { font-size: 12px; line-height: 1.65; }
+.article p { margin: 0; }
+.table { width: 100%; border: 1px solid #dedee3; border-spacing: 2px; text-align: left; }
+.table th, .table td { border: 1px solid #dedee3; padding: 2px 3px; font-weight: 400; vertical-align: middle; overflow-wrap: anywhere; }
+.table th:first-child { width: 80px; }
+.section { margin-top: 34px; scroll-margin-top: 120px; }
+.section h2 { font-size: 17px; margin: 0 0 10px; }
+.feedback { border-top: 1px solid #e1e1e5; margin-top: 40px; padding-top: 16px; display: flex; align-items: center; flex-wrap: wrap; gap: 14px; font-size: 12px; }
+.feedbackButtons { display: flex; gap: 8px; }
+.feedback button { min-width: 64px; min-height: 40px; border: 1px solid #64646b; border-radius: 24px; background: white; color: #222; font-size: 12px; font-weight: 700; cursor: pointer; }
+.feedback button:hover, .feedback button[aria-pressed="true"] { background: #222; color: white; }
+.feedback [role="status"] { flex-basis: 100%; }
+.srOnly { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+@media (max-width: 1200px) { .page { grid-template-columns: 280px minmax(0, 640px); gap: 40px; } }
+@media (max-width: 800px) {
+  .page { width: calc(100% - 40px); grid-template-columns: 1fr; gap: 32px; padding: 28px 0 56px; }
+  .sidebar h2 { margin-top: 20px; }
+  .sidebar nav { display: grid; grid-template-columns: 1fr 1fr; gap: 0 20px; }
+  .breadcrumb { margin-bottom: 28px; }
+  .article h1 { font-size: 22px; margin-bottom: 24px; }
+  .article p, .table { font-size: 13px; }
+}

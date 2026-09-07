@@ -1,0 +1,10 @@
+.article { min-width: 0; }
+.article ol { list-style: decimal; padding-left: 20px; margin: 14px 0; font-size: 12px; line-height: 1.65; }
+.article p a, .article li a { text-decoration: underline; text-underline-offset: 2px; }
+.orderAction { display: flex; justify-content: center; padding: 66px 0 50px; }
+.orderButton { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 12px 24px; background: #202024; color: white; font-size: 13px; font-weight: 800; }
+.orderButton:hover { background: #414146; }
+@media (max-width: 800px) {
+  .article ol { font-size: 13px; }
+  .orderAction { padding: 38px 0; }
+}
