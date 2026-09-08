@@ -157,6 +157,15 @@ input {
     padding-bottom: 5px
 }
 
+.utility .utility-login {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 1.389vw;
+    padding-bottom: 5px;
+    cursor: default
+}
+
 .utility a::after {
     content: "";
     position: absolute;
@@ -1111,7 +1120,8 @@ footer {
         justify-content: flex-end;
     }
 
-    .utility a {
+    .utility a,
+    .utility .utility-login {
         font-size: 0.95rem;
     }
 
@@ -1268,7 +1278,8 @@ footer {
         display: flex;
     }
 
-    .utility a {
+    .utility a,
+    .utility .utility-login {
         flex-direction: row;
         gap: 0.5rem;
         width: 100%;
@@ -1628,7 +1639,8 @@ footer {
         background: transparent;
     }
 
-    .utility a {
+    .utility a,
+    .utility .utility-login {
         width: auto;
     }
 
