@@ -3,11 +3,13 @@ import { Heart, HelpCircle, Search, ShoppingCart, UserRound } from "lucide-react
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import MegaMenuSlider from "./MegaMenuSlider";
+import { favoritesUpdatedEvent, getFavorites } from "@/lib/favorites";
 
 export default function Navbar() {
     const [menu, setMenu] = useState(false);
     const [query, setQuery] = useState("");
     const [cartCount, setCartCount] = useState(0);
+    const [favoriteCount, setFavoriteCount] = useState(0);
     const [categories, setCategories] = useState<Array<{id:string;name:string;slug:string;parentId:string|null}>>([]);
     useEffect(() => {
         const updateCartCount = () => {
@@ -18,6 +20,13 @@ export default function Navbar() {
         window.addEventListener("storage", updateCartCount);
         window.addEventListener("eye-champ-cart-updated", updateCartCount);
         return () => { window.removeEventListener("storage", updateCartCount); window.removeEventListener("eye-champ-cart-updated", updateCartCount); };
+    }, []);
+    useEffect(() => {
+        const updateFavoriteCount = () => setFavoriteCount(getFavorites().length);
+        updateFavoriteCount();
+        window.addEventListener("storage", updateFavoriteCount);
+        window.addEventListener(favoritesUpdatedEvent, updateFavoriteCount);
+        return () => { window.removeEventListener("storage", updateFavoriteCount); window.removeEventListener(favoritesUpdatedEvent, updateFavoriteCount); };
     }, []);
     useEffect(() => { fetch("/api/products/categories/navigation").then(response => response.ok ? response.json() : Promise.reject()).then((result:{categories?:Array<{id:string;name:string;slug:string;parentId:string|null}>}) => setCategories(result.categories ?? [])).catch(() => setCategories([])) }, []);
     const mainCategories = categories.filter(category => category.parentId === null);
@@ -30,7 +39,7 @@ export default function Navbar() {
                 <label className="search"><Search size={18} /><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search our AI recommended frames" /></label>
                 <nav className={`utility ${menu ? "open" : ""}`} aria-label="Account links">
                     <Link href="/admin" aria-label="Login"><UserRound size={18} /><small>Login</small></Link>
-                    <a href="#favorites" aria-label="Favorites"><Heart size={18} /><small>Favorites</small></a>
+                    <Link href="/favorites" aria-label={`Favorites with ${favoriteCount} products`}><Heart size={18} />{favoriteCount > 0 && <b className="cart-count">{favoriteCount}</b>}<small>Favorites</small></Link>
                     <a href="#help" aria-label="Help"><HelpCircle size={18} /><small>Help</small></a>
                     <Link href="/cart" aria-label={`Cart with ${cartCount} items`}><ShoppingCart size={18} />{cartCount > 0 && <b className="cart-count">{cartCount}</b>}<small>Cart</small></Link>
                 </nav>

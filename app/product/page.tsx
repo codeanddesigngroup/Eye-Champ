@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChevronDown, ChevronLeft, ChevronRight, Heart, ShieldCheck, Star, ThumbsUp, Video } from "lucide-react";
 import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -8,6 +8,7 @@ import "swiper/css";
 import "../product.css";
 import SelectLensesButton from "../../components/SelectLensesButton";
 import BuyNowButton from "../../components/BuyNowButton";
+import { favoritesUpdatedEvent, getFavorites, toggleFavorite } from "@/lib/favorites";
 
 const views = ["front", "side", "angle", "sun", "folded"];
 const productAssets: Record<string, { src: string; width: number; height: number }> = {
@@ -40,11 +41,13 @@ export default function ProductPage({databaseProduct}:{databaseProduct?:Database
     const selectedFrameColor=frameColors[color]??"";
     const databaseImages=(selectedFrameColor?frameVariant?.mediaByValue?.[selectedFrameColor]:undefined)??databaseProduct?.media??[];
     const databaseImage=(index:number)=>databaseImages[index%Math.max(databaseImages.length,1)]?.url;
+    useEffect(()=>{if(!databaseProduct)return;const refresh=()=>setLiked(getFavorites().some(item=>item.id===databaseProduct.id));refresh();window.addEventListener(favoritesUpdatedEvent,refresh);return()=>window.removeEventListener(favoritesUpdatedEvent,refresh)},[databaseProduct]);
+    const toggleLiked=()=>{if(!databaseProduct)return setLiked(value=>!value);const slug=(value:string)=>value.toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");setLiked(toggleFavorite({...databaseProduct,categorySlug:slug(databaseProduct.categories[0]||"shop-all"),subcategorySlug:slug(databaseProduct.subcategories[0]||"all")}))};
     return (
         <main className="pdp productDetails">
             <section className="product-hero wrap">
                 <div className="gallery">
-                    <button className="gallery-heart" onClick={() => setLiked(!liked)} aria-label="Save product">
+                    <button className="gallery-heart" onClick={toggleLiked} aria-label={liked ? "Remove from favorites" : "Add to favorites"}>
                         <Heart fill={liked ? "#0b6068" : "none"} />
                     </button>
                     <button type="button" className="gallery-arrow left" onClick={() => gallerySlider.current?.slidePrev()}><ChevronLeft /></button>
