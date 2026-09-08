@@ -90,5 +90,13 @@ export async function initializeDatabase() {
       media JSONB NOT NULL DEFAULT '[]'::jsonb,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
+    CREATE TABLE IF NOT EXISTS orders (
+      id BIGSERIAL PRIMARY KEY, order_number VARCHAR(40) UNIQUE, customer_name VARCHAR(160) NOT NULL,
+      email VARCHAR(320) NOT NULL, phone VARCHAR(50) NOT NULL, address TEXT NOT NULL, city VARCHAR(120) NOT NULL,
+      postal_code VARCHAR(30) NOT NULL, items JSONB NOT NULL DEFAULT '[]'::jsonb,
+      subtotal NUMERIC(12,2) NOT NULL CHECK (subtotal >= 0), payment_status VARCHAR(20) NOT NULL DEFAULT 'Pending',
+      fulfillment_status VARCHAR(30) NOT NULL DEFAULT 'Unfulfilled', created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+    ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_method VARCHAR(40) NOT NULL DEFAULT 'Cash on Delivery';
   `);
 }

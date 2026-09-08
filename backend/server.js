@@ -13,6 +13,8 @@ import { brandsRouter } from "./routes/brands.js";
 import { productsRouter } from "./routes/products.js";
 import { uploadsRouter } from "./routes/uploads.js";
 import { storefrontProductsRouter } from "./routes/storefront-products.js";
+import { checkoutRouter } from "./routes/checkout.js";
+import { ordersRouter } from "./routes/orders.js";
 
 const app = express();
 const port = Number(process.env.BACKEND_PORT || 4000);
@@ -33,8 +35,10 @@ app.use("/api/admin/categories", categoriesRouter);
 app.use("/api/admin/collections", collectionsRouter);
 app.use("/api/admin/brands", brandsRouter);
 app.use("/api/admin/products", productsRouter);
+app.use("/api/admin/orders", ordersRouter);
 app.use("/api/admin/uploads", uploadsRouter);
 app.use("/api/products", storefrontProductsRouter);
+app.use("/api/checkout", checkoutRouter);
 app.use((_request, response) => response.status(404).json({ error: "Route not found." }));
 app.use((error, _request, response, _next) => {
   console.error(error);
