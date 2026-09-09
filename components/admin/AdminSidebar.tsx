@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { BadgeCheck, Boxes, ChevronDown, CircleDollarSign, Glasses, Grid2X2, HelpCircle, Layers3, LibraryBig, MoreHorizontal, Settings, ShoppingBag, Tag, Truck, Users, X } from "lucide-react";
+import { BadgeCheck, Boxes, CircleDollarSign, Glasses, Grid2X2, HelpCircle, Layers3, LibraryBig, MoreHorizontal, Settings, ShoppingBag, Tag, Truck, Users, X } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import "./AdminSidebar.css";
@@ -25,7 +25,6 @@ const workspaceItems = [
 export default function AdminSidebar({ open, onClose }: AdminSidebarProps) {
   const pathname = usePathname();
   const onProductRoute = pathname.startsWith("/admin/products");
-  const [productsOpen, setProductsOpen] = useState(onProductRoute);
   const [unreadOrders, setUnreadOrders] = useState(cachedUnreadOrders);
 
   useEffect(() => {
@@ -60,13 +59,7 @@ export default function AdminSidebar({ open, onClose }: AdminSidebarProps) {
       <nav aria-label="Admin navigation">
         <p>Workspace</p>
         {workspaceItems.slice(0, 2).map(({label,icon:Icon,href,badge}) => {const visibleBadge=label==="Orders"?unreadOrders:badge;return <Link className={pathname === href ? "active" : ""} href={href} key={label} onClick={onClose}><Icon size={19}/><span>{label}</span>{pathname!==href&&Boolean(visibleBadge)&&<em>{visibleBadge}</em>}</Link>})}
-        <button className={onProductRoute ? "active product-toggle" : "product-toggle"} onClick={() => setProductsOpen(value => !value)} aria-expanded={productsOpen}>
-          <Glasses size={19}/><span>Products</span><ChevronDown className={productsOpen ? "open" : ""} size={16}/>
-        </button>
-        {productsOpen && <div className="admin-product-subnav">
-          <Link className={pathname === "/admin/products" ? "current" : ""} href="/admin/products" onClick={onClose}>View products</Link>
-          <Link className={pathname === "/admin/products/new" ? "current" : ""} href="/admin/products/new" onClick={onClose}>Add product</Link>
-        </div>}
+        <Link className={onProductRoute ? "active" : ""} href="/admin/products" onClick={onClose}><Glasses size={19}/><span>Products</span></Link>
         {workspaceItems.slice(2).map(({label,icon:Icon,href,badge}) => <Link className={pathname === href ? "active" : ""} href={href} key={label} onClick={onClose}><Icon size={19}/><span>{label}</span>{pathname !== href && badge && <em>{badge}</em>}</Link>)}
         <p>Management</p>
         <a href="#"><Truck size={19}/><span>Shipping</span></a>
