@@ -2,6 +2,8 @@ import { Router } from "express";
 import { pool } from "../db.js";
 import { requireAdmin } from "../middleware/require-admin.js";
 import sanitizeHtml from "sanitize-html";
+import { unlink } from "node:fs/promises";
+import { basename, dirname, resolve } from "node:path";
 
 export const productsRouter = Router();
 productsRouter.use(requireAdmin);
@@ -10,6 +12,28 @@ const validStatus = new Set(["Active", "Draft", "Archived"]);
 const slugify = (value) => value.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 const array = (value) => Array.isArray(value) ? value.map(String) : [];
 const numberOrNull = (value) => value === "" || value === null || value === undefined ? null : Number(value);
+const productUploadDirectory = resolve(process.cwd(), "uploads", "products");
+const uploadedImagePath = (url) => {
+  if (typeof url !== "string") return null;
+  let pathname = url.split(/[?#]/, 1)[0];
+  try { if (/^https?:\/\//i.test(url)) pathname = new URL(url).pathname; } catch { return null; }
+  const prefix = "/uploads/products/";
+  if (!pathname.startsWith(prefix)) return null;
+  let filename;
+  try { filename = decodeURIComponent(pathname.slice(prefix.length)); } catch { return null; }
+  if (!filename || basename(filename) !== filename) return null;
+  const target = resolve(productUploadDirectory, filename);
+  return dirname(target) === productUploadDirectory ? target : null;
+};
+const collectUploadedImages = (value, paths = new Set()) => {
+  if (Array.isArray(value)) value.forEach(item => collectUploadedImages(item, paths));
+  else if (value && typeof value === "object") {
+    const path = uploadedImagePath(value.url);
+    if (path) paths.add(path);
+    Object.values(value).forEach(item => collectUploadedImages(item, paths));
+  }
+  return paths;
+};
 const hasProductImage = (body) => {
   const media = Array.isArray(body.media) ? body.media : [];
   const variants = Array.isArray(body.variants) ? body.variants : [];
@@ -50,6 +74,11 @@ productsRouter.patch("/:id", async (request, response, next) => {
     if (!validStatus.has(body.status)) return response.status(400).json({ error: "Invalid product status." });
     const discountPercent = Number(body.discountPercent ?? 0);
     if (!Number.isFinite(discountPercent) || discountPercent < 0 || discountPercent > 100) return response.status(400).json({ error: "Price off must be between 0 and 100 percent." });
+    const existing = await pool.query("SELECT media, variants FROM products WHERE id=$1", [request.params.id]);
+    if (!existing.rows[0]) return response.status(404).json({ error: "Product not found." });
+    const previousImagePaths = new Set();
+    collectUploadedImages(existing.rows[0].media, previousImagePaths);
+    collectUploadedImages(existing.rows[0].variants, previousImagePaths);
     const description = sanitizeHtml(String(body.description ?? ""), { allowedTags: ["p","br","strong","b","em","i","ul","ol","li","div","span","font"], allowedAttributes: { "*": ["style", "align"], font: ["color","size"] }, allowedStyles: { "*": { color: [/^#[0-9a-f]{3,8}$/i, /^rgb\(/], "text-align": [/^(left|center|right|justify)$/], "font-size": [/^[0-9.]+(px|rem|em|%)$/] } } });
     const { rows } = await pool.query(`UPDATE products SET title=$1,slug=$2,description=$3,price=$4,quantity=$5,status=$6,sku=$7,
       compare_price=$8,cost=$9,taxable=$10,barcode=$11,track_quantity=$12,continue_selling=$13,shape=$14,material=$15,rim=$16,fit=$17,
@@ -61,7 +90,22 @@ productsRouter.patch("/:id", async (request, response, next) => {
       JSON.stringify(array(body.lensCompatibility)),JSON.stringify(body.variants??[]),JSON.stringify(array(body.genders)),JSON.stringify(array(body.categories)),JSON.stringify(array(body.subcategories)),
       JSON.stringify(array(body.collections)),JSON.stringify(array(body.brands)),JSON.stringify(array(body.tags)),JSON.stringify(body.media??[]),request.params.id,discountPercent]);
     if (!rows[0]) return response.status(404).json({ error: "Product not found." });
-    response.json({ product: rows[0] });
+    const currentImagePaths = new Set();
+    collectUploadedImages(body.media, currentImagePaths);
+    collectUploadedImages(body.variants, currentImagePaths);
+    const removedImagePaths = [...previousImagePaths].filter(path => !currentImagePaths.has(path));
+    const retained = await pool.query("SELECT media, variants FROM products");
+    const retainedPaths = new Set();
+    retained.rows.forEach(product => {
+      collectUploadedImages(product.media, retainedPaths);
+      collectUploadedImages(product.variants, retainedPaths);
+    });
+    const pathsToDelete = removedImagePaths.filter(path => !retainedPaths.has(path));
+    const cleanup = await Promise.allSettled(pathsToDelete.map(path => unlink(path)));
+    cleanup.forEach((result, index) => {
+      if (result.status === "rejected" && result.reason?.code !== "ENOENT") console.error(`Could not delete removed product image ${pathsToDelete[index]}`, result.reason);
+    });
+    response.json({ product: rows[0], imagesDeleted: cleanup.filter(result => result.status === "fulfilled").length });
   } catch (error) {
     if (error.code === "23505") return response.status(409).json({ error: error.constraint?.includes("sku") ? "This SKU is already in use." : "A product with this title already exists." });
     next(error);
@@ -118,7 +162,23 @@ productsRouter.delete("/", async (request, response, next) => {
   try {
     const { ids } = request.body ?? {};
     if (!Array.isArray(ids) || !ids.length) return response.status(400).json({ error: "Product IDs are required." });
-    const result = await pool.query("DELETE FROM products WHERE id=ANY($1::bigint[])", [ids]);
-    response.json({ deleted: result.rowCount });
+    const { rows } = await pool.query("DELETE FROM products WHERE id=ANY($1::bigint[]) RETURNING media, variants", [ids]);
+    const imagePaths = new Set();
+    rows.forEach(product => {
+      collectUploadedImages(product.media, imagePaths);
+      collectUploadedImages(product.variants, imagePaths);
+    });
+    const retained = await pool.query("SELECT media, variants FROM products");
+    const retainedPaths = new Set();
+    retained.rows.forEach(product => {
+      collectUploadedImages(product.media, retainedPaths);
+      collectUploadedImages(product.variants, retainedPaths);
+    });
+    const pathsToDelete = [...imagePaths].filter(path => !retainedPaths.has(path));
+    const cleanup = await Promise.allSettled(pathsToDelete.map(path => unlink(path)));
+    cleanup.forEach((result, index) => {
+      if (result.status === "rejected" && result.reason?.code !== "ENOENT") console.error(`Could not delete product image ${pathsToDelete[index]}`, result.reason);
+    });
+    response.json({ deleted: rows.length, imagesDeleted: cleanup.filter(result => result.status === "fulfilled").length });
   } catch (error) { next(error); }
 });
