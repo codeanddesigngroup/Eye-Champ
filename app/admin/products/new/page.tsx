@@ -23,6 +23,7 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [status, setStatus] = useState("Active");
   const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -44,7 +45,7 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
       if (!response.ok || !result.product) throw new Error(result.error || "Could not load product.");
       const product = result.product;
       setEditProduct(product);
-      setTitle(String(product.title ?? "")); setPrice(String(product.price ?? "")); setStatus(String(product.status ?? "Draft"));
+      setTitle(String(product.title ?? "")); setDescription(String(product.description ?? "")); setPrice(String(product.price ?? "")); setStatus(String(product.status ?? "Draft"));
       setLensCompatibility((product.lens_compatibility as string[]) ?? []);
       setSelectedMainCategories((product.categories as string[]) ?? []); setSelectedSubCategories((product.subcategories as string[]) ?? []);
       const loaded = ((product.variants as Array<{name:string;values:string[];mediaByValue?:Record<string,Media[]>}>) ?? []).map((variant, index) => ({ id: index + 1, name: variant.name, values: variant.values, input: "", mediaByValue: variant.mediaByValue }));
@@ -92,7 +93,7 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
     if (!form || saving || !form.reportValidity()) return;
     const data = new FormData(form);
     const payload = {
-      title: String(data.get("title") || ""), description: String(data.get("description") || ""),
+      title: String(data.get("title") || ""), description,
       price: String(data.get("price") || ""), discountPercent: String(data.get("discountPercent") || "0"),
       taxable: false, sku: String(data.get("sku") || ""), barcode: "",
       trackQuantity: data.has("trackQuantity"), quantity: String(data.get("quantity") || "0"), continueSelling: data.has("continueSelling"),
@@ -237,7 +238,7 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
                 </Field>
                 <div className="np-field full">
                   <span>Description</span>
-                  <RichTextEditor initialValue={String(editProduct?.description ?? "")} />
+                  <RichTextEditor initialValue={String(editProduct?.description ?? "")} onChange={setDescription} />
                   <small>This appears in the Description tab.</small>
                 </div>
               </section>
@@ -591,12 +592,12 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
   );
 }
 
-function RichTextEditor({initialValue=""}:{initialValue?:string}){
+function RichTextEditor({initialValue="",onChange}:{initialValue?:string;onChange?:(value:string)=>void}){
   const editorRef=useRef<HTMLDivElement>(null),hiddenInputRef=useRef<HTMLInputElement>(null),selectionRef=useRef<Range|null>(null);
   useEffect(()=>{if(editorRef.current&&initialValue){editorRef.current.innerHTML=initialValue;if(hiddenInputRef.current)hiddenInputRef.current.value=initialValue}},[initialValue]);
   const rememberSelection=()=>{const selection=window.getSelection();if(selection?.rangeCount&&editorRef.current?.contains(selection.anchorNode))selectionRef.current=selection.getRangeAt(0).cloneRange()};
   const restoreSelection=()=>{const selection=window.getSelection(),editor=editorRef.current;if(!selection||!editor)return false;editor.focus();if(selectionRef.current){selection.removeAllRanges();selection.addRange(selectionRef.current);return true}const range=document.createRange();range.selectNodeContents(editor);range.collapse(false);selection.removeAllRanges();selection.addRange(range);return true};
-  const sync=()=>{if(hiddenInputRef.current)hiddenInputRef.current.value=editorRef.current?.innerHTML??"";rememberSelection()};
+  const sync=()=>{const value=editorRef.current?.innerHTML??"";if(hiddenInputRef.current)hiddenInputRef.current.value=value;onChange?.(value);rememberSelection()};
   const command=(name:string,commandValue?:string)=>{if(!restoreSelection())return;document.execCommand(name,false,commandValue);sync()};
   const button=(label:string,icon:ReactNode,name:string)=><button type="button" title={label} aria-label={label} onMouseDown={(event)=>{event.preventDefault();command(name)}}>{icon}</button>;
   const alignButton=(label:string,icon:ReactNode,commandName:string)=><button type="button" title={label} aria-label={label} onMouseDown={(event)=>{event.preventDefault();command(commandName)}}>{icon}</button>;
