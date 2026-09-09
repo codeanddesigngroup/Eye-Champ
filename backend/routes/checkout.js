@@ -18,7 +18,7 @@ checkoutRouter.post("/", async (request, response, next) => {
     for (const item of items) {
       const quantity = Number(item.quantity);
       if (!item.productId || !Number.isInteger(quantity) || quantity < 1) throw Object.assign(new Error("Invalid cart item."), { status: 400 });
-      const { rows } = await client.query("SELECT id::text,title,price::float,quantity,continue_selling FROM products WHERE id=$1 AND status='Active' FOR UPDATE", [item.productId]);
+      const { rows } = await client.query("SELECT id::text,title,(price*(1-discount_percent/100))::float AS price,quantity,continue_selling FROM products WHERE id=$1 AND status='Active' FOR UPDATE", [item.productId]);
       const product = rows[0];
       if (!product) throw Object.assign(new Error("A product in your cart is unavailable."), { status: 409 });
       if (!product.continue_selling && product.quantity < quantity) throw Object.assign(new Error(`${product.title} does not have enough stock.`), { status: 409 });

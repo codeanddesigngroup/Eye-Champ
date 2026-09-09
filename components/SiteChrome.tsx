@@ -11,12 +11,14 @@ import Topbar from "./Topbar";
 export default function SiteChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isLensSelection = pathname === "/product/select-lenses" || pathname.endsWith("/select-lenses");
+  const isCustomerLogin = pathname === "/login";
+  const hideChrome = isLensSelection || isCustomerLogin;
 
   return <>
-    {!isLensSelection && <><Topbar /><Navbar /></>}
+    {!hideChrome && <><Topbar /><Navbar /></>}
     {children}
-    {!isLensSelection && <Footer />}
-    <a
+    {!hideChrome && <Footer />}
+    {!hideChrome && <a
       className={styles.whatsapp}
       href="https://wa.me/923338888888"
       target="_blank"
@@ -24,6 +26,6 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
       aria-label="Chat with us on WhatsApp"
     >
       <FontAwesomeIcon icon={faWhatsapp} aria-hidden="true" />
-    </a>
+    </a>}
   </>;
 }

@@ -57,9 +57,9 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
     const form = document.getElementById("new-product-form") as HTMLFormElement | null;
     if (!form) return;
     const measurements = (editProduct.measurements as Record<string, unknown>) ?? {};
-    const values: Record<string, unknown> = { comparePrice: editProduct.compare_price, cost: editProduct.cost, sku: editProduct.sku, barcode: editProduct.barcode, quantity: editProduct.quantity, shape: editProduct.shape, material: editProduct.material, rim: editProduct.rim, fit: editProduct.fit, weight: editProduct.weight, feature: editProduct.special_feature, tags: ((editProduct.tags as string[]) ?? []).join(", "), "lens-width": measurements.lensWidth, bridge: measurements.bridge, "temple-length": measurements.templeLength, "lens-height": measurements.lensHeight };
+    const values: Record<string, unknown> = { discountPercent: editProduct.discount_percent, sku: editProduct.sku, quantity: editProduct.quantity, shape: editProduct.shape, material: editProduct.material, rim: editProduct.rim, fit: editProduct.fit, weight: editProduct.weight, feature: editProduct.special_feature, tags: ((editProduct.tags as string[]) ?? []).join(", "), "lens-width": measurements.lensWidth, bridge: measurements.bridge, "temple-length": measurements.templeLength, "lens-height": measurements.lensHeight };
     Object.entries(values).forEach(([name, value]) => { const field = form.elements.namedItem(name) as HTMLInputElement | HTMLSelectElement | null; if (field && value != null) field.value = String(value) });
-    const checkedNames: Record<string, boolean> = { taxable: Boolean(editProduct.taxable), trackQuantity: Boolean(editProduct.track_quantity), continueSelling: Boolean(editProduct.continue_selling) };
+    const checkedNames: Record<string, boolean> = { trackQuantity: Boolean(editProduct.track_quantity), continueSelling: Boolean(editProduct.continue_selling) };
     Object.entries(checkedNames).forEach(([name, checked]) => { const field=form.elements.namedItem(name) as HTMLInputElement|null;if(field)field.checked=checked });
     (["gender","collections","brands"] as const).forEach(name => { const selected=(editProduct[name === "gender" ? "genders" : name] as string[]) ?? []; form.querySelectorAll<HTMLInputElement>(`input[name="${name}"]`).forEach(input => { input.checked=selected.includes(input.value) }) });
   }, [editProduct, collectionOptions, brandOptions]);
@@ -93,8 +93,8 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
     const data = new FormData(form);
     const payload = {
       title: String(data.get("title") || ""), description: String(data.get("description") || ""),
-      price: String(data.get("price") || ""), comparePrice: String(data.get("comparePrice") || ""), cost: String(data.get("cost") || ""),
-      taxable: data.has("taxable"), sku: String(data.get("sku") || ""), barcode: String(data.get("barcode") || ""),
+      price: String(data.get("price") || ""), discountPercent: String(data.get("discountPercent") || "0"),
+      taxable: false, sku: String(data.get("sku") || ""), barcode: "",
       trackQuantity: data.has("trackQuantity"), quantity: String(data.get("quantity") || "0"), continueSelling: data.has("continueSelling"),
       shape: String(data.get("shape") || ""), material: String(data.get("material") || ""), rim: String(data.get("rim") || ""), fit: String(data.get("fit") || ""),
       weight: String(data.get("weight") || ""), feature: String(data.get("feature") || ""),
@@ -246,24 +246,18 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
                 <CardTitle
                   number="02"
                   title="Pricing"
-                  subtitle="Set the product page’s starting price and cost."
+                  subtitle="Set the product price and percentage discount."
                 />
-                <div className="np-fields three">
+                <div className="np-fields">
                   <Money
-                    label="Starting price"
+                    label="Price"
                     name="price"
                     value={price}
                     onChange={setPrice}
                     required
                   />
-                  <Money label="Compare-at price" name="comparePrice" />
-                  <Money label="Cost per item" name="cost" />
+                  <Money label="Price off" name="discountPercent" prefix="%" max={100} />
                 </div>
-                <Check
-                  label="Charge tax on this product"
-                  name="taxable"
-                  checked
-                />
               </section>
 
               <section className="np-card">
@@ -272,38 +266,30 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
                   title="Inventory & shipping"
                   subtitle="Track stock and configure fulfillment details."
                 />
-                <div className="np-fields">
+                <div className="np-inventory-row">
+                  <div className="np-inventory-sku">
                   <Field label="SKU (Stock Keeping Unit)">
                     <input name="sku" placeholder="EC-FR-001" />
                   </Field>
-                  <Field label="Barcode">
-                    <input name="barcode" placeholder="ISBN, UPC, GTIN, etc." />
-                  </Field>
-                </div>
-                <Check label="Track quantity" name="trackQuantity" checked />
-                <div className="np-location">
-                  <div>
-                    <Package size={18} />
-                    <span>
-                      <strong>Eye Champ warehouse</strong>
-                      <small>Main fulfillment location</small>
-                    </span>
                   </div>
-                  <div>
-                    <label htmlFor="quantity">Available</label>
-                    <input
-                      id="quantity"
-                      name="quantity"
-                      type="number"
-                      defaultValue="0"
-                      min="0"
-                    />
+                  <div className="np-location">
+                    <div>
+                      <Package size={18} />
+                      <span>
+                        <strong>Eye Champ warehouse</strong>
+                        <small>Main fulfillment location</small>
+                      </span>
+                    </div>
+                    <div>
+                      <label htmlFor="quantity">Available</label>
+                      <input id="quantity" name="quantity" type="number" defaultValue="0" min="0" />
+                    </div>
                   </div>
                 </div>
-                <Check
-                  label="Continue selling when out of stock"
-                  name="continueSelling"
-                />
+                <div className="np-inventory-checks">
+                  <Check label="Track quantity" name="trackQuantity" checked />
+                  <Check label="Continue selling when out of stock" name="continueSelling" />
+                </div>
               </section>
 
               <section className="np-card">
@@ -724,17 +710,21 @@ function Money({
   value,
   onChange,
   required,
+  prefix = "Rs",
+  max,
 }: {
   label: string;
   name: string;
   value?: string;
   onChange?: (value: string) => void;
   required?: boolean;
+  prefix?: string;
+  max?: number;
 }) {
   return (
     <Field label={label}>
       <div className="np-money">
-        <span>Rs</span>
+        <span>{prefix}</span>
         <input
           name={name}
           required={required}
@@ -742,6 +732,8 @@ function Money({
           onChange={onChange ? (e) => onChange(e.target.value) : undefined}
           inputMode="decimal"
           placeholder="0.00"
+          min="0"
+          max={max}
         />
       </div>
     </Field>

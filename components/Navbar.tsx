@@ -38,7 +38,7 @@ export default function Navbar() {
                 </Link>
                 <label className="search"><Search size={18} /><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search our AI recommended frames" /></label>
                 <nav className={`utility ${menu ? "open" : ""}`} aria-label="Account links">
-                    <span className="utility-login"><UserRound size={18} /><small>Login</small></span>
+                    <Link href="/login" aria-label="Customer login"><UserRound size={18} /><small>Login</small></Link>
                     <Link href="/favorites" aria-label={`Favorites with ${favoriteCount} products`}><Heart size={18} />{favoriteCount > 0 && <b className="cart-count">{favoriteCount}</b>}<small>Favorites</small></Link>
                     <a href="#help" aria-label="Help"><HelpCircle size={18} /><small>Help</small></a>
                     <Link href="/cart" aria-label={`Cart with ${cartCount} items`}><ShoppingCart size={18} />{cartCount > 0 && <b className="cart-count">{cartCount}</b>}<small>Cart</small></Link>

@@ -72,6 +72,7 @@ export async function initializeDatabase() {
       slug VARCHAR(220) NOT NULL UNIQUE,
       description TEXT NOT NULL DEFAULT '',
       price NUMERIC(12,2) NOT NULL CHECK (price >= 0),
+      discount_percent NUMERIC(5,2) NOT NULL DEFAULT 0 CHECK (discount_percent >= 0 AND discount_percent <= 100),
       compare_price NUMERIC(12,2) CHECK (compare_price IS NULL OR compare_price >= 0),
       cost NUMERIC(12,2) CHECK (cost IS NULL OR cost >= 0),
       taxable BOOLEAN NOT NULL DEFAULT TRUE,
@@ -98,5 +99,23 @@ export async function initializeDatabase() {
       fulfillment_status VARCHAR(30) NOT NULL DEFAULT 'Unfulfilled', created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
     ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_method VARCHAR(40) NOT NULL DEFAULT 'Cash on Delivery';
+    ALTER TABLE products ADD COLUMN IF NOT EXISTS discount_percent NUMERIC(5,2) NOT NULL DEFAULT 0 CHECK (discount_percent >= 0 AND discount_percent <= 100);
+    CREATE TABLE IF NOT EXISTS customer_otp_challenges (
+      id CHAR(64) PRIMARY KEY,
+      email VARCHAR(320) NOT NULL,
+      code_hash CHAR(64) NOT NULL,
+      attempts SMALLINT NOT NULL DEFAULT 0,
+      expires_at TIMESTAMPTZ NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+    CREATE INDEX IF NOT EXISTS customer_otp_email_idx ON customer_otp_challenges(email);
+    CREATE INDEX IF NOT EXISTS customer_otp_expires_idx ON customer_otp_challenges(expires_at);
+    CREATE TABLE IF NOT EXISTS customer_sessions (
+      token_hash CHAR(64) PRIMARY KEY,
+      email VARCHAR(320) NOT NULL,
+      expires_at TIMESTAMPTZ NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+    CREATE INDEX IF NOT EXISTS customer_sessions_expires_idx ON customer_sessions(expires_at);
   `);
 }

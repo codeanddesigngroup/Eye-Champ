@@ -5,7 +5,7 @@ export const storefrontProductsRouter = Router();
 
 storefrontProductsRouter.get("/detail/:slug", async (request, response, next) => {
   try {
-    const { rows } = await pool.query(`SELECT id::text, title, slug, description, price::float, quantity,
+    const { rows } = await pool.query(`SELECT id::text, title, slug, description, price::float, discount_percent::float AS "discountPercent", quantity,
       shape, material, rim, fit, weight::float, special_feature AS "specialFeature", measurements,
       lens_compatibility AS "lensCompatibility", genders, categories, subcategories, collections,
       brands, media, variants FROM products WHERE slug=$1 AND status='Active'`, [request.params.slug]);
@@ -29,7 +29,7 @@ storefrontProductsRouter.get("/", async (request, response, next) => {
         subcategoryName = subcategoryRows[0].name;
       }
     }
-    const { rows } = await pool.query(`SELECT p.id::text, p.title, p.slug, p.price::float, p.quantity, p.shape, p.material, p.rim,
+    const { rows } = await pool.query(`SELECT p.id::text, p.title, p.slug, p.price::float, p.discount_percent::float AS "discountPercent", p.quantity, p.shape, p.material, p.rim,
       p.genders, p.categories, p.subcategories, p.collections, p.brands, p.media, p.variants, p.created_at AS "createdAt",
       (SELECT c.slug FROM categories c WHERE c.parent_id IS NULL AND LOWER(c.name)=LOWER(p.categories->>0) LIMIT 1) AS "categorySlug",
       (SELECT c.slug FROM categories c WHERE c.parent_id IS NOT NULL AND LOWER(c.name)=LOWER(p.subcategories->>0) LIMIT 1) AS "subcategorySlug"

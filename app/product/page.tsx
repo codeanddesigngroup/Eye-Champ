@@ -21,7 +21,7 @@ const productAssets: Record<string, { src: string; width: number; height: number
 };
 const products = [["Rs 599.00", "4.7", "586", "front"], ["Rs 599.00", "4.6", "224", "side"], ["Rs 599.00", "4.5", "1961", "sun"], ["Rs 599.00", "4.5", "417", "angle"], ["Rs 599.00", "4.5", "221", "front"], ["Rs 599.00", "4.8", "312", "angle"], ["Rs 599.00", "4.6", "148", "side"], ["Rs 599.00", "4.9", "93", "sun"]];
 const reviews = [[5, "starseed03", "Great quality", "4 days ago", "I got them delivered earlier that expected. The frame was sturdy and of good quality.", "True to Size", "High", 0], [5, "Reviewer1948161032", "Great pair of glasses", "7 days ago", "The experience was great! The glasses are much better quality than the ones I usually get at Costco, and they were less expensive. I’m very happy with my purchase!", "True to Size", "Average", 0], [3, "Olivia", "Not true to color", "7 days ago", "I really love the size and shape of these frames, but if you’re someone who can’t wear really dark frames then these aren’t for you! I still like them overall.", "True to Size", "High", 1], [1, "craigbruckner", "Big ugly frames", "12 days ago", "These frames are way too big for my face. My wife laughed when she saw them. Oh well, I can wear them when I work outside as safety glasses.", "Loose", "Low", 0]] as const;
-export type DatabaseProduct = { id:string; title:string; slug:string; description:string; price:number; quantity:number; shape:string|null; material:string|null; rim:string|null; fit:string|null; weight:number|null; specialFeature:string|null; measurements:Record<string,string>; lensCompatibility:string[]; genders:string[]; categories:string[]; subcategories:string[]; collections:string[]; brands:string[]; media:Array<{name?:string;url:string;primary?:boolean}>; variants:Array<{name:string;values:string[];mediaByValue?:Record<string,Array<{name?:string;url:string}>>}> };
+export type DatabaseProduct = { id:string; title:string; slug:string; description:string; price:number; discountPercent:number; quantity:number; shape:string|null; material:string|null; rim:string|null; fit:string|null; weight:number|null; specialFeature:string|null; measurements:Record<string,string>; lensCompatibility:string[]; genders:string[]; categories:string[]; subcategories:string[]; collections:string[]; brands:string[]; media:Array<{name?:string;url:string;primary?:boolean}>; variants:Array<{name:string;values:string[];mediaByValue?:Record<string,Array<{name?:string;url:string}>>}> };
 function ProductImage({ view, className = "", src }: { view: string, className?: string, src?:string }) {
     const asset = productAssets[view] ?? productAssets.front;
     return <div className={`sprite product-asset ${className}`}><Image key={src??asset.src} src={src??asset.src} width={asset.width} height={asset.height} alt={`${view} product view`} unoptimized /></div>
@@ -41,8 +41,9 @@ export default function ProductPage({databaseProduct}:{databaseProduct?:Database
     const selectedFrameColor=frameColors[color]??"";
     const databaseImages=(selectedFrameColor?frameVariant?.mediaByValue?.[selectedFrameColor]:undefined)??databaseProduct?.media??[];
     const databaseImage=(index:number)=>databaseImages[index%Math.max(databaseImages.length,1)]?.url;
+    const salePrice=Number(databaseProduct?.price??599)*(1-Number(databaseProduct?.discountPercent??0)/100);
     useEffect(()=>{if(!databaseProduct)return;const refresh=()=>setLiked(getFavorites().some(item=>item.id===databaseProduct.id));refresh();window.addEventListener(favoritesUpdatedEvent,refresh);return()=>window.removeEventListener(favoritesUpdatedEvent,refresh)},[databaseProduct]);
-    const toggleLiked=()=>{if(!databaseProduct)return setLiked(value=>!value);const slug=(value:string)=>value.toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");setLiked(toggleFavorite({...databaseProduct,categorySlug:slug(databaseProduct.categories[0]||"shop-all"),subcategorySlug:slug(databaseProduct.subcategories[0]||"all")}))};
+    const toggleLiked=()=>{if(!databaseProduct)return setLiked(value=>!value);const slug=(value:string)=>value.toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");setLiked(toggleFavorite({...databaseProduct,price:salePrice,categorySlug:slug(databaseProduct.categories[0]||"shop-all"),subcategorySlug:slug(databaseProduct.subcategories[0]||"all")}))};
     return (
         <main className="pdp productDetails">
             <section className="product-hero wrap">
@@ -63,7 +64,7 @@ export default function ProductPage({databaseProduct}:{databaseProduct?:Database
                     <div className="title-row">
                         <div>
                             <small>Starting at</small>
-                            <div className="price">Rs {Number(databaseProduct?.price??599).toFixed(2)}</div>
+                            <div className="price">Rs {salePrice.toFixed(2)}</div>
                         </div>
                         <a className="score" href="#reviews"><Star fill="currentColor" /> <b>4.7</b> <u>221 reviews</u></a>
                     </div>
@@ -71,8 +72,8 @@ export default function ProductPage({databaseProduct}:{databaseProduct?:Database
                         <div className="size-line"><b>Size:</b> {databaseProduct?(productSizes.join(", ")||"Not specified"):"large (52 □ 19 - 143)"}</div>
                         {/* <b className="size-pill">Large</b> */}
                         <p><b>Color:</b> {selectedFrameColor||"Tortoiseshell"}</p><div className="swatches">{(frameColors.length?frameColors:["tortoise","black","blue"]).map((c, i) => <button key={c} onClick={() => setColor(i)} style={databaseProduct?{background:c}:undefined} className={`${databaseProduct?"":c} ${color === i ? "selected" : ""}`} aria-label={c} />)}</div></div>
-                    <BuyNowButton productId={databaseProduct?.id} name={databaseProduct?.title} frameColor={selectedFrameColor||undefined} image={databaseImage(0)} framePrice={databaseProduct?.price} />
-                    <SelectLensesButton product={databaseProduct?{productId:databaseProduct.id,name:databaseProduct.title,frameColor:selectedFrameColor||"Default",image:databaseImage(0)||"/images/Browline.webp",framePrice:Number(databaseProduct.price),lensColors}:undefined} />
+                    <BuyNowButton productId={databaseProduct?.id} name={databaseProduct?.title} frameColor={selectedFrameColor||undefined} image={databaseImage(0)} framePrice={salePrice} />
+                    <SelectLensesButton product={databaseProduct?{productId:databaseProduct.id,name:databaseProduct.title,frameColor:selectedFrameColor||"Default",image:databaseImage(0)||"/images/Browline.webp",framePrice:salePrice,lensColors}:undefined} />
                     <div className="pay-card">Pay over time with PayPal, Affirm or Afterpay. &nbsp;<u>Learn More</u><br />Use your insurance or FSA/HSA benefits. &nbsp;<u>Learn more</u></div>
                     <div className="includes"><h3>ZENNI WOW PRICE INCLUDES:</h3><p>✓ High-quality frame<br />✓ Basic prescription lenses*<br />✓ Anti-scratch coating<br />✓ UV protection</p><i>*multifocal or readers lenses start at additional cost</i></div>
                     <div className="bought">
