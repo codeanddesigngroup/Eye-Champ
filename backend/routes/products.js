@@ -79,16 +79,16 @@ productsRouter.patch("/:id", async (request, response, next) => {
     const previousImagePaths = new Set();
     collectUploadedImages(existing.rows[0].media, previousImagePaths);
     collectUploadedImages(existing.rows[0].variants, previousImagePaths);
-    const description = sanitizeHtml(String(body.description ?? ""), { allowedTags: ["p","br","strong","b","em","i","ul","ol","li","div","span","font"], allowedAttributes: { "*": ["style", "align"], font: ["color","size"] }, allowedStyles: { "*": { color: [/^#[0-9a-f]{3,8}$/i, /^rgb\(/], "text-align": [/^(left|center|right|justify)$/], "font-size": [/^[0-9.]+(px|rem|em|%)$/] } } });
+    const description = sanitizeHtml(String(body.description ?? ""), { allowedTags: ["p", "br", "strong", "b", "em", "i", "ul", "ol", "li", "div", "span", "font"], allowedAttributes: { "*": ["style", "align"], font: ["color", "size"] }, allowedStyles: { "*": { color: [/^#[0-9a-f]{3,8}$/i, /^rgb\(/], "text-align": [/^(left|center|right|justify)$/], "font-size": [/^[0-9.]+(px|rem|em|%)$/] } } });
     const { rows } = await pool.query(`UPDATE products SET title=$1,slug=$2,description=$3,price=$4,quantity=$5,status=$6,sku=$7,
       compare_price=$8,cost=$9,taxable=$10,barcode=$11,track_quantity=$12,continue_selling=$13,shape=$14,material=$15,rim=$16,fit=$17,
       weight=$18,special_feature=$19,measurements=$20::jsonb,lens_compatibility=$21::jsonb,variants=$22::jsonb,genders=$23::jsonb,
       categories=$24::jsonb,subcategories=$25::jsonb,collections=$26::jsonb,brands=$27::jsonb,tags=$28::jsonb,media=$29::jsonb,discount_percent=$31,updated_at=NOW()
-      WHERE id=$30 RETURNING id::text,title,slug,price::float,quantity,status`, [title,slugify(title),description,price,quantity,body.status,String(body.sku??"").trim()||null,
-      numberOrNull(body.comparePrice),numberOrNull(body.cost),body.taxable===true,String(body.barcode??"").trim()||null,true,false,
-      body.shape||null,body.material||null,body.rim||null,body.fit||null,numberOrNull(body.weight),String(body.feature??"").trim()||null,JSON.stringify(body.measurements??{}),
-      JSON.stringify(array(body.lensCompatibility)),JSON.stringify(body.variants??[]),JSON.stringify(array(body.genders)),JSON.stringify(array(body.categories)),JSON.stringify(array(body.subcategories)),
-      JSON.stringify(array(body.collections)),JSON.stringify(array(body.brands)),JSON.stringify(array(body.tags)),JSON.stringify(body.media??[]),request.params.id,discountPercent]);
+      WHERE id=$30 RETURNING id::text,title,slug,price::float,quantity,status`, [title, slugify(title), description, price, quantity, body.status, String(body.sku ?? "").trim() || null,
+      numberOrNull(body.comparePrice), numberOrNull(body.cost), body.taxable === true, String(body.barcode ?? "").trim() || null, true, false,
+      body.shape || null, body.material || null, body.rim || null, body.fit || null, numberOrNull(body.weight), String(body.feature ?? "").trim() || null, JSON.stringify(body.measurements ?? {}),
+      JSON.stringify(array(body.lensCompatibility)), JSON.stringify(body.variants ?? []), JSON.stringify(array(body.genders)), JSON.stringify(array(body.categories)), JSON.stringify(array(body.subcategories)),
+      JSON.stringify(array(body.collections)), JSON.stringify(array(body.brands)), JSON.stringify(array(body.tags)), JSON.stringify(body.media ?? []), request.params.id, discountPercent]);
     if (!rows[0]) return response.status(404).json({ error: "Product not found." });
     const currentImagePaths = new Set();
     collectUploadedImages(body.media, currentImagePaths);
@@ -143,7 +143,7 @@ productsRouter.post("/", async (request, response, next) => {
         $21::jsonb,$22,$23::jsonb,$24::jsonb,$25::jsonb,$26::jsonb,$27::jsonb,$28::jsonb,$29::jsonb,$30
       ) RETURNING id::text,title,slug,sku,price::float,quantity,status,created_at AS "createdAt"
     `, [
-      body.title.trim(), slug, sanitizeHtml(String(body.description ?? ""), { allowedTags: ["p","br","strong","b","em","i","ul","ol","li","div","span","font"], allowedAttributes: { "*": ["style", "align"], font: ["color","size"] }, allowedStyles: { "*": { color: [/^#[0-9a-f]{3,8}$/i, /^rgb\(/], "text-align": [/^(left|center|right|justify)$/], "font-size": [/^[0-9.]+(px|rem|em|%)$/] } } }), price, null, null, false,
+      body.title.trim(), slug, sanitizeHtml(String(body.description ?? ""), { allowedTags: ["p", "br", "strong", "b", "em", "i", "ul", "ol", "li", "div", "span", "font"], allowedAttributes: { "*": ["style", "align"], font: ["color", "size"] }, allowedStyles: { "*": { color: [/^#[0-9a-f]{3,8}$/i, /^rgb\(/], "text-align": [/^(left|center|right|justify)$/], "font-size": [/^[0-9.]+(px|rem|em|%)$/] } } }), price, null, null, false,
       String(body.sku ?? "").trim() || null, String(body.barcode ?? "").trim() || null, true,
       quantity, false, body.shape || null, body.material || null, body.rim || null,
       body.fit || null, weight, String(body.feature ?? "").trim() || null, JSON.stringify(measurements),
