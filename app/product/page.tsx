@@ -41,7 +41,8 @@ export default function ProductPage({databaseProduct}:{databaseProduct?:Database
     const productSizes=databaseProduct?.variants.find(variant=>variant.name.toLowerCase()==="size")?.values??[];
     const displayedLensCompatibility=databaseProduct?databaseProduct.lensCompatibility:["Sunglasses","EyeQLenz™","Transitions®","Specialty lenses","Blokz® blue-light blocking"];
     const selectedFrameColor=frameColors[color]??"";
-    const databaseImages=(selectedFrameColor?frameVariant?.mediaByValue?.[selectedFrameColor]:undefined)??databaseProduct?.media??[];
+    const rawDatabaseImages=(selectedFrameColor?frameVariant?.mediaByValue?.[selectedFrameColor]:undefined)??databaseProduct?.media??[];
+    const databaseImages=rawDatabaseImages.filter((image,index,images)=>images.findIndex(item=>item.url===image.url)===index);
     const databaseImage=(index:number)=>databaseImages[index%Math.max(databaseImages.length,1)]?.url;
     const salePrice=Number(databaseProduct?.price??599)*(1-Number(databaseProduct?.discountPercent??0)/100);
     const hasProductImages=!databaseProduct||databaseImages.length>0;
@@ -56,11 +57,11 @@ export default function ProductPage({databaseProduct}:{databaseProduct?:Database
                         <Heart fill={liked ? "#0b6068" : "none"} />
                     </button>
                     {hasProductImages?(showGallerySlider?<><button type="button" className="gallery-arrow left" onClick={() => gallerySlider.current?.slidePrev()}><ChevronLeft /></button>
-                    <Swiper className="gallery-main" loop speed={450} onSwiper={swiper => { gallerySlider.current = swiper }} onSlideChange={swiper => setView(views[swiper.realIndex])}>{views.map((v,index) => <SwiperSlide key={v}><ProductImage view={v} src={databaseImage(index)} database={Boolean(databaseProduct)} /></SwiperSlide>)}</Swiper>
+                    <Swiper className="gallery-main" loop speed={450} onSwiper={swiper => { gallerySlider.current = swiper }} onSlideChange={swiper => setView(views[swiper.realIndex]??"front")}>{databaseProduct?databaseImages.map((image,index)=><SwiperSlide key={`${image.url}-${index}`}><ProductImage view={views[index]??"front"} src={image.url} database/></SwiperSlide>):views.map(v=><SwiperSlide key={v}><ProductImage view={v}/></SwiperSlide>)}</Swiper>
                     <button type="button" className="gallery-arrow right" onClick={() => gallerySlider.current?.slideNext()}><ChevronRight /></button>
                     <div className="gallery-tools"><button>360°</button><button>▰</button></div>
                     <div className="thumbnails">
-                        {views.slice(0, 4).map((v,index) => <button type="button" aria-label={`Show ${v} view`} className={view === v ? "active" : ""} key={v} onClick={() => gallerySlider.current?.slideToLoop(views.indexOf(v))}><ProductImage view={v} src={databaseImage(index)} database={Boolean(databaseProduct)} /></button>)}
+                        {databaseProduct?databaseImages.slice(0,4).map((image,index)=>{const imageView=views[index]??"front";return <button type="button" aria-label={`Show image ${index+1}`} className={view===imageView?"active":""} key={`${image.url}-${index}`} onClick={()=>gallerySlider.current?.slideToLoop(index)}><ProductImage view={imageView} src={image.url} database/></button>}):views.slice(0,4).map(v=><button type="button" aria-label={`Show ${v} view`} className={view===v?"active":""} key={v} onClick={()=>gallerySlider.current?.slideToLoop(views.indexOf(v))}><ProductImage view={v}/></button>)}
                     </div></>:<div className="gallery-single-image"><ProductImage view="front" src={databaseImage(0)} database/></div>):<div className="gallery-empty">No image available</div>}
                 </div>
                 <div className="product-info-panel">
