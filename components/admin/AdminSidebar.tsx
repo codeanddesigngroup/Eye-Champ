@@ -18,7 +18,7 @@ const workspaceItems = [
   { label: "Categories", icon: Layers3, href: "/admin/categories" },
   { label: "Collections", icon: LibraryBig, href: "/admin/collections" },
   { label: "Brands", icon: BadgeCheck, href: "/admin/brands" },
-  { label: "Customers", icon: Users, href: "#" },
+  { label: "Customers", icon: Users, href: "/admin/customers" },
   { label: "Discounts", icon: Tag, href: "#" },
 ];
 
