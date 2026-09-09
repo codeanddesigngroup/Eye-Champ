@@ -9,14 +9,15 @@ type BuyNowButtonProps = {
   frameColor?: string;
   image?: string;
   framePrice?: number;
+  outOfStock?: boolean;
 };
 
-export default function BuyNowButton({ productId, name = "Celine CL40248U", frameColor = "Black", image = "/images/product/1.avif", framePrice = 15000 }: BuyNowButtonProps) {
+export default function BuyNowButton({ productId, name = "Celine CL40248U", frameColor = "Black", image = "/images/product/1.avif", framePrice = 15000, outOfStock = false }: BuyNowButtonProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
   const buyNow = () => {
-    if (loading) return;
+    if (loading || outOfStock) return;
     const cart = JSON.parse(localStorage.getItem("eye-champ-cart") ?? "[]") as Array<Record<string, unknown>>;
     const cartId = productId ? `${productId}:${frameColor}` : `${Date.now()}`;
     const existing = cart.find(item => item.id === cartId);
@@ -29,7 +30,7 @@ export default function BuyNowButton({ productId, name = "Celine CL40248U", fram
   };
 
   return <>
-    <button className="select-lenses" type="button" disabled={loading} onClick={buyNow}>Buy Now</button>
+    <button className="select-lenses" type="button" disabled={loading || outOfStock} onClick={buyNow}>{outOfStock ? "Out of stock" : "Buy Now"}</button>
     {loading && <div className="lens-loading-overlay" role="status" aria-live="polite" aria-label="Adding product to cart"><div className="lens-loading-card"><span className="lens-loading-spinner" aria-hidden="true" /><b>Loading...</b><small>Please wait</small></div></div>}
   </>;
 }

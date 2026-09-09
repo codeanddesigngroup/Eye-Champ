@@ -6,6 +6,7 @@ import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminTopbar from "@/components/admin/AdminTopbar";
 import { AlignCenter, AlignJustify, AlignLeft, AlignRight, ArrowLeft, Bold, ImagePlus, Italic, List, Package, Trash2, X } from "lucide-react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useRouter } from "next/navigation";
 import { showAuthToast } from "@/components/AuthToast";
 import "./new-product.css";
 
@@ -20,12 +21,12 @@ type VariantOption = {
 };
 
 export default function NewProductPage({ editId }: { editId?: string } = {}) {
+  const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [status, setStatus] = useState("Active");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
-  const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [lensCompatibility, setLensCompatibility] = useState<string[]>([]);
   const [lensInput, setLensInput] = useState("");
@@ -60,8 +61,6 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
     const measurements = (editProduct.measurements as Record<string, unknown>) ?? {};
     const values: Record<string, unknown> = { discountPercent: editProduct.discount_percent, sku: editProduct.sku, quantity: editProduct.quantity, shape: editProduct.shape, material: editProduct.material, rim: editProduct.rim, fit: editProduct.fit, weight: editProduct.weight, feature: editProduct.special_feature, tags: ((editProduct.tags as string[]) ?? []).join(", "), "lens-width": measurements.lensWidth, bridge: measurements.bridge, "temple-length": measurements.templeLength, "lens-height": measurements.lensHeight };
     Object.entries(values).forEach(([name, value]) => { const field = form.elements.namedItem(name) as HTMLInputElement | HTMLSelectElement | null; if (field && value != null) field.value = String(value) });
-    const checkedNames: Record<string, boolean> = { trackQuantity: Boolean(editProduct.track_quantity), continueSelling: Boolean(editProduct.continue_selling) };
-    Object.entries(checkedNames).forEach(([name, checked]) => { const field=form.elements.namedItem(name) as HTMLInputElement|null;if(field)field.checked=checked });
     (["gender","collections","brands"] as const).forEach(name => { const selected=(editProduct[name === "gender" ? "genders" : name] as string[]) ?? []; form.querySelectorAll<HTMLInputElement>(`input[name="${name}"]`).forEach(input => { input.checked=selected.includes(input.value) }) });
   }, [editProduct, collectionOptions, brandOptions]);
 
@@ -90,13 +89,20 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
 
   const save = async (statusOverride?: "Draft") => {
     const form = document.getElementById("new-product-form") as HTMLFormElement | null;
-    if (!form || saving || !form.reportValidity()) return;
+    if (!form || saving) return;
     const data = new FormData(form);
+    const missingGroup = [["gender", "Gender"], ["category", "Category"], ["subCategory", "Sub category"]].find(([name]) => data.getAll(name).length === 0);
+    if (missingGroup) {
+      showAuthToast({ message: `Select at least one ${missingGroup[1].toLowerCase()}.`, type: "error" });
+      form.querySelector<HTMLInputElement>(`input[name="${missingGroup[0]}"]`)?.focus();
+      return;
+    }
+    if (!form.reportValidity()) return;
     const payload = {
       title: String(data.get("title") || ""), description,
       price: String(data.get("price") || ""), discountPercent: String(data.get("discountPercent") || "0"),
       taxable: false, sku: String(data.get("sku") || ""), barcode: "",
-      trackQuantity: data.has("trackQuantity"), quantity: String(data.get("quantity") || "0"), continueSelling: data.has("continueSelling"),
+      trackQuantity: true, quantity: String(data.get("quantity") || "0"), continueSelling: false,
       shape: String(data.get("shape") || ""), material: String(data.get("material") || ""), rim: String(data.get("rim") || ""), fit: String(data.get("fit") || ""),
       weight: String(data.get("weight") || ""), feature: String(data.get("feature") || ""),
       measurements: { lensWidth: data.get("lens-width"), bridge: data.get("bridge"), templeLength: data.get("temple-length"), lensHeight: data.get("lens-height") },
@@ -111,8 +117,8 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
       const response = await fetch(editId ? `/api/admin/products/${editId}` : "/api/admin/products", { method: editId ? "PATCH" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
       const result = await response.json() as { product?: { id: string }; error?: string };
       if (!response.ok) throw new Error(result.error || "Could not save product.");
-      setSaved(true); window.setTimeout(() => setSaved(false), 2400);
       showAuthToast({ message: statusOverride === "Draft" ? "Product saved as draft." : "Product added successfully.", type: "success" });
+      router.push("/admin/products");
     } catch (error) { showAuthToast({ message: error instanceof Error ? error.message : "Could not save product.", type: "error" }); }
     finally { setSaving(false); }
   };
@@ -206,11 +212,6 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
               </button>
             </div>
           </div>
-          {saved && (
-            <div className="np-toast" role="status">
-              <span>✓</span> Product details saved successfully.
-            </div>
-          )}
           <form
             id="new-product-form"
             onSubmit={(event) => {
@@ -225,7 +226,7 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
                   title="Product information"
                   subtitle="Add the basic details customers will see."
                 />
-                <Field className="full" label="Product title">
+                <Field className="full" label="Product title" required>
                   <input
                     name="title"
                     required
@@ -269,8 +270,8 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
                 />
                 <div className="np-inventory-row">
                   <div className="np-inventory-sku">
-                  <Field label="SKU (Stock Keeping Unit)">
-                    <input name="sku" placeholder="EC-FR-001" />
+                  <Field label="SKU (Stock Keeping Unit)" required>
+                    <input name="sku" placeholder="EC-FR-001" required/>
                   </Field>
                   </div>
                   <div className="np-location">
@@ -283,13 +284,9 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
                     </div>
                     <div>
                       <label htmlFor="quantity">Available</label>
-                      <input id="quantity" name="quantity" type="number" defaultValue="0" min="0" />
+                      <input id="quantity" name="quantity" type="number" defaultValue="1" min="1"/>
                     </div>
                   </div>
-                </div>
-                <div className="np-inventory-checks">
-                  <Check label="Track quantity" name="trackQuantity" checked />
-                  <Check label="Continue selling when out of stock" name="continueSelling" />
                 </div>
               </section>
 
@@ -312,16 +309,19 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
                       "Browline",
                       "Aviator",
                     ]}
+                    required
                   />
                   <Select
                     label="Frame material"
                     name="material"
                     values={["Select material", "Plastic", "Metal", "Mix material", "Acetate"]}
+                    required
                   />
                   <Select
                     label="Rim"
                     name="rim"
                     values={["Select rim", "Full Rim", "Half Rim", "Rimless"]}
+                    required
                   />
                   <Select
                     label="Fit / width"
@@ -547,6 +547,7 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
                   label="Gender"
                   name="gender"
                   values={["Men", "Women"]}
+                  required
                 />
 
                 <MultiCheck
@@ -555,6 +556,7 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
                   values={categoryOptions.filter((category) => category.parentId === null).map((category) => category.name)}
                   selectedValues={selectedMainCategories}
                   onSelectedValuesChange={(values) => { setSelectedMainCategories(values); setSelectedSubCategories([]); }}
+                  required
                 />
 
                 <MultiCheck
@@ -566,6 +568,7 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
                   }).map((category) => category.name)}
                   selectedValues={selectedSubCategories}
                   onSelectedValuesChange={setSelectedSubCategories}
+                  required
                 />
 
                 <MultiCheck
@@ -641,14 +644,16 @@ function Field({
   label,
   children,
   className = "",
+  required = false,
 }: {
-  label: string;
+  label: ReactNode;
   children: ReactNode;
   className?: string;
+  required?: boolean;
 }) {
   return (
     <label className={`np-field ${className}`}>
-      <span>{label}</span>
+      <span>{label}{required && <em className="np-required"> *</em>}</span>
       {children}
     </label>
   );
@@ -657,16 +662,18 @@ function Select({
   label,
   name,
   values,
+  required = false,
 }: {
   label: string;
   name: string;
   values: string[];
+  required?: boolean;
 }) {
   return (
-    <Field label={label}>
-      <select name={name}>
-        {values.map((value) => (
-          <option key={value}>{value}</option>
+    <Field label={<>{label}{required && <em className="np-required"> *</em>}</>}>
+      <select name={name} required={required} defaultValue={required ? "" : undefined}>
+        {values.map((value, index) => (
+          <option key={value} value={required && index === 0 ? "" : value} disabled={required && index === 0}>{value}</option>
         ))}
       </select>
     </Field>
@@ -678,16 +685,18 @@ function MultiCheck({
   values,
   selectedValues,
   onSelectedValuesChange,
+  required = false,
 }: {
   label: string;
   name: string;
   values: string[];
   selectedValues?: string[];
   onSelectedValuesChange?: (values: string[]) => void;
+  required?: boolean;
 }) {
   return (
-    <fieldset className="np-multicheck">
-      <legend>{label}</legend>
+    <fieldset className="np-multicheck" aria-required={required}>
+      <legend>{label}{required && <em className="np-required"> *</em>}</legend>
       <div>
         {values.length === 0 ? <p className="no-options">No options available.</p> : values.map((value) => (
           <label key={value}>
@@ -723,7 +732,7 @@ function Money({
   max?: number;
 }) {
   return (
-    <Field label={label}>
+    <Field label={label} required={required}>
       <div className="np-money">
         <span>{prefix}</span>
         <input

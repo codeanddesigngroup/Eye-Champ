@@ -4,12 +4,12 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export type LensProduct = { productId?:string; name:string; frameColor:string; image:string; framePrice:number; lensColors?:string[]; returnUrl?:string };
-export default function SelectLensesButton({product}:{product?:LensProduct}) {
+export default function SelectLensesButton({product,outOfStock=false}:{product?:LensProduct;outOfStock?:boolean}) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
   const openLensSelection = () => {
-    if (loading) return;
+    if (loading || outOfStock) return;
     const productPath=window.location.pathname;
     if(product)sessionStorage.setItem("eye-champ-lens-product",JSON.stringify({...product,returnUrl:productPath}));
     setLoading(true);
@@ -17,7 +17,7 @@ export default function SelectLensesButton({product}:{product?:LensProduct}) {
   };
 
   return <>
-    <button className="select-lenses" type="button" disabled={loading} onClick={openLensSelection}>Select Lenses</button>
+    <button className="select-lenses" type="button" disabled={loading || outOfStock} onClick={openLensSelection}>{outOfStock ? "Out of stock" : "Select Lenses"}</button>
     {loading && <div className="lens-loading-overlay" role="status" aria-live="polite" aria-label="Loading lens selection">
       <div className="lens-loading-card">
         <span className="lens-loading-spinner" aria-hidden="true" />

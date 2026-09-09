@@ -20,11 +20,11 @@ export default function Favorites() {
     <div className="section-title left"><h2><Heart fill="currentColor" /> FAVORITES</h2><p>Your saved frames, all in one place.</p></div>
     {favorites.length === 0 ? <div className="favorites-empty"><Heart /><p>Click the heart on a product to save it here.</p><Link href="/shop-all">Shop all products</Link></div> :
       <div className="favorites-grid">{favorites.map(product => {
-        const image = product.media?.find(item => item.primary)?.url || product.media?.[0]?.url || "/images/Browline.webp";
+        const image = product.media?.find(item => item.primary)?.url || product.media?.[0]?.url;
         const main = product.categorySlug || "shop-all";
         const sub = product.subcategorySlug || "all";
         return <article key={product.id}>
-          <Link href={`/${main}/${sub}/${product.slug}`}><img src={image} alt={product.title} /><strong>{product.title}</strong><span>Rs {Number(product.price).toFixed(2)}</span><small>{product.shape || "Classic"}</small></Link>
+          <Link href={`/${main}/${sub}/${product.slug}`}>{image?<img src={image} alt={product.title}/>:<div style={{height:165,display:"grid",placeItems:"center",background:"#f5f7f7",color:"#87969a",fontSize:12,fontWeight:700}}>No image</div>}<strong>{product.title}</strong><span>Rs {Number(product.price).toFixed(2)}</span><small>{product.shape || "Classic"}</small></Link>
           <button type="button" onClick={() => toggleFavorite(product)} aria-label={`Remove ${product.title} from favorites`}><X /></button>
         </article>;
       })}</div>}

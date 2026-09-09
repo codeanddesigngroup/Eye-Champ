@@ -352,6 +352,17 @@
   filter: grayscale(.25)
 }
 
+.plp-no-image {
+  width: 100%;
+  height: 100%;
+  display: grid !important;
+  place-items: center;
+  background: #f4f6f6;
+  color: #8a989c !important;
+  font-size: 12px !important;
+  font-weight: 700
+}
+
 .plp-card-line span {
   font-size: 13px;
   display: flex;

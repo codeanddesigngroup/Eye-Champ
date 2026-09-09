@@ -1408,6 +1408,11 @@ body:has(.np-admin) {
     font-weight: 700
 }
 
+.np-required {
+    color: #c8453d;
+    font-style: normal
+}
+
 .np-multicheck>div {
     max-height: 150px;
     padding: 7px;

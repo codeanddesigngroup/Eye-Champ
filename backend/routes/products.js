@@ -30,6 +30,8 @@ productsRouter.get("/:id", async (request, response, next) => {
 productsRouter.patch("/:id", async (request, response, next) => {
   try {
     const body = request.body ?? {};
+    if (!array(body.genders).length || !array(body.categories).length || !array(body.subcategories).length) return response.status(400).json({ error: "Gender, category, and sub category are required." });
+    if (![body.shape, body.material, body.rim].every(value => typeof value === "string" && value.trim() && !value.startsWith("Select "))) return response.status(400).json({ error: "Frame shape, frame material, and rim are required." });
     const title = String(body.title ?? "").trim(), price = Number(body.price), quantity = Number(body.quantity);
     if (!title) return response.status(400).json({ error: "Product title is required." });
     if (!Number.isFinite(price) || price < 0) return response.status(400).json({ error: "A valid product price is required." });
@@ -43,7 +45,7 @@ productsRouter.patch("/:id", async (request, response, next) => {
       weight=$18,special_feature=$19,measurements=$20::jsonb,lens_compatibility=$21::jsonb,variants=$22::jsonb,genders=$23::jsonb,
       categories=$24::jsonb,subcategories=$25::jsonb,collections=$26::jsonb,brands=$27::jsonb,tags=$28::jsonb,media=$29::jsonb,discount_percent=$31,updated_at=NOW()
       WHERE id=$30 RETURNING id::text,title,slug,price::float,quantity,status`, [title,slugify(title),description,price,quantity,body.status,String(body.sku??"").trim()||null,
-      numberOrNull(body.comparePrice),numberOrNull(body.cost),body.taxable===true,String(body.barcode??"").trim()||null,body.trackQuantity===true,body.continueSelling===true,
+      numberOrNull(body.comparePrice),numberOrNull(body.cost),body.taxable===true,String(body.barcode??"").trim()||null,true,false,
       body.shape||null,body.material||null,body.rim||null,body.fit||null,numberOrNull(body.weight),String(body.feature??"").trim()||null,JSON.stringify(body.measurements??{}),
       JSON.stringify(array(body.lensCompatibility)),JSON.stringify(body.variants??[]),JSON.stringify(array(body.genders)),JSON.stringify(array(body.categories)),JSON.stringify(array(body.subcategories)),
       JSON.stringify(array(body.collections)),JSON.stringify(array(body.brands)),JSON.stringify(array(body.tags)),JSON.stringify(body.media??[]),request.params.id,discountPercent]);
@@ -58,6 +60,8 @@ productsRouter.patch("/:id", async (request, response, next) => {
 productsRouter.post("/", async (request, response, next) => {
   try {
     const body = request.body ?? {};
+    if (!array(body.genders).length || !array(body.categories).length || !array(body.subcategories).length) return response.status(400).json({ error: "Gender, category, and sub category are required." });
+    if (![body.shape, body.material, body.rim].every(value => typeof value === "string" && value.trim() && !value.startsWith("Select "))) return response.status(400).json({ error: "Frame shape, frame material, and rim are required." });
     if (typeof body.title !== "string" || !body.title.trim()) return response.status(400).json({ error: "Product title is required." });
     const price = numberOrNull(body.price);
     if (price === null || !Number.isFinite(price) || price < 0) return response.status(400).json({ error: "A valid product price is required." });
@@ -84,8 +88,8 @@ productsRouter.post("/", async (request, response, next) => {
       ) RETURNING id::text,title,slug,sku,price::float,quantity,status,created_at AS "createdAt"
     `, [
       body.title.trim(), slug, sanitizeHtml(String(body.description ?? ""), { allowedTags: ["p","br","strong","b","em","i","ul","ol","li","div","span","font"], allowedAttributes: { "*": ["style", "align"], font: ["color","size"] }, allowedStyles: { "*": { color: [/^#[0-9a-f]{3,8}$/i, /^rgb\(/], "text-align": [/^(left|center|right|justify)$/], "font-size": [/^[0-9.]+(px|rem|em|%)$/] } } }), price, null, null, false,
-      String(body.sku ?? "").trim() || null, String(body.barcode ?? "").trim() || null, body.trackQuantity === true,
-      quantity, body.continueSelling === true, body.shape || null, body.material || null, body.rim || null,
+      String(body.sku ?? "").trim() || null, String(body.barcode ?? "").trim() || null, true,
+      quantity, false, body.shape || null, body.material || null, body.rim || null,
       body.fit || null, weight, String(body.feature ?? "").trim() || null, JSON.stringify(measurements),
       JSON.stringify(array(body.lensCompatibility)), JSON.stringify(variants), body.status,
       JSON.stringify(array(body.genders)), JSON.stringify(array(body.categories)), JSON.stringify(array(body.subcategories)),

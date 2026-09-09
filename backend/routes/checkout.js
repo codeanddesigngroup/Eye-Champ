@@ -21,7 +21,7 @@ checkoutRouter.post("/", async (request, response, next) => {
       const { rows } = await client.query("SELECT id::text,title,(price*(1-discount_percent/100))::float AS price,quantity,continue_selling FROM products WHERE id=$1 AND status='Active' FOR UPDATE", [item.productId]);
       const product = rows[0];
       if (!product) throw Object.assign(new Error("A product in your cart is unavailable."), { status: 409 });
-      if (!product.continue_selling && product.quantity < quantity) throw Object.assign(new Error(`${product.title} does not have enough stock.`), { status: 409 });
+      if (product.quantity < quantity) throw Object.assign(new Error(`${product.title} is out of stock or does not have enough stock.`), { status: 409 });
       const lensPrice = Number(item.lensPrice ?? 0);
       if (!lensPrices.has(lensPrice)) throw Object.assign(new Error("Invalid lens price."), { status: 400 });
       subtotal += (product.price + lensPrice) * quantity;

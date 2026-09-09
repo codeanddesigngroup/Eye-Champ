@@ -22,8 +22,9 @@ const productAssets: Record<string, { src: string; width: number; height: number
 const products = [["Rs 599.00", "4.7", "586", "front"], ["Rs 599.00", "4.6", "224", "side"], ["Rs 599.00", "4.5", "1961", "sun"], ["Rs 599.00", "4.5", "417", "angle"], ["Rs 599.00", "4.5", "221", "front"], ["Rs 599.00", "4.8", "312", "angle"], ["Rs 599.00", "4.6", "148", "side"], ["Rs 599.00", "4.9", "93", "sun"]];
 const reviews = [[5, "starseed03", "Great quality", "4 days ago", "I got them delivered earlier that expected. The frame was sturdy and of good quality.", "True to Size", "High", 0], [5, "Reviewer1948161032", "Great pair of glasses", "7 days ago", "The experience was great! The glasses are much better quality than the ones I usually get at Costco, and they were less expensive. I’m very happy with my purchase!", "True to Size", "Average", 0], [3, "Olivia", "Not true to color", "7 days ago", "I really love the size and shape of these frames, but if you’re someone who can’t wear really dark frames then these aren’t for you! I still like them overall.", "True to Size", "High", 1], [1, "craigbruckner", "Big ugly frames", "12 days ago", "These frames are way too big for my face. My wife laughed when she saw them. Oh well, I can wear them when I work outside as safety glasses.", "Loose", "Low", 0]] as const;
 export type DatabaseProduct = { id:string; title:string; slug:string; description:string; price:number; discountPercent:number; quantity:number; shape:string|null; material:string|null; rim:string|null; fit:string|null; weight:number|null; specialFeature:string|null; measurements:Record<string,string>; lensCompatibility:string[]; genders:string[]; categories:string[]; subcategories:string[]; collections:string[]; brands:string[]; media:Array<{name?:string;url:string;primary?:boolean}>; variants:Array<{name:string;values:string[];mediaByValue?:Record<string,Array<{name?:string;url:string}>>}> };
-function ProductImage({ view, className = "", src }: { view: string, className?: string, src?:string }) {
+function ProductImage({ view, className = "", src, database = false }: { view: string, className?: string, src?:string, database?:boolean }) {
     const asset = productAssets[view] ?? productAssets.front;
+    if(database&&!src)return <div className={`sprite product-asset product-no-image ${className}`}>No image available</div>;
     return <div className={`sprite product-asset ${className}`}><Image key={src??asset.src} src={src??asset.src} width={asset.width} height={asset.height} alt={`${view} product view`} unoptimized /></div>
 }
 function Rating({ value = 5 }: { value?: number }) { return <span className="stars">{[1, 2, 3, 4, 5].map(i => <Star key={i} fill={i <= value ? "currentColor" : "#c7d2d5"} color={i <= value ? "currentColor" : "#c7d2d5"} />)}</span> }
@@ -38,10 +39,13 @@ export default function ProductPage({databaseProduct}:{databaseProduct?:Database
     const frameVariant=databaseProduct?.variants.find(variant=>variant.name.toLowerCase()==="frame color"),frameColors=frameVariant?.values??[];
     const lensColors=databaseProduct?.variants.find(variant=>variant.name.toLowerCase()==="lens color")?.values??[];
     const productSizes=databaseProduct?.variants.find(variant=>variant.name.toLowerCase()==="size")?.values??[];
+    const displayedLensCompatibility=databaseProduct?databaseProduct.lensCompatibility:["Sunglasses","EyeQLenz™","Transitions®","Specialty lenses","Blokz® blue-light blocking"];
     const selectedFrameColor=frameColors[color]??"";
     const databaseImages=(selectedFrameColor?frameVariant?.mediaByValue?.[selectedFrameColor]:undefined)??databaseProduct?.media??[];
     const databaseImage=(index:number)=>databaseImages[index%Math.max(databaseImages.length,1)]?.url;
     const salePrice=Number(databaseProduct?.price??599)*(1-Number(databaseProduct?.discountPercent??0)/100);
+    const hasProductImages=!databaseProduct||databaseImages.length>0;
+    const showGallerySlider=!databaseProduct||databaseImages.length>1;
     useEffect(()=>{if(!databaseProduct)return;const refresh=()=>setLiked(getFavorites().some(item=>item.id===databaseProduct.id));refresh();window.addEventListener(favoritesUpdatedEvent,refresh);return()=>window.removeEventListener(favoritesUpdatedEvent,refresh)},[databaseProduct]);
     const toggleLiked=()=>{if(!databaseProduct)return setLiked(value=>!value);const slug=(value:string)=>value.toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");setLiked(toggleFavorite({...databaseProduct,price:salePrice,categorySlug:slug(databaseProduct.categories[0]||"shop-all"),subcategorySlug:slug(databaseProduct.subcategories[0]||"all")}))};
     return (
@@ -51,13 +55,13 @@ export default function ProductPage({databaseProduct}:{databaseProduct?:Database
                     <button className="gallery-heart" onClick={toggleLiked} aria-label={liked ? "Remove from favorites" : "Add to favorites"}>
                         <Heart fill={liked ? "#0b6068" : "none"} />
                     </button>
-                    <button type="button" className="gallery-arrow left" onClick={() => gallerySlider.current?.slidePrev()}><ChevronLeft /></button>
-                    <Swiper className="gallery-main" loop speed={450} onSwiper={swiper => { gallerySlider.current = swiper }} onSlideChange={swiper => setView(views[swiper.realIndex])}>{views.map((v,index) => <SwiperSlide key={v}><ProductImage view={v} src={databaseImage(index)} /></SwiperSlide>)}</Swiper>
+                    {hasProductImages?(showGallerySlider?<><button type="button" className="gallery-arrow left" onClick={() => gallerySlider.current?.slidePrev()}><ChevronLeft /></button>
+                    <Swiper className="gallery-main" loop speed={450} onSwiper={swiper => { gallerySlider.current = swiper }} onSlideChange={swiper => setView(views[swiper.realIndex])}>{views.map((v,index) => <SwiperSlide key={v}><ProductImage view={v} src={databaseImage(index)} database={Boolean(databaseProduct)} /></SwiperSlide>)}</Swiper>
                     <button type="button" className="gallery-arrow right" onClick={() => gallerySlider.current?.slideNext()}><ChevronRight /></button>
                     <div className="gallery-tools"><button>360°</button><button>▰</button></div>
                     <div className="thumbnails">
-                        {views.slice(0, 4).map((v,index) => <button type="button" aria-label={`Show ${v} view`} className={view === v ? "active" : ""} key={v} onClick={() => gallerySlider.current?.slideToLoop(views.indexOf(v))}><ProductImage view={v} src={databaseImage(index)} /></button>)}
-                    </div>
+                        {views.slice(0, 4).map((v,index) => <button type="button" aria-label={`Show ${v} view`} className={view === v ? "active" : ""} key={v} onClick={() => gallerySlider.current?.slideToLoop(views.indexOf(v))}><ProductImage view={v} src={databaseImage(index)} database={Boolean(databaseProduct)} /></button>)}
+                    </div></>:<div className="gallery-single-image"><ProductImage view="front" src={databaseImage(0)} database/></div>):<div className="gallery-empty">No image available</div>}
                 </div>
                 <div className="product-info-panel">
                     <h1>{databaseProduct?.title??"Tortoiseshell Square Glasses"}</h1>
@@ -71,9 +75,9 @@ export default function ProductPage({databaseProduct}:{databaseProduct?:Database
                     <div className="options-card">
                         <div className="size-line"><b>Size:</b> {databaseProduct?(productSizes.join(", ")||"Not specified"):"large (52 □ 19 - 143)"}</div>
                         {/* <b className="size-pill">Large</b> */}
-                        <p><b>Color:</b> {selectedFrameColor||"Tortoiseshell"}</p><div className="swatches">{(frameColors.length?frameColors:["tortoise","black","blue"]).map((c, i) => <button key={c} onClick={() => setColor(i)} style={databaseProduct?{background:c}:undefined} className={`${databaseProduct?"":c} ${color === i ? "selected" : ""}`} aria-label={c} />)}</div></div>
-                    <BuyNowButton productId={databaseProduct?.id} name={databaseProduct?.title} frameColor={selectedFrameColor||undefined} image={databaseImage(0)} framePrice={salePrice} />
-                    <SelectLensesButton product={databaseProduct?{productId:databaseProduct.id,name:databaseProduct.title,frameColor:selectedFrameColor||"Default",image:databaseImage(0)||"/images/Browline.webp",framePrice:salePrice,lensColors}:undefined} />
+                        {(!databaseProduct||frameColors.length>0)&&<><p><b>Color:</b> {selectedFrameColor||"Tortoiseshell"}</p><div className="swatches">{(databaseProduct?frameColors:["tortoise","black","blue"]).map((c, i) => <button key={c} onClick={() => setColor(i)} style={databaseProduct?{background:c}:undefined} className={`${databaseProduct?"":c} ${color === i ? "selected" : ""}`} aria-label={c} />)}</div></>}</div>
+                    <BuyNowButton productId={databaseProduct?.id} name={databaseProduct?.title} frameColor={selectedFrameColor||undefined} image={databaseImage(0)} framePrice={salePrice} outOfStock={Boolean(databaseProduct&&databaseProduct.quantity<=0)} />
+                    <SelectLensesButton product={databaseProduct?{productId:databaseProduct.id,name:databaseProduct.title,frameColor:selectedFrameColor,image:databaseImage(0)||"",framePrice:salePrice,lensColors}:undefined} outOfStock={Boolean(databaseProduct&&databaseProduct.quantity<=0)} />
                     <div className="pay-card">Pay over time with PayPal, Affirm or Afterpay. &nbsp;<u>Learn More</u><br />Use your insurance or FSA/HSA benefits. &nbsp;<u>Learn more</u></div>
                     <div className="includes"><h3>ZENNI WOW PRICE INCLUDES:</h3><p>✓ High-quality frame<br />✓ Basic prescription lenses*<br />✓ Anti-scratch coating<br />✓ UV protection</p><i>*multifocal or readers lenses start at additional cost</i></div>
                     <div className="bought">
@@ -89,10 +93,10 @@ export default function ProductPage({databaseProduct}:{databaseProduct?:Database
                 </div>
                 {tab === "Features" && <div className="feature-content wrap">
                     <div className="frame-design"><h3>Frame design</h3><dl><dt>Shape</dt><dd><u>{databaseProduct?.shape??"Square"}</u></dd><dt>Feature</dt><dd><u>{databaseProduct?.specialFeature??"Spring Hinges, Universal Bridge Fit"}</u></dd><dt>Rim</dt><dd><u>{databaseProduct?.rim??"Full Rim"}</u></dd><dt>Material</dt><dd><u>{databaseProduct?.material??"Acetate"}</u></dd><dt>Weight</dt><dd>{databaseProduct?.weight?`${databaseProduct.weight} grams`:"(23 grams / 0.8 ounces)"}</dd></dl></div>
-                    <div className="lens-list"><h3>Lens compatibility</h3>{["Sunglasses", "EyeQLenz™", "Transitions®", "Specialty lenses", "Blokz® blue-light blocking"].map(item => <p key={item}><span>✓</span><b>{item}</b></p>)}</div>
+                    <div className="lens-list"><h3>Lens compatibility</h3>{displayedLensCompatibility.length?displayedLensCompatibility.map(item => <p key={item}><span>✓</span><b>{item}</b></p>):<p>No lens compatibility specified.</p>}</div>
                     <div className="special-list"><h3>What makes it special</h3><div><span>✓</span><p><b>Zenni Promise</b><br />Experience high quality frames at our most affordable prices.</p></div><div><span>✓</span><p><b>Made for all faces</b><br />Designed to accommodate many face shapes and sizes.</p></div><div><span>✓</span><p><b>Luxury Crafted</b><br />Handcrafted acetate delivers vibrant, fade-resistant colors with hypoallergenic durability.</p></div></div>
                 </div>}
-                {tab === "Description" && <div className="detail-content wrap"><div>{databaseProduct?<div dangerouslySetInnerHTML={{__html:databaseProduct.description||"<p>No description provided.</p>"}}/>:<><b>Design:</b><p>Discover timeless sophistication with these full rim square glasses, meticulously crafted from premium acetate to showcase a sleek design and impeccable craftsmanship.</p><b>Fit:</b><p>These glasses feature spring hinges and a universal bridge fit, ensuring superior comfort and a secure fit for everyday wear.</p><b>Recommendation:</b><p>These glasses offer a sophisticated and classic style, perfect for both men and women. With their square frame shape, they are ideal for individuals with heart and oval face shapes.</p></>}</div><ProductImage view="angle" src={databaseImage(2)} /></div>}
+                {tab === "Description" && <div className="detail-content wrap"><div>{databaseProduct?<div dangerouslySetInnerHTML={{__html:databaseProduct.description||"<p>No description provided.</p>"}}/>:<><b>Design:</b><p>Discover timeless sophistication with these full rim square glasses, meticulously crafted from premium acetate to showcase a sleek design and impeccable craftsmanship.</p><b>Fit:</b><p>These glasses feature spring hinges and a universal bridge fit, ensuring superior comfort and a secure fit for everyday wear.</p><b>Recommendation:</b><p>These glasses offer a sophisticated and classic style, perfect for both men and women. With their square frame shape, they are ideal for individuals with heart and oval face shapes.</p></>}</div><ProductImage view="angle" src={databaseImage(2)} database={Boolean(databaseProduct)} /></div>}
             </section>
 
             <section className="recommend">
