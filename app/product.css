@@ -1729,6 +1729,11 @@ svg.live-lens-tint .lens-shine.right {
     font-weight: 800
 }
 
+.select-lenses:disabled {
+    opacity: .5;
+    cursor: not-allowed
+}
+
 .pay-card {
     margin-top: 24px;
     padding: 16px;

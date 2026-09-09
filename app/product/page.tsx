@@ -37,7 +37,7 @@ export default function ProductPage({databaseProduct}:{databaseProduct?:Database
     const [view, setView] = useState("front"), [liked, setLiked] = useState(false), [tab, setTab] = useState("Features"), [color, setColor] = useState(0), [photosOnly, setPhotosOnly] = useState(false), [sideView, setSideView] = useState(false), [sortOpen, setSortOpen] = useState(false), [sortOrder, setSortOrder] = useState("Newest"), [reviewsOpen, setReviewsOpen] = useState(true);
     const slideProducts = (direction: number) => direction < 0 ? productSlider.current?.slidePrev() : productSlider.current?.slideNext();
     const sortedReviews = [...reviews].sort((a, b) => sortOrder === "Highest rating" ? b[0] - a[0] : sortOrder === "Lowest rating" ? a[0] - b[0] : sortOrder === "Most helpful" ? b[7] - a[7] : 0);
-    const frameVariant=databaseProduct?.variants.find(variant=>variant.name.toLowerCase()==="frame color"),frameColors=frameVariant?.values??[];
+    const frameVariant=databaseProduct?.variants.find(variant=>variant.name.trim().toLowerCase()==="frame color"),frameColors=frameVariant?.values??[];
     const lensColors=databaseProduct?.variants.find(variant=>variant.name.toLowerCase()==="lens color")?.values??[];
     const productSizes=databaseProduct?.variants.find(variant=>variant.name.toLowerCase()==="size")?.values??[];
     const displayedLensCompatibility=databaseProduct?databaseProduct.lensCompatibility:["Sunglasses","EyeQLenz™","Transitions®","Specialty lenses","Blokz® blue-light blocking"];
@@ -48,6 +48,7 @@ export default function ProductPage({databaseProduct}:{databaseProduct?:Database
     const salePrice=Number(databaseProduct?.price??599)*(1-Number(databaseProduct?.discountPercent??0)/100);
     const hasProductImages=!databaseProduct||databaseImages.length>0;
     const showGallerySlider=!databaseProduct||databaseImages.length>1;
+    const outOfStock=Boolean(databaseProduct&&databaseProduct.quantity<=0);
     useEffect(()=>{if(!databaseProduct)return;const refresh=()=>setLiked(getFavorites().some(item=>item.id===databaseProduct.id));refresh();window.addEventListener(favoritesUpdatedEvent,refresh);return()=>window.removeEventListener(favoritesUpdatedEvent,refresh)},[databaseProduct]);
     const toggleLiked=()=>{if(!databaseProduct)return setLiked(value=>!value);const slug=(value:string)=>value.toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");setLiked(toggleFavorite({...databaseProduct,price:salePrice,categorySlug:slug(databaseProduct.categories[0]||"shop-all"),subcategorySlug:slug(databaseProduct.subcategories[0]||"all")}))};
     return (
@@ -77,9 +78,8 @@ export default function ProductPage({databaseProduct}:{databaseProduct?:Database
                     <div className="options-card">
                         <div className="size-line"><b>Size:</b> {databaseProduct?(productSizes.join(", ")||"Not specified"):"large (52 □ 19 - 143)"}</div>
                         {/* <b className="size-pill">Large</b> */}
-                        {(!databaseProduct||frameColors.length>0)&&<><p><b>Color:</b> {selectedFrameColor||"Tortoiseshell"}</p><div className="swatches">{(databaseProduct?frameColors:["tortoise","black","blue"]).map((c, i) => <button key={c} onClick={() => setColor(i)} style={{background:productColor(c)}} className={color === i ? "selected" : ""} aria-label={c} title={c}/>)}</div></>}</div>
-                    <BuyNowButton productId={databaseProduct?.id} name={databaseProduct?.title} frameColor={selectedFrameColor||undefined} image={databaseImage(0)} framePrice={salePrice} outOfStock={Boolean(databaseProduct&&databaseProduct.quantity<=0)} />
-                    <SelectLensesButton product={databaseProduct?{productId:databaseProduct.id,name:databaseProduct.title,frameColor:selectedFrameColor,image:databaseImage(0)||"",framePrice:salePrice,lensColors}:undefined} outOfStock={Boolean(databaseProduct&&databaseProduct.quantity<=0)} />
+                        {(!databaseProduct||frameColors.length>0)&&<><p><b>Frame color:</b> {selectedFrameColor||"Tortoiseshell"}</p><div className="swatches" aria-label="Frame colors">{(databaseProduct?frameColors:["tortoise","black","blue"]).map((c, i) => <button key={c} onClick={() => setColor(i)} style={{background:productColor(c)}} className={color === i ? "selected" : ""} aria-label={`Select frame color ${c}`} title={c}/>)}</div></>}</div>
+                    {outOfStock?<button className="select-lenses" type="button" disabled>Out of stock</button>:<><BuyNowButton productId={databaseProduct?.id} name={databaseProduct?.title} frameColor={selectedFrameColor||undefined} image={databaseImage(0)} framePrice={salePrice}/><SelectLensesButton product={databaseProduct?{productId:databaseProduct.id,name:databaseProduct.title,frameColor:selectedFrameColor,image:databaseImage(0)||"",framePrice:salePrice,lensColors}:undefined}/></>}
                     <div className="pay-card">Pay over time with PayPal, Affirm or Afterpay. &nbsp;<u>Learn More</u><br />Use your insurance or FSA/HSA benefits. &nbsp;<u>Learn more</u></div>
                     <div className="includes"><h3>ZENNI WOW PRICE INCLUDES:</h3><p>✓ High-quality frame<br />✓ Basic prescription lenses*<br />✓ Anti-scratch coating<br />✓ UV protection</p><i>*multifocal or readers lenses start at additional cost</i></div>
                     <div className="bought">
