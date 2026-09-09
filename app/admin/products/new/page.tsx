@@ -97,6 +97,12 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
       form.querySelector<HTMLInputElement>(`input[name="${missingGroup[0]}"]`)?.focus();
       return;
     }
+    const hasProductImage = Object.values(variantMedia).some((images) => images.some((image) => Boolean(image.url?.trim())));
+    if (!hasProductImage) {
+      showAuthToast({ message: "Upload at least one product image before saving.", type: "error" });
+      document.querySelector(".np-variant-media")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
     if (!form.reportValidity()) return;
     const payload = {
       title: String(data.get("title") || ""), description,
@@ -495,7 +501,7 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
                       <Trash2 size={17} />
                     </button>
                     {option.name === "Frame color" && option.values.length > 0 && <div className="np-variant-media">
-                      <strong>Images by color</strong>
+                      <strong>Images by color <em className="np-required">*</em></strong>
                       {option.values.map((value) => {
                         const key = `${option.id}:${value}`, images = variantMedia[key] ?? []; return <div className="np-color-media-row" key={value}>
                           <span className="np-color-name"><i style={{ background: colorFor(value) }} />{value}</span>

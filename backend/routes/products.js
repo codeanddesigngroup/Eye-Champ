@@ -10,6 +10,16 @@ const validStatus = new Set(["Active", "Draft", "Archived"]);
 const slugify = (value) => value.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 const array = (value) => Array.isArray(value) ? value.map(String) : [];
 const numberOrNull = (value) => value === "" || value === null || value === undefined ? null : Number(value);
+const hasProductImage = (body) => {
+  const media = Array.isArray(body.media) ? body.media : [];
+  const variants = Array.isArray(body.variants) ? body.variants : [];
+  return media.some((item) => typeof item?.url === "string" && item.url.trim()) || variants.some((variant) => {
+    const mediaByValue = variant?.mediaByValue;
+    return mediaByValue && typeof mediaByValue === "object" && Object.values(mediaByValue).some((items) =>
+      Array.isArray(items) && items.some((item) => typeof item?.url === "string" && item.url.trim())
+    );
+  });
+};
 
 productsRouter.get("/", async (_request, response, next) => {
   try {
@@ -30,6 +40,7 @@ productsRouter.get("/:id", async (request, response, next) => {
 productsRouter.patch("/:id", async (request, response, next) => {
   try {
     const body = request.body ?? {};
+    if (!hasProductImage(body)) return response.status(400).json({ error: "At least one product image is required." });
     if (!array(body.genders).length || !array(body.categories).length || !array(body.subcategories).length) return response.status(400).json({ error: "Gender, category, and sub category are required." });
     if (![body.shape, body.material, body.rim].every(value => typeof value === "string" && value.trim() && !value.startsWith("Select "))) return response.status(400).json({ error: "Frame shape, frame material, and rim are required." });
     const title = String(body.title ?? "").trim(), price = Number(body.price), quantity = Number(body.quantity);
@@ -60,6 +71,7 @@ productsRouter.patch("/:id", async (request, response, next) => {
 productsRouter.post("/", async (request, response, next) => {
   try {
     const body = request.body ?? {};
+    if (!hasProductImage(body)) return response.status(400).json({ error: "At least one product image is required." });
     if (!array(body.genders).length || !array(body.categories).length || !array(body.subcategories).length) return response.status(400).json({ error: "Gender, category, and sub category are required." });
     if (![body.shape, body.material, body.rim].every(value => typeof value === "string" && value.trim() && !value.startsWith("Select "))) return response.status(400).json({ error: "Frame shape, frame material, and rim are required." });
     if (typeof body.title !== "string" || !body.title.trim()) return response.status(400).json({ error: "Product title is required." });
