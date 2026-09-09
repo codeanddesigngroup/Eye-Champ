@@ -976,7 +976,8 @@ body:has(.np-admin) {
     height: 34px;
     padding: 0 9px;
     border: 1px solid #d8e0e2;
-    border-radius: 6px
+    border-radius: 6px;
+    font-size: 12px;
 }
 
 .np-measurements {
