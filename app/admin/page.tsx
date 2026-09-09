@@ -49,7 +49,7 @@ export default function AdminDashboard() {
 
         <div className={styles.content}>
           <div className={styles.headingRow}>
-            <div><p>Tuesday, August 25</p><h1>Good morning, Admin</h1><span>Here’s what’s happening with your store today.</span></div>
+            <div><p>Tuesday, August 25</p><h1>Hello, Admin</h1><span>Here’s what’s happening with your store today.</span></div>
             <div className={styles.headingActions}><button className={styles.secondaryButton}><Download size={17} /> Export report</button><Link className={styles.primaryButton} href="/admin/products/new"><Plus size={17} /> Add product</Link></div>
           </div>
 
