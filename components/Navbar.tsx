@@ -10,7 +10,7 @@ export default function Navbar() {
     const [query, setQuery] = useState("");
     const [cartCount, setCartCount] = useState(0);
     const [favoriteCount, setFavoriteCount] = useState(0);
-    const [categories, setCategories] = useState<Array<{id:string;name:string;slug:string;parentId:string|null}>>([]);
+    const [categories, setCategories] = useState<Array<{ id: string; name: string; slug: string; parentId: string | null }>>([]);
     useEffect(() => {
         const updateCartCount = () => {
             const cart = JSON.parse(localStorage.getItem("eye-champ-cart") ?? "[]") as Array<{ quantity?: number }>;
@@ -28,7 +28,7 @@ export default function Navbar() {
         window.addEventListener(favoritesUpdatedEvent, updateFavoriteCount);
         return () => { window.removeEventListener("storage", updateFavoriteCount); window.removeEventListener(favoritesUpdatedEvent, updateFavoriteCount); };
     }, []);
-    useEffect(() => { fetch("/api/products/categories/navigation").then(response => response.ok ? response.json() : Promise.reject()).then((result:{categories?:Array<{id:string;name:string;slug:string;parentId:string|null}>}) => setCategories(result.categories ?? [])).catch(() => setCategories([])) }, []);
+    useEffect(() => { fetch("/api/products/categories/navigation").then(response => response.ok ? response.json() : Promise.reject()).then((result: { categories?: Array<{ id: string; name: string; slug: string; parentId: string | null }> }) => setCategories(result.categories ?? [])).catch(() => setCategories([])) }, []);
     const mainCategories = categories.filter(category => category.parentId === null);
     return (
         <>
@@ -47,13 +47,15 @@ export default function Navbar() {
             </header>
 
             <nav className="main-nav" aria-label="Shop categories">
-                {mainCategories.map(main => { const children=categories.filter(category=>category.parentId===main.id); return <div className="mega-trigger" key={main.id}>
-                    <Link className="mega-link" href={`/${main.slug}/all`}>{main.name}</Link>
-                    <section className="mega-menu" aria-label={`${main.name} menu`}><div className="mega-inner">
-                        <div className="mega-column"><b>{main.name}</b><Link href={`/${main.slug}/all`}>All {main.name.toLowerCase()}</Link>{children.map(child=><Link href={`/${main.slug}/${child.slug}`} key={child.id}>{child.name}</Link>)}</div>
-                        <MegaMenuSlider />
-                    </div></section>
-                </div>})}
+                {mainCategories.map(main => {
+                    const children = categories.filter(category => category.parentId === main.id); return <div className="mega-trigger" key={main.id}>
+                        <Link className="mega-link" href={`/${main.slug}/all`}>{main.name}</Link>
+                        <section className="mega-menu" aria-label={`${main.name} menu`}><div className="mega-inner">
+                            <div className="mega-column"><b>{main.name}</b><Link href={`/${main.slug}/all`}>All {main.name.toLowerCase()}</Link>{children.map(child => <Link href={`/${main.slug}/${child.slug}`} key={child.id}>{child.name}</Link>)}</div>
+                            <MegaMenuSlider />
+                        </div></section>
+                    </div>
+                })}
                 <div className="mega-trigger">
                     <a className="mega-link mega-trending" href="#trending-now">✨ Trending Now</a>
                     <section className="mega-menu" aria-label="Trending Now menu">
