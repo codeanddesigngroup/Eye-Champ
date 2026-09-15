@@ -6,7 +6,7 @@ import shared from "../accepted-payment-methods/page.module.css";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = {
-  title: "Internet Privacy Policy | Eye Champ",
+  title: "Privacy Policy | Eye Champ",
   description: "Learn how EyeChamp collects, uses, and protects your personal information when you shop at EyeChamp.pk.",
 };
 
@@ -14,12 +14,11 @@ export default function InternetPrivacyPolicyPage() {
   return <main id="top" className={`${shared.page} ${styles.page}`}>
     <aside className={shared.sidebar} aria-label="Privacy navigation">
       <Link href="/get-support" className={shared.back} aria-label="Back to Get Support"><ChevronLeft size={22} strokeWidth={1.5} /></Link>
-      <h2>INTERNET PRIVACY POLICY</h2>
-      <nav aria-label="Privacy and security"><Link href="/internet-privacy-policy" aria-current="page">INTERNET PRIVACY POLICY</Link></nav>
+      <h2>PRIVACY POLICY</h2>
     </aside>
     <article className={shared.article}>
       <nav className={shared.breadcrumb} aria-label="Breadcrumb"><Link href="/get-support">GET SUPPORT</Link><span aria-hidden="true"> / </span><span>Privacy &amp; security</span><span aria-hidden="true"> / </span><span aria-current="page">Internet privacy policy</span></nav>
-      <h1>INTERNET PRIVACY POLICY</h1>
+      <h1>PRIVACY POLICY</h1>
       <div className={styles.policyContent}>
         <p>At <strong>EyeChamp</strong>, we value your privacy and are committed to protecting the personal information you provide when using our website, placing an order, or communicating with us.</p>
 
