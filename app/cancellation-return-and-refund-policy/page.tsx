@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
-import Feedback from "../accepted-payment-methods/Feedback";
 import styles from "../accepted-payment-methods/page.module.css";
 import returnStyles from "./page.module.css";
 
 export const metadata: Metadata = {
   title: "Cancellation Return and Refund Policy | Eye Champ",
-  description: "Learn about returns, packing your order, refunds, and assistance with missing or defective goods.",
+  description: "Read EyeChamp's cancellation, return, and refund policy, including return eligibility, damaged products, and refund timelines.",
 };
 
 export default function CancelOrReturnOrderPage() {
@@ -19,31 +18,79 @@ export default function CancelOrReturnOrderPage() {
     <article className={`${styles.article} ${returnStyles.article}`}>
       <nav className={styles.breadcrumb} aria-label="Breadcrumb"><Link href="/#help">GET SUPPORT</Link><span aria-hidden="true"> / </span><span>Shipping &amp; returns</span><span aria-hidden="true"> / </span><span aria-current="page">Cancellation return and refund policy</span></nav>
       <h1>CANCELLATION, RETURN & REFUND POLICY</h1>
-      <section className={styles.section} aria-labelledby="satisfaction-heading">
-        <h2 id="satisfaction-heading">YOUR SATISFACTION IS GUARANTEED.</h2>
-        <p>When shopping at Ray-Ban you can always change your mind. If you are not happy with any product(s) purchased on our website for any reason, you can decide to return it within 45 days from receiving the shipment.</p>
-        <p>We only accept returns on items purchased from ray-ban.com, customized (REMIX) frames excluded. Items purchased from Authorized Ray-Ban retailers must be returned to the place of purchase.</p>
+      <p>At EyeChamp, we aim to provide customers with correctly supplied and properly delivered eyewear products.</p>
+
+      <section className={styles.section}>
+        <h2>Order Cancellation</h2>
+        <p>Customers may request cancellation before an order has been dispatched or before customization has started.</p>
+        <p>For prescription or customized products, cancellation may not be possible once lens production, fitting, customization, or processing has begun.</p>
+        <p>Cancellation requests should be sent to:</p>
+        <p><strong><a href="mailto:support@eyechamp.pk">support@eyechamp.pk</a></strong></p>
+        <p>Please include your order number and contact details.</p>
       </section>
-      <section className={styles.section} aria-labelledby="steps-heading">
-        <h2 id="steps-heading">JUST FOLLOW THESE SIMPLE STEPS:</h2>
-        <ol>
-          <li>On the My Orders page enter your order number and the email address used when placing your order.</li>
-          <li>Follow the guided procedure and print the Return Label &amp; Authorization.</li>
-          <li>Pack item(s) in the original packaging including any documentation, accessories and manuals received with the product — make sure the package is secure and that the contents do not risk being damaged during shipping.</li>
-          <li>Attach the Return Label on the outside of the package covering any previous address label.</li>
-        </ol>
-        <div className={returnStyles.orderAction}><a className={returnStyles.orderButton} href="https://www.ray-ban.com/global/my-orders">MY ORDERS</a></div>
-        <p>An email notification will be sent to the email address used when placing the order confirming that the refund has been issued. All refunds will occur via the original payment method. Please be aware that Express Delivery costs will not be refunded. For further assistance, you can contact our Customer Care team at this link: <a href="">Contact us</a>, indicating your order number and which item(s) you wish to return.</p>
+
+      <section className={styles.section}>
+        <h2>Returns</h2>
+        <p>Eligible non-customized products may be returned within <strong>7 days of delivery</strong>, subject to the following conditions:</p>
+        <ul>
+          <li>Product must be unused and unworn</li>
+          <li>Product must be in its original condition</li>
+          <li>Original packaging must be included</li>
+          <li>Tags and accessories must remain intact</li>
+          <li>Product must not have been damaged after delivery</li>
+          <li>Proof of purchase must be available</li>
+        </ul>
+        <p>Returned products may be inspected before approval.</p>
       </section>
-      <section id="missing-goods" className={styles.section} aria-labelledby="missing-heading">
-        <h2 id="missing-heading">MISSING OR DEFECTIVE GOODS</h2>
-        <p>Check your order as soon as it arrives to make sure everything is as expected. If your order is incorrect or an item is missing or damaged:</p>
-        <ol>
-          <li>Contact our Customer Care team at this link: <a href="">Contact us</a>.</li>
-          <li>Indicate your order number. Please consider that you must contact us within 14 days of receiving the shipment as we will not be able to accept responsibility for the item(s) after this time frame.</li>
-          <li>Attach clear pictures of the incorrect or damaged item(s) received, including the SKU code of the eyewear (usually found on the inside of the left temple), the delivery note and the packaging.</li>
-        </ol>
-        <p>Our Customer Care team will assess the information provided and investigate further. We will get back to you as soon as possible with a resolution.</p>
+
+      <section className={styles.section}>
+        <h2>Prescription &amp; Customized Products</h2>
+        <p>Prescription lenses, customized eyewear, specially manufactured lenses, or products prepared according to customer-provided measurements or prescriptions are generally not eligible for return due to change of mind.</p>
+        <p>However, a replacement, correction, or refund may be considered where:</p>
+        <ul>
+          <li>The wrong product was supplied</li>
+          <li>The product arrived damaged</li>
+          <li>A verified manufacturing defect exists</li>
+          <li>The supplied product materially differs from the confirmed order due to an error by EyeChamp</li>
+        </ul>
+      </section>
+
+      <section className={styles.section}>
+        <h2>Contact Lenses &amp; Hygiene-Sensitive Products</h2>
+        <p>Opened or used contact lenses and other sealed hygiene-sensitive products cannot normally be returned for health and hygiene reasons.</p>
+        <p>They may still qualify for replacement or refund if they were:</p>
+        <ul>
+          <li>Damaged on arrival</li>
+          <li>Defective</li>
+          <li>Incorrectly supplied</li>
+        </ul>
+        <p>Unopened products must remain in their original sealed packaging.</p>
+      </section>
+
+      <section id="missing-goods" className={styles.section}>
+        <h2>Damaged or Incorrect Products</h2>
+        <p>Customers should report damaged, defective, or incorrectly supplied products within <strong>48 hours of delivery</strong>.</p>
+        <p>We may request photographs, videos, packaging details, or other reasonable information to verify the issue.</p>
+      </section>
+
+      <section className={styles.section}>
+        <h2>Refunds</h2>
+        <p>Once an eligible return or refund request has been approved, the refund will normally be initiated within <strong>7&ndash;10 business days</strong>.</p>
+        <p>Refunds will generally be processed through the original payment method where technically possible.</p>
+        <p>Banks, card issuers, mobile wallets, and payment gateways may require additional processing time before the amount appears in the customer&apos;s account.</p>
+      </section>
+
+      <section className={styles.section}>
+        <h2>Shipping Charges</h2>
+        <p>Original delivery charges are generally non-refundable for change-of-mind returns.</p>
+        <p>Where EyeChamp has supplied an incorrect, damaged, or defective product, applicable return or replacement delivery charges will be handled by EyeChamp.</p>
+      </section>
+
+      <section className={styles.section}>
+        <h2>Contact</h2>
+        <p>For cancellation, return, exchange, or refund requests:</p>
+        <p><strong>Email:</strong> <a href="mailto:support@eyechamp.pk">support@eyechamp.pk</a><br />
+          <strong>Phone / WhatsApp:</strong> <a href="https://wa.me/923318099594">+92 331 8099594</a></p>
       </section>
     </article>
   </main>;
