@@ -49,9 +49,30 @@ function Evolution({ icon }: { icon: typeof icons[number] }) {
 export default function HistoryExperience() {
   const root = useRef<HTMLElement>(null);
   const dialog = useRef<HTMLDialogElement>(null);
+  const heroVideo = useRef<HTMLVideoElement>(null);
   const [paused, setPaused] = useState(false);
   const [active, setActive] = useState("wayfarer");
   const [decade, setDecade] = useState(0);
+
+  useEffect(() => {
+    const video = heroVideo.current;
+    if (!video) return;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const updatePlayback = () => {
+      if (paused || reducedMotion.matches) {
+        video.pause();
+      } else {
+        void video.play().catch(() => { video.controls = true; });
+      }
+      if (reducedMotion.matches) video.controls = true;
+    };
+    updatePlayback();
+    reducedMotion.addEventListener("change", updatePlayback);
+    return () => {
+      reducedMotion.removeEventListener("change", updatePlayback);
+      video.pause();
+    };
+  }, [paused]);
 
   useEffect(() => {
     const element = root.current;
@@ -93,16 +114,25 @@ export default function HistoryExperience() {
   }, [paused]);
 
   return <main ref={root} id="top" className={`${styles.history} ${paused ? styles.paused : ""}`}>
-    <div className={styles.toolbar}><button onClick={() => setPaused(!paused)} aria-pressed={paused} aria-label={paused ? "Play motion" : "Pause motion"}>{paused ? <Play size={15} /> : <Pause size={15} />}</button><button onClick={() => dialog.current?.showModal()}>Shop icons</button></div>
+    <div className={styles.toolbar}>
+      <button onClick={() => setPaused(!paused)} aria-pressed={paused} aria-label={paused ? "Play motion" : "Pause motion"}>{paused ? <Play size={15} /> : <Pause size={15} />}</button>
+      <button onClick={() => dialog.current?.showModal()}>Shop icons</button>
+    </div>
+
     <header className={styles.hero} id="icon-series">
-      <ReferenceArt y={16} height={80} alt="The Icon Series: black and white campaign portrait" />
-      <h1 className={styles.srOnly}>Our Icons History — The Icon Series</h1><a className={styles.explore} href="#wayfarer" aria-label="Explore the icons"><ArrowDown size={20} /></a>
+      <video ref={heroVideo} className={styles.heroVideo} muted loop playsInline preload="metadata" aria-label="The Icon Series campaign video">
+        <source src="/video/Hero_D.mp4" type="video/mp4" />
+        Your browser does not support embedded video.
+      </video>
+      <h1 className={styles.heroTitle}>The Icon Series</h1><a className={styles.explore} href="#wayfarer" aria-label="Explore the icons"><ArrowDown size={20} /></a>
     </header>
+
     <nav className={styles.chapterNav} aria-label="Icon chapters">{icons.map(icon => <a key={icon.slug} href={`#${icon.slug}`} aria-current={active === icon.slug ? "location" : undefined}>{icon.name}</a>)}<a href="#history" aria-current={active === "history" ? "location" : undefined}>The history</a></nav>
     {icons.map((icon, index) => <section id={icon.slug} data-chapter key={icon.slug} className={styles.chapter}>
       <div className={styles.scene} data-reveal><h2 className={styles.srOnly}>{icon.name}</h2><ReferenceArt y={scenes[index]} height={108} alt={`${icon.name}: campaign portrait and signature eyewear`} /><div className={`${styles.sceneCopy} ${index % 2 ? styles.copyLeft : ""}`}><p>{icon.description}</p><div className={styles.shopLinks}><Link href="/sunglasses/all">Shop sunglasses</Link><Link href="/eyeglasses/all">Shop eyeglasses</Link></div></div></div>
       <Evolution icon={icon} />
     </section>)}
+
     <div className={styles.historyHeadline}>YOU KNOW THE <span>NAME</span></div>
     <section id="history" data-chapter className={styles.timeline}>
       <div className={styles.scrollTimeline} data-timeline><div className={styles.stickyHistory}><h2>DO YOU KNOW THE STORY?</h2><p className={styles.historyIntro}>From the first aviators to a new generation of originals. Discover the people, designs and decades behind the icons.</p><div className={styles.archiveTrack}>{decades.map(([year, title, description], index) => <article key={year}><ReferenceArt x={index < 6 ? (index % 3) * 46 : (index - 6) * 44} y={index < 6 ? 1400 : 1893} width={43} height={index < 6 ? 43 : 22} alt={`${year}s campaign archive`} /><span>{year}s</span><h3>{title}</h3><p>{description}</p></article>)}</div></div></div>
