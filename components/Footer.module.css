@@ -11,7 +11,7 @@
   justify-content: center;
   gap: 14px;
   background: #fff;
-  color: #087984;
+  color: #fa3c3c;
 }
 
 .socialBanner>strong {
@@ -37,7 +37,7 @@
   height: 25px;
   display: grid;
   place-items: center;
-  color: #087984;
+  color: #fa3c3c;
 }
 
 .socialBanner a svg {

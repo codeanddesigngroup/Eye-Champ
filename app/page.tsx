@@ -28,14 +28,14 @@ export default function Home() {
         <article className="gender-card" id="men">
           <div>
             <span>FOR</span>
-            <h2>MEN’S</h2>
+            <h2>MEN</h2>
             <Link className="btn" href="/shop-all">SHOP NOW</Link>
           </div>
         </article>
         <article className="gender-card" id="women">
           <div>
             <span>FOR</span>
-            <h2>WOMEN’S</h2>
+            <h2>WOMEN</h2>
             <Link className="btn" href="/shop-all">SHOP NOW</Link>
           </div>
         </article>
@@ -81,7 +81,7 @@ export default function Home() {
       <section className="shape-shop">
         <div className="section-title left">
           <h2>SHOP BY FRAME SHAPE</h2>
-          <p>Versatile shapes made to fit your mood and every moment.</p>
+          <p>Versatile shapes made for every mood and moment.</p>
         </div>
         <div className="shape-grid">{shapes.map((shape, i) => <Link href="/product" key={shape}><div><img src={shapeImages[i]} alt={shape} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "1.25vw" }} /></div><b>{shape}</b></Link>)}</div></section></div>
 

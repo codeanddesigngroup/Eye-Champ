@@ -20,7 +20,7 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
     {!hideChrome && <Footer />}
     {!hideChrome && <a
       className={styles.whatsapp}
-      href="https://wa.me/923338888888"
+      href="https://wa.me/+923318099594"
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Chat with us on WhatsApp"
