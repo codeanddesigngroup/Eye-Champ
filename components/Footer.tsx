@@ -32,7 +32,7 @@ const shopByLinks: Record<string, string> = {
   "SPECIAL OFFERS": "/shop-all",
 };
 
-const cards = [["VISA", styles.visa], ["●●", styles.mastercard], ["Diners", styles.diners], ["DISCOVER", styles.discover], ["●●", styles.maestro]];
+const cards = [["VISA", styles.visa], ["●●", styles.mastercard]];
 
 export default function Footer() {
   return <footer id="help" className={styles.footer}>
