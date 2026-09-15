@@ -39,6 +39,7 @@ export default function SizeGuidePage() {
     <section id="frame-size" className={styles.section}>
       <div className={styles.copy}><h2>WHAT IS FRAME SIZE?</h2>
         <p>Frame size is defined by lens and bridge width. These values are always displayed in that order, in millimeters. If you wear glasses, you&apos;ve likely noticed some numbers on the temple and wondered what they mean. These numbers indicate the <strong>lens and bridge width</strong>, which determine the frame size.</p>
+         <img src="/images/en-us.avif" alt="" />
       </div>
       <div className={styles.wideIllustration}><Illustration y={310} height={196} alt="Frame measurements: lens width across one lens and bridge width between the lenses. The temple marking 55 square 22 indicates a 55 mm lens and 22 mm bridge." /></div>
     </section>

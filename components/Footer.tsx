@@ -12,7 +12,7 @@ const groups = [
   ["HOW CAN WE HELP?", "GET SUPPORT", "CONTACT US", "TRACK ORDERS", "TRACK RETURNS", "FAQ"],
 ];
 const shopByLinks: Record<string, string> = {
-  "OUR ICONS HISTORY": "/our-icons-history",
+  "OUR STORY": "/our-story",
   "BLOG": "#top",
   "GET SUPPORT": "/get-support",
   "CONTACT US": "/contact-us",
