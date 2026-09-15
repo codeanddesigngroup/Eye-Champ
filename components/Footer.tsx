@@ -7,7 +7,7 @@ import ShippingCountry from "./ShippingCountry";
 
 const groups = [
   ["SHOP BY", "ALL SUNGLASSES", "ALL EYEGLASSES", "POLARIZED", "NEW ICONS", "SPECIAL OFFERS"],
-  ["SHOPPING ONLINE", "SIZE GUIDE", "ACCEPTED PAYMENT METHODS", "PARTS & SERVICE", "SHIPPING INFORMATION", "CANCEL OR RETURN AN ORDER"],
+  ["SHOPPING ONLINE", "SIZE GUIDE", "ACCEPTED PAYMENT METHODS", "PARTS & SERVICE", "SHIPPING INFORMATION", "CANCELLATION, RETURN & REFUND POLICY"],
   ["ABOUT US", "OUR ICONS HISTORY", "RAY-BAN RED", "THE ONES", "ONESIGHT"], ["DO IT IN PERSON", "STORE LOCATOR"],
   ["HOW CAN WE HELP?", "GET SUPPORT", "TRACK ORDERS", "TRACK RETURNS", "FAQ", "REPORT A FAKE"],
 ];
@@ -25,7 +25,7 @@ const shopByLinks: Record<string, string> = {
   "ACCEPTED PAYMENT METHODS": "/accepted-payment-methods",
   "PARTS & SERVICE": "/parts-and-service",
   "SHIPPING INFORMATION": "/shipping-information",
-  "CANCEL OR RETURN AN ORDER": "/cancel-or-return-an-order",
+  "CANCELLATION, RETURN & REFUND POLICY": "/cancellation-return-and-refund-policy",
   "ALL SUNGLASSES": "/sunglasses/all",
   "ALL EYEGLASSES": "/eyeglasses/all",
   "POLARIZED": "/sunglasses/polarized-sunglasses",
