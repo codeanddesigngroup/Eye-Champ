@@ -9,13 +9,14 @@ const groups = [
   ["SHOP BY", "ALL SUNGLASSES", "ALL EYEGLASSES", "POLARIZED", "NEW ICONS", "SPECIAL OFFERS"],
   ["SHOPPING ONLINE", "SIZE GUIDE", "ACCEPTED PAYMENT METHODS", "PARTS & SERVICE", "SHIPPING AND DELIVERY POLICY", "CANCELLATION, RETURN & REFUND POLICY"],
   ["ABOUT US", "OUR ICONS HISTORY", "RAY-BAN RED", "THE ONES", "ONESIGHT"], ["DO IT IN PERSON", "STORE LOCATOR"],
-  ["HOW CAN WE HELP?", "GET SUPPORT", "TRACK ORDERS", "TRACK RETURNS", "FAQ", "REPORT A FAKE"],
+  ["HOW CAN WE HELP?", "GET SUPPORT", "CONTACT US", "TRACK ORDERS", "TRACK RETURNS", "FAQ", "REPORT A FAKE"],
 ];
 const shopByLinks: Record<string, string> = {
   "OUR ICONS HISTORY": "/our-icons-history",
   "THE ONES": "/the-ones",
   "ONESIGHT": "/one-sight",
   "GET SUPPORT": "/get-support",
+  "CONTACT US": "/contact-us",
   "TRACK ORDERS": "/track-orders",
   "TRACK RETURNS": "/track-returns",
   "FAQ": "/faq",

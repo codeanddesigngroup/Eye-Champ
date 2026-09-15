@@ -1,0 +1,12 @@
+.page { min-height: 550px; }
+.page h1, .page aside h2 { font-family: Impact, 'Arial Narrow', Arial, sans-serif; font-weight: 400; }
+.article { min-width: 0; }
+.details { margin: 24px 0; font-size: 12px; line-height: 1.65; }
+.details > div { display: flex; flex-wrap: wrap; gap: 0 6px; margin-top: 12px; }
+.details dt { font-weight: 700; }
+.details dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.details a { text-decoration: underline; text-underline-offset: 2px; }
+@media (max-width: 800px) {
+  .page { min-height: auto; }
+  .details { font-size: 13px; }
+}
