@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import fitPetite from "@/public/images/size-guide/fit-petite.jpg";
+import fitStandard from "@/public/images/size-guide/fit-standard.jpg";
+import fitGenerous from "@/public/images/size-guide/fit-generous.jpg";
 import faceWidth1 from "@/public/images/size-guide/face-width-1.avif";
 import faceWidth2 from "@/public/images/size-guide/face-width-2.avif";
 import faceWidth3 from "@/public/images/size-guide/face-width-3.avif";
@@ -61,7 +64,7 @@ export default function SizeGuidePage() {
     <section id="face-coverage" className={styles.section}>
       <div className={styles.copy}><h2>WHAT IS FACE COVERAGE?</h2><p>Face coverage is aesthetic information which determines how much of the face is covered by each given size.</p></div>
       <div className={styles.grid}>{["PETITE", "STANDARD", "GENEROUS"].map((fit, index) => <figure key={fit}>
-        <Illustration x={[0, 247, 494][index]} y={965} width={244} height={188} alt={`${fit.toLowerCase()} sunglasses coverage shown on the same face for comparison.`} />
+        <Image src={[fitPetite, fitStandard, fitGenerous][index]} alt={`${fit.toLowerCase()} sunglasses coverage shown on the same face for comparison.`} className={styles.stepImage} sizes="(max-width: 600px) 100vw, (max-width: 1680px) 33vw, 560px" />
         <figcaption><h3>{fit}</h3></figcaption>
       </figure>)}</div>
       <div className={styles.details}><p>There are three different fits available to choose from. These are unrelated to size and instead refer to lens width.</p><p>The three possible fittings are:</p>
@@ -71,7 +74,9 @@ export default function SizeGuidePage() {
 
     <section id="bridge-nosepads" className={styles.section}>
       <div className={styles.copy}><h2>WHAT ARE THE BRIDGE AND NOSEPADS?</h2><p>This functional information describes the different types of the bridge and the nosepads.</p></div>
-      <div className={styles.wideIllustration}><Illustration y={1400} height={215} alt="Close-up illustrations of a molded frame bridge and adjustable nosepads, with the nose contact areas outlined in red." /></div>
+      <div className={styles.wideIllustration}>
+        <img src="/images/bridge-nose-d.avif" alt="" />
+      </div>
       <div className={styles.details}><p>The four possible bridge and nosepads options are:</p>
         <ul><li><strong>High bridge fit:</strong> offers a more secure and comfortable fit for those with a high nose bridge and lower cheekbones. A good choice if the bridge of your nose is above the level of your pupils.</li><li><strong>Low bridge fit:</strong> offers a more secure and comfortable fit for those with a low nose bridge and higher cheekbones. A good choice if eyewear tends to slide down your nose, sit too low, or press on your temples or cheeks.</li><li><strong>Universal fit:</strong> this option accommodates most face shapes.</li><li><strong>Adjustable nosepads:</strong> nosepads that can be widened or narrowed to fit your unique nose shape.</li></ul>
       </div>
