@@ -17,6 +17,7 @@
 .illustration { width: 100%; background-image: url('/images/size-guide/reference.png'); background-repeat: no-repeat; }
 .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
 .grid figure { margin: 0; }
+.stepImage { display: block; width: 100%; height: auto; }
 .grid figcaption { padding: 20px 24px 0; }
 .grid p { margin: 0; }
 .details { max-width: 920px; padding: 0 24px; margin: 70px auto 0; }

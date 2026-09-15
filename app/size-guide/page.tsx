@@ -1,4 +1,8 @@
 import type { Metadata } from "next";
+import Image from "next/image";
+import faceWidth1 from "@/public/images/size-guide/face-width-1.avif";
+import faceWidth2 from "@/public/images/size-guide/face-width-2.avif";
+import faceWidth3 from "@/public/images/size-guide/face-width-3.avif";
 import { Glasses, ScanFace, PersonStanding } from "lucide-react";
 import styles from "./page.module.css";
 
@@ -19,9 +23,9 @@ function Illustration({ x = 0, y, width = 738, height, alt }: {
 }
 
 const steps = [
-  { title: "TAKE A CREDIT CARD", description: "Get a credit, debit or loyalty card.", x: 0, alt: "A standard card held vertically." },
-  { title: "STAND IN FRONT OF A MIRROR", description: "Hold the card steady and align one edge with the center of your nose.", x: 247, alt: "A person aligning a vertical card with the center of their nose." },
-  { title: "CHECK THE CARD POSITION", description: "See where the opposite edge of the card lines up with your eye to find your fit.", x: 494, alt: "Card edge positions compared with the eye: B outside, A at the edge, C inside." },
+  { title: "TAKE A CREDIT CARD", description: "Get a credit, debit or loyalty card.", image: faceWidth1, alt: "A standard card held vertically." },
+  { title: "STAND IN FRONT OF A MIRROR", description: "Hold the card steady and align one edge with the center of your nose.", image: faceWidth2, alt: "A person aligning a vertical card with the center of their nose." },
+  { title: "CHECK THE CARD POSITION", description: "See where the opposite edge of the card lines up with your eye to find your fit.", image: faceWidth3, alt: "Card edge positions compared with the eye: B outside, A at the edge, C inside." },
 ];
 
 export default function SizeGuidePage() {
@@ -39,15 +43,16 @@ export default function SizeGuidePage() {
     <section id="frame-size" className={styles.section}>
       <div className={styles.copy}><h2>WHAT IS FRAME SIZE?</h2>
         <p>Frame size is defined by lens and bridge width. These values are always displayed in that order, in millimeters. If you wear glasses, you&apos;ve likely noticed some numbers on the temple and wondered what they mean. These numbers indicate the <strong>lens and bridge width</strong>, which determine the frame size.</p>
-         <img src="/images/en-us.avif" alt="" />
       </div>
-      <div className={styles.wideIllustration}><Illustration y={310} height={196} alt="Frame measurements: lens width across one lens and bridge width between the lenses. The temple marking 55 square 22 indicates a 55 mm lens and 22 mm bridge." /></div>
+      <div className={styles.wideIllustration}>
+        <img src="/images/en-us.avif" alt="" />
+      </div>
     </section>
 
     <section className={styles.section}>
       <div className={styles.copy}><h2>MEASURE YOUR FACE WIDTH</h2><p>If you don&apos;t already own a pair of glasses with measurements, you can measure your face using a card.</p></div>
       <div className={styles.grid}>{steps.map((step, index) => <figure key={step.title}>
-        <Illustration x={step.x} y={610} width={244} height={189} alt={step.alt} />
+        <Image src={step.image} alt={step.alt} className={styles.stepImage} sizes="(max-width: 600px) 100vw, (max-width: 1680px) 33vw, 560px" />
         <figcaption><h3>STEP {index + 1}<br />{step.title}</h3><p>{step.description}</p></figcaption>
       </figure>)}</div>
       <p className={styles.cardTip}>If the card reaches beyond your eye, try a petite fit. If it aligns with the outer edge, try standard. If it falls inside the outer edge, try generous.</p>
