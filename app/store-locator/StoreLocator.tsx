@@ -53,7 +53,7 @@ export default function StoreLocator() {
       </aside>
       <div className={styles.map}><iframe title="Store locator map" src={`https://maps.google.com/maps?q=${encodeURIComponent(mapQuery)}&output=embed`} referrerPolicy="no-referrer-when-downgrade" allowFullScreen /></div>
     </section>
-    <section className={styles.banner} aria-label="Come visit our Ray-Ban stores to enjoy the finest brand experience"><h2 className={styles.srOnly}>COME VISIT OUR RAY-BAN STORES TO ENJOY THE FINEST BRAND EXPERIENCE</h2></section>
+    <section className={styles.banner} aria-label="Come visit our Ray-Ban stores to enjoy the finest brand experience"><h2>COME VISIT OUR RAY-BAN STORES TO ENJOY THE FINEST BRAND EXPERIENCE</h2></section>
     <section className={styles.resellers} aria-labelledby="reseller-heading"><h2 id="reseller-heading">RAY-BAN ONLINE CERTIFIED RESELLERS</h2><p>SEARCH BY DOMAIN</p><form className={styles.domainForm} onSubmit={checkDomain}><label className={styles.srOnly} htmlFor="reseller-domain">Reseller website domain</label><input id="reseller-domain" name="domain" type="text" required pattern=".*\S.*" maxLength={253} placeholder="www.ray-ban.com" autoCapitalize="none" spellCheck={false} /><button type="submit" className={styles.button}>SEARCH</button></form>{domainMessage && <div className={styles.domainStatus}><p role="status">{domainMessage}</p><Link href="/get-support#contact-support">Contact support</Link></div>}</section>
     <section className={styles.shop}><p>Want to discover Ray-Ban exclusives and full<br />collections? Shop on our website.</p><Link href="/shop-all" className={styles.button}>SHOP NOW</Link></section>
   </main>;

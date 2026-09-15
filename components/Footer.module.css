@@ -35,7 +35,7 @@
 .socialBanner a {
   width: 25px;
   height: 25px;
-  display: grid;
+  display: flex;
   place-items: center;
   color: #fa3c3c;
 }

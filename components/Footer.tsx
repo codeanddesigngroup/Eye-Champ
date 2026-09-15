@@ -40,7 +40,7 @@ export default function Footer() {
       <FontAwesomeIcon className={styles.socialMark} icon={faSquareFontAwesomeStroke} aria-hidden="true" />
       <strong>Socialize with us</strong>
       <nav>
-        <a href="#top" aria-label="Facebook"><FontAwesomeIcon icon={faFacebookF} /></a>
+        <a href="#top" id="facebook" aria-label="Facebook"><FontAwesomeIcon icon={faFacebookF} /></a>
         <a href="#top" aria-label="Twitter"><FontAwesomeIcon icon={faTwitter} /></a>
         <a href="#top" aria-label="Instagram"><FontAwesomeIcon icon={faInstagram} /></a>
         <a href="#top" aria-label="YouTube"><FontAwesomeIcon icon={faYoutube} /></a>

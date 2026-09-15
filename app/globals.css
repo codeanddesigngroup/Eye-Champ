@@ -451,6 +451,11 @@ input {
     margin-top: auto
 }
 
+
+/* a#facebook {
+    width: 3.5%;
+} */
+
 .product-rail {
     display: grid;
     grid-auto-flow: column;
