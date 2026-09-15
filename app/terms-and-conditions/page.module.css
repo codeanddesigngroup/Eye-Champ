@@ -1,4 +1,8 @@
 .page { min-height: 550px; }
 .page h1, .page aside h2 { font-family: Impact, 'Arial Narrow', Arial, sans-serif; font-weight: 400; }
 .documentLink { text-decoration: underline; text-underline-offset: 2px; }
+.termsContent p + p { margin-top: 12px; }
+.termsContent ul { margin: 12px 0; padding-left: 22px; list-style: disc; font-size: 12px; line-height: 1.65; }
+.termsContent li + li { margin-top: 6px; }
+@media (max-width: 800px) { .termsContent ul { font-size: 13px; } }
 @media (max-width: 800px) { .page { min-height: auto; } }
