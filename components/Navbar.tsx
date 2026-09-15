@@ -21,6 +21,7 @@ export default function Navbar() {
         window.addEventListener("eye-champ-cart-updated", updateCartCount);
         return () => { window.removeEventListener("storage", updateCartCount); window.removeEventListener("eye-champ-cart-updated", updateCartCount); };
     }, []);
+
     useEffect(() => {
         const updateFavoriteCount = () => setFavoriteCount(getFavorites().length);
         updateFavoriteCount();
@@ -28,6 +29,7 @@ export default function Navbar() {
         window.addEventListener(favoritesUpdatedEvent, updateFavoriteCount);
         return () => { window.removeEventListener("storage", updateFavoriteCount); window.removeEventListener(favoritesUpdatedEvent, updateFavoriteCount); };
     }, []);
+    
     useEffect(() => { fetch("/api/products/categories/navigation").then(response => response.ok ? response.json() : Promise.reject()).then((result: { categories?: Array<{ id: string; name: string; slug: string; parentId: string | null }> }) => setCategories(result.categories ?? [])).catch(() => setCategories([])) }, []);
     const mainCategories = categories.filter(category => category.parentId === null);
     return (
