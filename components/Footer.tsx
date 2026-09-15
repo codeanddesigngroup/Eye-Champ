@@ -2,6 +2,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFacebookF, faInstagram, faSquareFontAwesomeStroke, faTwitter, faXTwitter, faYoutube } from "@fortawesome/free-brands-svg-icons";
 import { LockKeyhole, Truck } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import styles from "./Footer.module.css";
 
 const groups = [
@@ -31,7 +32,7 @@ const shopByLinks: Record<string, string> = {
   "SPECIAL OFFERS": "/shop-all",
 };
 
-const cards = [["VISA", styles.visa], ["●●", styles.mastercard]];
+const cards = [["JazzCash", styles.jazzcash], ["VISA", styles.visa], ["●●", styles.mastercard]];
 
 export default function Footer() {
   return <footer id="help" className={styles.footer}>
@@ -49,7 +50,7 @@ export default function Footer() {
       <div><LockKeyhole aria-hidden="true" /><strong>SECURE CHECKOUT</strong></div><Link href="/shipping-and-delivery-policy"><Truck aria-hidden="true" /><strong>RESPONSIBLE SHIPPING</strong></Link>
     </section>
     <section className={styles.security}><p><LockKeyhole aria-hidden="true" /> We guarantee every transaction is 100% secure.</p>
-      <div className={styles.paymentMarks} aria-label="Accepted payment methods">{cards.map(([label, className], i) => <span className={className} key={`${label}-${i}`}>{label}</span>)}</div>
+      <div className={styles.paymentMarks} aria-label="Accepted payment methods">{cards.map(([label, className], i) => <span className={className} key={`${label}-${i}`}>{label === "JazzCash" ? <Image src="/images/payments/jazzcash.png" alt="JazzCash" width={24} height={24} /> : label}</span>)}</div>
     </section>
     <section className={styles.linksArea}><div className={styles.linkGrid}>
       {groups.map(([heading, ...links]) => <div className={styles.linkGroup} key={heading}><h2>{heading}</h2>{links.map(label => shopByLinks[label] ? <Link href={shopByLinks[label]} key={label}>{label}</Link> : <a href="#top" key={label}>{label}</a>)}</div>)}

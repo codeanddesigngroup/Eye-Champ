@@ -127,6 +127,18 @@
   background: radial-gradient(circle at 42% 50%, #eb001b 0 27%, transparent 28%), radial-gradient(circle at 59% 50%, #f79e1b 0 27%, white 28%);
 }
 
+.paymentMarks .jazzcash {
+  background: white;
+}
+
+.jazzcash img {
+  display: block;
+  width: auto;
+  height: 100%;
+  max-height: 22px;
+  object-fit: contain;
+}
+
 .paymentMarks .maestro {
   color: transparent;
   background: radial-gradient(circle at 42% 50%, #e31837 0 27%, transparent 28%), radial-gradient(circle at 59% 50%, #0089cf 0 27%, white 28%);
