@@ -29,14 +29,14 @@ export default function Home() {
           <div>
             <span>FOR</span>
             <h2>MEN</h2>
-            <Link className="btn" href="/shop-all">SHOP NOW</Link>
+            <Link className="btn" href="/all-glasses/men">SHOP NOW</Link>
           </div>
         </article>
         <article className="gender-card" id="women">
           <div>
             <span>FOR</span>
             <h2>WOMEN</h2>
-            <Link className="btn" href="/shop-all">SHOP NOW</Link>
+            <Link className="btn" href="/all-glasses/women">SHOP NOW</Link>
           </div>
         </article>
       </section>

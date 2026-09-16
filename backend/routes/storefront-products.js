@@ -18,6 +18,7 @@ storefrontProductsRouter.get("/", async (request, response, next) => {
   try {
     const categorySlug = String(request.query.category ?? "").trim();
     const subcategorySlug = String(request.query.subcategory ?? "").trim();
+    const gender = String(request.query.gender ?? "").trim();
     let categoryName = "", subcategoryName = "";
     if (categorySlug) {
       const { rows: categoryRows } = await pool.query("SELECT id, name FROM categories WHERE slug=$1 AND parent_id IS NULL AND status='Active'", [categorySlug]);
@@ -36,7 +37,8 @@ storefrontProductsRouter.get("/", async (request, response, next) => {
       FROM products p WHERE p.status = 'Active'
       AND ($1 = '' OR p.categories ? $1)
       AND ($2 = '' OR p.subcategories ? $2)
-      ORDER BY p.created_at DESC`, [categoryName, subcategoryName]);
+      AND ($3 = '' OR EXISTS (SELECT 1 FROM jsonb_array_elements_text(p.genders) AS product_gender WHERE LOWER(product_gender) = LOWER($3)))
+      ORDER BY p.created_at DESC`, [categoryName, subcategoryName, gender]);
     response.json({ products: rows, category: categoryName || null, subcategory: subcategoryName || null });
   } catch (error) { next(error); }
 });
