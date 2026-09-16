@@ -89,7 +89,10 @@ export default function Slider() {
                   {/* <button className="try-on" type="button"><Video fill="currentColor" aria-hidden="true" />Try on</button> */}
                 </div>
                 <div className="seller-info">
-                  <div className="seller-line"><strong>{product.price}</strong><span><Star fill="currentColor" aria-hidden="true" /> {product.rating} ({product.reviews})</span></div>
+                  <div className="seller-line">
+                    <strong>{product.price}</strong>
+                    {/* <span><Star fill="currentColor" aria-hidden="true" /> {product.rating} ({product.reviews})</span> */}
+                    </div>
                   <p>{product.shape}</p>
                   {product.delivery && <b className="seller-delivery">Get it as early as Fri, Aug 21</b>}
                   <div className="seller-colors" aria-label="Available colors">

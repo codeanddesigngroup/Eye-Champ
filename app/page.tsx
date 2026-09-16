@@ -78,7 +78,7 @@ export default function Home() {
           <Link className="btn" href="/all-glasses">SHOP NOW</Link>
         </div>
       </section>
-      
+
       <section className="shape-shop">
         <div className="section-title left">
           <h2>SHOP BY FRAME SHAPE</h2>
@@ -90,7 +90,7 @@ export default function Home() {
 
     <div className="page shell">
       <section className="trend card">
-        <div key={`${trendBanners[trendIndex]}-${mobileTrendBanners[mobileTrendIndex]}`} className="trend-bg" style={{ "--trend-desktop-image": `url(${trendBanners[trendIndex]})`, "--trend-mobile-image": `url(${mobileTrendBanners[mobileTrendIndex]})` } as CSSProperties} /><div><h2>THE TREND SHOP</h2><p>Curated styles, fresh colors, and must-see edits.</p><Link className="btn" href="/product">SHOP NOW</Link></div>
+        <div key={`${trendBanners[trendIndex]}-${mobileTrendBanners[mobileTrendIndex]}`} className="trend-bg" style={{ "--trend-desktop-image": `url(${trendBanners[trendIndex]})`, "--trend-mobile-image": `url(${mobileTrendBanners[mobileTrendIndex]})` } as CSSProperties} /><div><h2>THE TREND SHOP</h2><p>Curated styles, fresh colors, and must-see edits.</p><Link className="btn" href="/shop-all">SHOP NOW</Link></div>
       </section>
     </div>
     <UnderSlider />

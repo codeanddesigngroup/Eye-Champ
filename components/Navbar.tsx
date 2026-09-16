@@ -29,7 +29,7 @@ export default function Navbar() {
         window.addEventListener(favoritesUpdatedEvent, updateFavoriteCount);
         return () => { window.removeEventListener("storage", updateFavoriteCount); window.removeEventListener(favoritesUpdatedEvent, updateFavoriteCount); };
     }, []);
-    
+
     useEffect(() => { fetch("/api/products/categories/navigation").then(response => response.ok ? response.json() : Promise.reject()).then((result: { categories?: Array<{ id: string; name: string; slug: string; parentId: string | null }> }) => setCategories(result.categories ?? [])).catch(() => setCategories([])) }, []);
     const mainCategories = categories.filter(category => category.parentId === null);
     return (
@@ -53,7 +53,10 @@ export default function Navbar() {
                     const children = categories.filter(category => category.parentId === main.id); return <div className="mega-trigger" key={main.id}>
                         <Link className="mega-link" href={`/${main.slug}/all`}>{main.name}</Link>
                         <section className="mega-menu" aria-label={`${main.name} menu`}><div className="mega-inner">
-                            <div className="mega-column"><b>{main.name}</b><Link href={`/${main.slug}/all`}>All {main.name.toLowerCase()}</Link>{children.map(child => <Link href={`/${main.slug}/${child.slug}`} key={child.id}>{child.name}</Link>)}</div>
+                            <div className="mega-column">
+                                <b>{main.name}</b>
+                                <Link href={`/${main.slug}/all`}>All {main.name.toLowerCase()}</Link>{children.map(child => <Link href={`/${main.slug}/${child.slug}`} key={child.id}>{child.name}</Link>)} 
+                            </div>
                             <MegaMenuSlider />
                         </div></section>
                     </div>

@@ -38,7 +38,7 @@ export default function UnderSlider() {
           <h2 id="best-sellers-title">UNDER 5000 PICKS</h2>
         </div>
         <div className="best-sellers-actions">
-          <Link href="/product" className="best-sellers-shop">Shop all</Link>
+          <Link href="/all-glasses/under-5000" className="best-sellers-shop">Shop all</Link>
         </div>
       </div>
 
@@ -84,7 +84,10 @@ export default function UnderSlider() {
                   {/* <button className="try-on" type="button"><Video fill="currentColor" aria-hidden="true" />Try on</button> */}
                 </div>
                 <div className="seller-info">
-                  <div className="seller-line"><strong>{product.price}</strong><span><Star fill="currentColor" aria-hidden="true" /> {product.rating} ({product.reviews})</span></div>
+                  <div className="seller-line">
+                    <strong>{product.price}</strong>
+                    {/* <span><Star fill="currentColor" aria-hidden="true" /> {product.rating} ({product.reviews})</span> */}
+                  </div>
                   <p>{product.shape}</p>
                   {product.delivery && <b className="seller-delivery">Get it as early as Fri, Aug 21</b>}
                   <div className="seller-colors" aria-label="Available colors">
