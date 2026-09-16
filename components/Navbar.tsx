@@ -66,7 +66,7 @@ export default function Navbar() {
                         </div>
                     </section>
                 </div>
-                <Link className="sale-link" href="#sale">🛍 Sale</Link>
+                <Link className="sale-link" href="/all-glasses/on-sale">🛍 Sale</Link>
             </nav>
         </>
     );
