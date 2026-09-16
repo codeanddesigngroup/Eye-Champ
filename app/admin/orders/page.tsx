@@ -91,7 +91,6 @@ export default function OrdersPage() {
             <label><Search size={16} /><input value={query} onChange={event => setQuery(event.target.value)} placeholder="Search order, customer, or email" /></label>
             <select value={payment} onChange={event => setPayment(event.target.value)}><option>All payments</option><option>Paid</option><option>Pending</option><option>Refunded</option></select>
             <select value={fulfillment} onChange={event => setFulfillment(event.target.value)}><option>All fulfillment</option><option>Unfulfilled</option><option>Processing</option><option>Fulfilled</option></select>
-            <button><Filter size={15} /> More filters</button>
           </div>
           {selected.length > 0 && <div className="orders-bulk"><strong>{selected.length} orders selected</strong><button onClick={markSelectedFulfilled} disabled={selected.some(id => updating.includes(id))}>Mark fulfilled</button><button>Print packing slips</button><button>Archive</button><button onClick={() => setSelected([])}>Clear</button></div>}
           {loading && <div className="orders-empty"><p>Loading orders...</p></div>}
