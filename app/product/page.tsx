@@ -45,7 +45,8 @@ export default function ProductPage({databaseProduct}:{databaseProduct?:Database
     const rawDatabaseImages=(selectedFrameColor?frameVariant?.mediaByValue?.[selectedFrameColor]:undefined)??databaseProduct?.media??[];
     const databaseImages=rawDatabaseImages.filter((image,index,images)=>images.findIndex(item=>item.url===image.url)===index);
     const databaseImage=(index:number)=>databaseImages[index%Math.max(databaseImages.length,1)]?.url;
-    const salePrice=Number(databaseProduct?.price??599)*(1-Number(databaseProduct?.discountPercent??0)/100);
+    const originalPrice=Number(databaseProduct?.price??599),discountPercent=Number(databaseProduct?.discountPercent??0),hasDiscount=discountPercent>0;
+    const salePrice=originalPrice*(1-discountPercent/100);
     const hasProductImages=!databaseProduct||databaseImages.length>0;
     const showGallerySlider=!databaseProduct||databaseImages.length>1;
     const outOfStock=Boolean(databaseProduct&&databaseProduct.quantity<=0);
@@ -71,7 +72,8 @@ export default function ProductPage({databaseProduct}:{databaseProduct?:Database
                     <div className="title-row">
                         <div>
                             <small>Starting at</small>
-                            <div className="price">Rs {salePrice.toFixed(2)}</div>
+                            <div className="product-price-line"><div className={`price ${hasDiscount?"discounted":""}`}>Rs {salePrice.toFixed(2)}</div>{hasDiscount&&<span className="original-price">Rs {originalPrice.toFixed(2)}</span>}</div>
+                            {hasDiscount&&<strong className="price-off">{Number.isInteger(discountPercent)?discountPercent:discountPercent.toFixed(1)}% off</strong>}
                         </div>
                         <a className="score" href="#reviews"><Star fill="currentColor" /> <b>4.7</b> <u>221 reviews</u></a>
                     </div>

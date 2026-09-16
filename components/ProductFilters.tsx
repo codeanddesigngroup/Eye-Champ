@@ -19,15 +19,17 @@ type ProductFiltersProps = {
   selected: ProductFilterSelection;
   onToggle: (group: ProductFilterTitle, value: string) => void;
   onHide: () => void;
+  activeOptions?: { collections: string[]; brands: string[] };
 };
 
-export default function ProductFilters({ selected, onToggle, onHide }: ProductFiltersProps) {
+export default function ProductFilters({ selected, onToggle, onHide, activeOptions }: ProductFiltersProps) {
+  const groups = productFilterGroups.map(([title, items]) => [title, title === "Collections" ? activeOptions?.collections ?? [] : title === "Brand" ? activeOptions?.brands ?? [] : items] as const);
   return <aside className="filters open">
     <div className="filters-title">
       <h2>Filters</h2>
       <button className="hide-filters" onClick={onHide}><SlidersHorizontal /><span>Hide Filters</span></button>
     </div>
-    {productFilterGroups.map(([title, items]) => <FilterGroup key={title} title={title} items={items} selected={selected[title] ?? []} onToggle={value => onToggle(title, value)} />)}
+    {groups.map(([title, items]) => <FilterGroup key={title} title={title} items={items} selected={selected[title] ?? []} onToggle={value => onToggle(title, value)} />)}
   </aside>;
 }
 

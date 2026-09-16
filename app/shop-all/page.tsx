@@ -52,8 +52,10 @@ type CatalogQuery = Partial<Record<"gender"|"collection"|"shape"|"material"|"bra
 export default function ShopAll({categorySlug="",subcategorySlug="",catalogTitle="The A-List Collection",catalogQuery={}}:{categorySlug?:string;subcategorySlug?:string;catalogTitle?:string;catalogQuery?:CatalogQuery}) {
   const [filtersOpen, setFiltersOpen] = useState(true), [sort, setSort] = useState("Relevance"), [filters, setFilters] = useState<ProductFilterSelection>({}), [faq, setFaq] = useState<number | null>(null), [density, setDensity] = useState<"roomy" | "compact">("compact");
   const [products, setProducts] = useState<Product[]>([]), [loading, setLoading] = useState(true), [loadError, setLoadError] = useState("");
+  const [activeOptions, setActiveOptions] = useState<{collections:string[];brands:string[]}>({ collections:[], brands:[] });
   const catalogQueryString=new URLSearchParams(catalogQuery as Record<string,string>).toString();
   useEffect(() => { const params=new URLSearchParams(catalogQueryString);if(categorySlug){params.set("category",categorySlug);params.set("subcategory",subcategorySlug)}const query=params.size?`?${params.toString()}`:""; fetch(`/api/products${query}`, { cache: "no-store" }).then(async response => { const result = await response.json() as { products?: Product[]; error?: string }; if (!response.ok) throw new Error(result.error); setProducts(result.products ?? []) }).catch(error => setLoadError(error instanceof Error ? error.message : "Could not load products.")).finally(() => setLoading(false)) }, [categorySlug,subcategorySlug,catalogQueryString]);
+  useEffect(() => { fetch("/api/products/categories/navigation", { cache:"no-store" }).then(async response => { const result = await response.json() as { collections?:string[]; brands?:string[] }; if (!response.ok) throw new Error(); setActiveOptions({ collections:result.collections ?? [], brands:result.brands ?? [] }) }).catch(() => setActiveOptions({ collections:[], brands:[] })) }, []);
   const visible = useMemo(() => {
     const matches=(values:string[]|undefined,value:string|null|undefined)=>!values?.length||(value?values.some(item=>item.toLowerCase()===value.toLowerCase()):false);
     const matchesAny=(selected:string[]|undefined,values:string[])=>!selected?.length||selected.some(item=>values.some(value=>value.toLowerCase()===item.toLowerCase()));
@@ -97,7 +99,7 @@ export default function ShopAll({categorySlug="",subcategorySlug="",catalogTitle
     </section>
 
     <div className={`plp-body ${filtersOpen ? "" : "filters-hidden"}`}>
-      {filtersOpen && <ProductFilters selected={filters} onToggle={toggleFilter} onHide={() => setFiltersOpen(false)} />}
+      {filtersOpen && <ProductFilters selected={filters} onToggle={toggleFilter} onHide={() => setFiltersOpen(false)} activeOptions={activeOptions} />}
 
       <section className={`plp-grid ${density}`}>
         {loading && <p>Loading products...</p>}

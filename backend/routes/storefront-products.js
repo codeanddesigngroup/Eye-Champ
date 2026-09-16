@@ -59,8 +59,12 @@ storefrontProductsRouter.get("/", async (request, response, next) => {
 
 storefrontProductsRouter.get("/categories/navigation", async (_request, response, next) => {
   try {
-    const { rows } = await pool.query(`SELECT id::text, name, slug, parent_id::text AS "parentId"
-      FROM categories WHERE status='Active' ORDER BY parent_id NULLS FIRST, created_at ASC`);
-    response.json({ categories: rows });
+    const [categoryResult, collectionResult, brandResult] = await Promise.all([
+      pool.query(`SELECT id::text, name, slug, parent_id::text AS "parentId"
+        FROM categories WHERE status='Active' ORDER BY parent_id NULLS FIRST, created_at ASC`),
+      pool.query("SELECT name FROM collections WHERE status='Active' ORDER BY name ASC"),
+      pool.query("SELECT name FROM brands WHERE status='Active' ORDER BY name ASC"),
+    ]);
+    response.json({ categories: categoryResult.rows, collections: collectionResult.rows.map(item => item.name), brands: brandResult.rows.map(item => item.name) });
   } catch (error) { next(error); }
 });

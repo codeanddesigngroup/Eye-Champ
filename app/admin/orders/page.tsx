@@ -17,6 +17,7 @@ export default function OrdersPage() {
   const [query, setQuery] = useState("");
   const [payment, setPayment] = useState("All payments");
   const [fulfillment, setFulfillment] = useState("All fulfillment");
+  const [dateRange, setDateRange] = useState("All dates");
   const [selected, setSelected] = useState<string[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -34,11 +35,14 @@ export default function OrdersPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const shown = useMemo(() => orders.filter(order =>
-    (payment === "All payments" || order.payment === payment) &&
-    (fulfillment === "All fulfillment" || order.fulfillment === fulfillment) &&
-    `${order.orderNumber} ${order.customer} ${order.email}`.toLowerCase().includes(query.toLowerCase())
-  ), [orders, query, payment, fulfillment]);
+  const shown = useMemo(() => orders.filter(order => {
+    const created = new Date(order.createdAt), now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const dateMatches = dateRange === "All dates" || (dateRange === "Today" ? created >= startOfToday : created >= new Date(now.getTime() - Number(dateRange === "Last 7 days" ? 7 : 30) * 24 * 60 * 60 * 1000));
+    return (payment === "All payments" || order.payment === payment) &&
+      (fulfillment === "All fulfillment" || order.fulfillment === fulfillment) && dateMatches &&
+      `${order.orderNumber} ${order.customer} ${order.email}`.toLowerCase().includes(query.toLowerCase());
+  }), [orders, query, payment, fulfillment, dateRange]);
   const counts = {
     unfulfilled: orders.filter(order => order.fulfillment === "Unfulfilled").length,
     processing: orders.filter(order => order.fulfillment === "Processing").length,
@@ -87,7 +91,7 @@ export default function OrdersPage() {
             <button className={fulfillment === "Unfulfilled" ? "active" : ""} onClick={() => setFulfillment("Unfulfilled")}>Unfulfilled <span>{counts.unfulfilled}</span></button>
             <button className={fulfillment === "Processing" ? "active" : ""} onClick={() => setFulfillment("Processing")}>Processing <span>{counts.processing}</span></button>
             <button className={fulfillment === "Fulfilled" ? "active" : ""} onClick={() => setFulfillment("Fulfilled")}>Fulfilled <span>{counts.fulfilled}</span></button>
-          </div><button><CalendarDays size={15} /> All dates <ChevronDown size={14} /></button></div>
+          </div><label className="orders-date-filter"><CalendarDays size={15} /><select value={dateRange} onChange={event => setDateRange(event.target.value)} aria-label="Filter orders by date"><option>All dates</option><option>Today</option><option>Last 7 days</option><option>Last 30 days</option></select><ChevronDown size={14}/></label></div>
           <div className="orders-tools">
             <label><Search size={16} /><input value={query} onChange={event => setQuery(event.target.value)} placeholder="Search order, customer, or email" /></label>
             <select value={payment} onChange={event => setPayment(event.target.value)}><option>All payments</option><option>Paid</option><option>Pending</option><option>Refunded</option></select>
@@ -99,7 +103,7 @@ export default function OrdersPage() {
           {!loading && !error && <div className="orders-table"><table><thead><tr><th><input type="checkbox" checked={shown.length > 0 && selected.length === shown.length} onChange={event => setSelected(event.target.checked ? shown.map(order => order.id) : [])} /></th><th>Order</th><th>Date</th><th>Customer</th><th>Payment</th><th>Fulfillment</th><th>Items</th><th>Payment method</th><th>Total</th><th /></tr></thead><tbody>
             {shown.map(order => { const created = new Date(order.createdAt), isUpdating = updating.includes(order.id); return <tr key={order.id}><td><input type="checkbox" checked={selected.includes(order.id)} onChange={() => toggle(order.id)} /></td><td><Link className="order-id" href={`/admin/orders/${order.id}`}>{order.orderNumber}</Link></td><td><div className="order-date"><span>{created.toLocaleDateString("en-US", { month:"short", day:"numeric", year:"numeric" })}</span><small>{created.toLocaleTimeString("en-US", { hour:"numeric", minute:"2-digit" })}</small></div></td><td><div className="order-customer"><span>{initials(order.customer)}</span><div><strong>{order.customer}</strong><small>{order.email}</small></div></div></td><td><select className={`order-status-select ${order.payment.toLowerCase()}`} aria-label={`Payment status for ${order.orderNumber}`} value={order.payment} disabled={isUpdating} onChange={event => updateOrder(order.id, { payment:event.target.value })}><option>Pending</option><option>Paid</option><option>Refunded</option></select></td><td><select className={`order-status-select ${order.fulfillment.toLowerCase()}`} aria-label={`Fulfillment status for ${order.orderNumber}`} value={order.fulfillment} disabled={isUpdating} onChange={event => updateOrder(order.id, { fulfillment:event.target.value })}><option>Unfulfilled</option><option>Processing</option><option>Fulfilled</option><option>Cancelled</option></select></td><td>{order.items} {order.items === 1 ? "item" : "items"}</td><td>{order.paymentMethod}</td><td><strong>Rs {Number(order.total).toLocaleString()}</strong></td><td><Link className="order-row-action" href={`/admin/orders/${order.id}`} aria-label={`View ${order.orderNumber}`}><MoreHorizontal size={18} /></Link></td></tr> })}
           </tbody></table></div>}
-          {!loading && !error && shown.length === 0 && <div className="orders-empty"><ShoppingBag size={32} /><h2>No orders found</h2><p>Try adjusting your search or filters.</p><button onClick={() => { setQuery(""); setPayment("All payments"); setFulfillment("All fulfillment"); }}>Clear filters</button></div>}
+          {!loading && !error && shown.length === 0 && <div className="orders-empty"><ShoppingBag size={32} /><h2>No orders found</h2><p>Try adjusting your search or filters.</p><button onClick={() => { setQuery(""); setPayment("All payments"); setFulfillment("All fulfillment"); setDateRange("All dates"); }}>Clear filters</button></div>}
           <div className="orders-pagination"><span>Showing {shown.length ? 1 : 0}–{shown.length} of {orders.length} orders</span><div><button disabled>←</button><button className="active">1</button><button disabled>→</button></div></div>
         </section>
       </div>

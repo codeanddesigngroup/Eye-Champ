@@ -1636,6 +1636,31 @@ svg.live-lens-tint .lens-shine.right {
     font-weight: 800
 }
 
+.product-price-line {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    margin-top: 4px
+}
+
+.price.discounted {
+    color: #c50000
+}
+
+.original-price {
+    color: #555;
+    font-size: 13px;
+    line-height: 1.1;
+    text-decoration: line-through
+}
+
+.price-off {
+    display: block;
+    margin-top: 3px;
+    color: #c50000;
+    font-size: 13px
+}
+
 .score {
     display: flex;
     align-items: center;

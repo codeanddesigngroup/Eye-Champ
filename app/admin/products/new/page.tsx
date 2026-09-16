@@ -11,8 +11,8 @@ import { showAuthToast } from "@/components/AuthToast";
 import "./new-product.css";
 
 type Media = { name: string; url: string };
-type CategoryOption = { id: string; name: string; parentId: string | null };
-type NamedOption = { name: string };
+type CategoryOption = { id: string; name: string; parentId: string | null; status: string };
+type NamedOption = { name: string; status: string };
 type VariantOption = {
   id: number;
   name: string;
@@ -69,7 +69,7 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
       .then(async (response) => {
         const result = await response.json() as { categories?: CategoryOption[]; error?: string };
         if (!response.ok) throw new Error(result.error);
-        setCategoryOptions(result.categories ?? []);
+        setCategoryOptions((result.categories ?? []).filter((category) => category.status === "Active"));
       })
       .catch(() => showAuthToast({ message: "Could not load product categories.", type: "error" }));
   }, []);
@@ -82,8 +82,8 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
       const collectionsResult = await collectionsResponse.json() as { collections?: NamedOption[]; error?: string };
       const brandsResult = await brandsResponse.json() as { brands?: NamedOption[]; error?: string };
       if (!collectionsResponse.ok || !brandsResponse.ok) throw new Error(collectionsResult.error || brandsResult.error);
-      setCollectionOptions((collectionsResult.collections ?? []).map((collection) => collection.name));
-      setBrandOptions((brandsResult.brands ?? []).map((brand) => brand.name));
+      setCollectionOptions((collectionsResult.collections ?? []).filter((collection) => collection.status === "Active").map((collection) => collection.name));
+      setBrandOptions((brandsResult.brands ?? []).filter((brand) => brand.status === "Active").map((brand) => brand.name));
     }).catch(() => showAuthToast({ message: "Could not load collections or brands.", type: "error" }));
   }, []);
 
