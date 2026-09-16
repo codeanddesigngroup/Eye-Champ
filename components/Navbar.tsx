@@ -55,7 +55,12 @@ export default function Navbar() {
                         <section className="mega-menu" aria-label={`${main.name} menu`}><div className="mega-inner">
                             <div className="mega-column">
                                 <b>{main.name}</b>
-                                <Link href={`/${main.slug}/all`}>All {main.name.toLowerCase()}</Link>{children.map(child => <Link href={`/${main.slug}/${child.slug}`} key={child.id}>{child.name}</Link>)} 
+                                <Link href={`/${main.slug}/all`}>All {main.name.toLowerCase()}</Link>
+                                {children.map(child => <Link href={`/${main.slug}/${child.slug}`} key={child.id}>{child.name}</Link>)}
+                                {(["eyeglasses", "sunglasses"].includes(main.slug) || ["eyeglasses", "sunglasses"].includes(main.name.toLowerCase())) && <>
+                                    {!children.some(child => child.slug === "new-arrivals") && <Link href={`/${main.slug}/new-arrivals`}>New arrivals</Link>}
+                                    {!children.some(child => child.slug === "under-5000") && <Link href={`/${main.slug}/under-5000`}>Under 5000</Link>}
+                                </>}
                             </div>
                             <MegaMenuSlider />
                         </div></section>
