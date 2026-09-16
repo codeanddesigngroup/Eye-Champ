@@ -317,20 +317,34 @@
 
 .plp-prices {
   display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 5px 8px
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
 }
 
-.plp-prices del {
-  color: #839095;
-  font-size: 12px
+.plp-price-current {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px;
+  line-height: 1.25;
+}
+
+.plp-price-current b {
+  color: #111;
+  font-size: 18px;
+}
+
+.plp-price-was {
+  color: #606568;
+  font-size: 14px;
+  line-height: 1.4;
 }
 
 .plp-prices small {
-  color: #c8453d;
-  font-size: 10px;
-  font-weight: 800
+  color: #d00000;
+  font-size: 18px;
+  font-weight: 700;
 }
 
 .plp-stock-badge {
