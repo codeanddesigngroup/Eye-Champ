@@ -58,7 +58,7 @@ export default function CheckoutPage() {
             <label>Email<input name="email" type="email" required /></label>
             <label>Phone<input name="phone" required /></label>
             <label>City<input name="city" required /></label>
-            <label className="wide">Address<textarea name="address" required /></label>
+            <label>Address<textarea name="address" required /></label>
             <label>Postal code<input name="postalCode" required /></label>
           </div>
         </section>

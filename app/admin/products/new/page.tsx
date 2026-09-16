@@ -8,6 +8,7 @@ import { AlignCenter, AlignJustify, AlignLeft, AlignRight, ArrowLeft, Bold, Imag
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { showAuthToast } from "@/components/AuthToast";
+import useProductDraft from "@/components/admin/useProductDraft";
 import "./new-product.css";
 
 type Media = { name: string; url: string };
@@ -87,10 +88,32 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
     }).catch(() => showAuthToast({ message: "Could not load collections or brands.", type: "error" }));
   }, []);
 
+  const readPayload = () => {
+    const form = document.getElementById("new-product-form") as HTMLFormElement | null;
+    if (!form) return null;
+    const data = new FormData(form);
+    return {
+      title: String(data.get("title") || ""), description,
+      price: String(data.get("price") || ""), discountPercent: String(data.get("discountPercent") || "0"),
+      taxable: false, sku: String(data.get("sku") || ""), barcode: "",
+      trackQuantity: true, quantity: String(data.get("quantity") || "0"), continueSelling: false,
+      shape: String(data.get("shape") || ""), material: String(data.get("material") || ""), rim: String(data.get("rim") || ""), fit: String(data.get("fit") || ""),
+      weight: String(data.get("weight") || ""), feature: String(data.get("feature") || ""),
+      measurements: { lensWidth: data.get("lens-width"), bridge: data.get("bridge"), templeLength: data.get("temple-length"), lensHeight: data.get("lens-height") },
+      lensCompatibility: data.getAll("lensCompatibility").map(String), variants: variants.map(({ id, name, values }) => ({ name, values, mediaByValue: Object.fromEntries(values.map((value) => [value, variantMedia[`${id}:${value}`] ?? []])) })),
+      status, genders: data.getAll("gender").map(String), categories: data.getAll("category").map(String),
+      subcategories: data.getAll("subCategory").map(String), collections: data.getAll("collections").map(String), brands: data.getAll("brands").map(String),
+      tags: String(data.get("tags") || "").split(",").map((tag) => tag.trim()).filter(Boolean),
+      media: Object.values(variantMedia).flat().slice(0, 1).map(item => ({ name: item.name, url: item.url, primary: true })),
+    };
+  };
+  const draft = useProductDraft(!editId, readPayload);
+
   const save = async (statusOverride?: "Draft") => {
     const form = document.getElementById("new-product-form") as HTMLFormElement | null;
     if (!form || saving) return;
     const data = new FormData(form);
+    if ((statusOverride ?? status) !== "Draft") {
     const missingGroup = [["gender", "Gender"], ["category", "Category"], ["subCategory", "Sub category"]].find(([name]) => data.getAll(name).length === 0);
     if (missingGroup) {
       showAuthToast({ message: `Select at least one ${missingGroup[1].toLowerCase()}.`, type: "error" });
@@ -104,26 +127,18 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
       return;
     }
     if (!form.reportValidity()) return;
-    const payload = {
-      title: String(data.get("title") || ""), description,
-      price: String(data.get("price") || ""), discountPercent: String(data.get("discountPercent") || "0"),
-      taxable: false, sku: String(data.get("sku") || ""), barcode: "",
-      trackQuantity: true, quantity: String(data.get("quantity") || "0"), continueSelling: false,
-      shape: String(data.get("shape") || ""), material: String(data.get("material") || ""), rim: String(data.get("rim") || ""), fit: String(data.get("fit") || ""),
-      weight: String(data.get("weight") || ""), feature: String(data.get("feature") || ""),
-      measurements: { lensWidth: data.get("lens-width"), bridge: data.get("bridge"), templeLength: data.get("temple-length"), lensHeight: data.get("lens-height") },
-      lensCompatibility: data.getAll("lensCompatibility").map(String), variants: variants.map(({ id, name, values }) => ({ name, values, mediaByValue: Object.fromEntries(values.map((value) => [value, variantMedia[`${id}:${value}`] ?? []])) })),
-      status: statusOverride ?? status, genders: data.getAll("gender").map(String), categories: data.getAll("category").map(String),
-      subcategories: data.getAll("subCategory").map(String), collections: data.getAll("collections").map(String), brands: data.getAll("brands").map(String),
-      tags: String(data.get("tags") || "").split(",").map((tag) => tag.trim()).filter(Boolean),
-      media: Object.values(variantMedia).flat().slice(0, 1).map(item => ({ name: item.name, url: item.url, primary: true })),
-    };
+    }
+    const payload = readPayload();
+    if (!payload) return;
+    payload.status = statusOverride ?? status;
     setSaving(true);
     try {
-      const response = await fetch(editId ? `/api/admin/products/${editId}` : "/api/admin/products", { method: editId ? "PATCH" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+      const productId = editId || await draft.flush();
+      const response = await fetch(productId ? `/api/admin/products/${productId}` : "/api/admin/products", { method: productId ? "PATCH" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
       const result = await response.json() as { product?: { id: string }; error?: string };
       if (!response.ok) throw new Error(result.error || "Could not save product.");
       showAuthToast({ message: statusOverride === "Draft" ? "Product saved as draft." : "Product added successfully.", type: "success" });
+      draft.finish();
       router.push("/admin/products");
     } catch (error) { showAuthToast({ message: error instanceof Error ? error.message : "Could not save product.", type: "error" }); }
     finally { setSaving(false); }
@@ -206,10 +221,11 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
                 <ArrowLeft size={16} /> Products
               </Link>
               <h1>{editId ? "Edit product" : "Add new product"}</h1>
+              {!editId && draft.message && <p role="status" aria-live="polite">{draft.message}</p>}
               <p>Create a frame using the details shown on the product page.</p>
             </div>
             <div>
-              <Link href="/admin/products">Discard</Link>
+              <Link href="/admin/products">{editId ? "Discard" : "Close"}</Link>
               <button type="button" className="np-draft" onClick={() => save("Draft")} disabled={saving}>
                 {saving ? "Saving..." : "Save as draft"}
               </button>
@@ -219,7 +235,7 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
             </div>
           </div>
           <form
-            id="new-product-form"
+            id="new-product-form" noValidate
             onSubmit={(event) => {
               event.preventDefault();
               save();
