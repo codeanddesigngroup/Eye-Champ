@@ -6,6 +6,9 @@ import AuthToast from "@/components/AuthToast";
 export const metadata: Metadata = {
   title: "Eye Champ | Eyewear for Everyone",
   description: "Shop eyeglasses, sunglasses and premium frames for every style.",
+  icons: {
+    icon: { url: "/favicon.webp", type: "image/webp" },
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
