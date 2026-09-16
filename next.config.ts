@@ -11,6 +11,12 @@ const nextConfig: NextConfig = {
       { source: "/uploads/:path*", destination: `${backend}/uploads/:path*` },
     ];
   },
+  async redirects() {
+    return [
+      { source: "/all-men-glasses", destination: "/all-glasses/men", permanent: false },
+      { source: "/all-women-glasses", destination: "/all-glasses/women", permanent: false },
+    ];
+  },
 };
 
 export default nextConfig;

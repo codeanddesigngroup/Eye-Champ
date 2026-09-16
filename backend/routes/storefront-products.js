@@ -19,6 +19,13 @@ storefrontProductsRouter.get("/", async (request, response, next) => {
     const categorySlug = String(request.query.category ?? "").trim();
     const subcategorySlug = String(request.query.subcategory ?? "").trim();
     const gender = String(request.query.gender ?? "").trim();
+    const collection = String(request.query.collection ?? "").trim();
+    const shape = String(request.query.shape ?? "").trim();
+    const material = String(request.query.material ?? "").trim();
+    const brand = String(request.query.brand ?? "").trim();
+    const rim = String(request.query.rim ?? "").trim();
+    const maxPrice = Math.max(0, Number(request.query.maxPrice) || 0);
+    const onSale = String(request.query.onSale ?? "") === "true";
     let categoryName = "", subcategoryName = "";
     if (categorySlug) {
       const { rows: categoryRows } = await pool.query("SELECT id, name FROM categories WHERE slug=$1 AND parent_id IS NULL AND status='Active'", [categorySlug]);
@@ -38,7 +45,14 @@ storefrontProductsRouter.get("/", async (request, response, next) => {
       AND ($1 = '' OR p.categories ? $1)
       AND ($2 = '' OR p.subcategories ? $2)
       AND ($3 = '' OR EXISTS (SELECT 1 FROM jsonb_array_elements_text(p.genders) AS product_gender WHERE LOWER(product_gender) = LOWER($3)))
-      ORDER BY p.created_at DESC`, [categoryName, subcategoryName, gender]);
+      AND ($4 = '' OR EXISTS (SELECT 1 FROM jsonb_array_elements_text(p.collections) AS product_collection WHERE LOWER(product_collection) = LOWER($4)))
+      AND ($5 = '' OR LOWER(COALESCE(p.shape, '')) = LOWER($5))
+      AND ($6 = '' OR LOWER(COALESCE(p.material, '')) = LOWER($6))
+      AND ($7 = '' OR EXISTS (SELECT 1 FROM jsonb_array_elements_text(p.brands) AS product_brand WHERE LOWER(product_brand) = LOWER($7)))
+      AND ($8 = '' OR LOWER(COALESCE(p.rim, '')) = LOWER($8))
+      AND ($9::float = 0 OR p.price <= $9::float)
+      AND (NOT $10::boolean OR p.discount_percent > 0)
+      ORDER BY p.created_at DESC`, [categoryName, subcategoryName, gender, collection, shape, material, brand, rim, maxPrice, onSale]);
     response.json({ products: rows, category: categoryName || null, subcategory: subcategoryName || null });
   } catch (error) { next(error); }
 });
