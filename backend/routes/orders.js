@@ -33,6 +33,23 @@ ordersRouter.get("/", async (_request, response, next) => {
   }
 });
 
+ordersRouter.get("/:id", async (request, response, next) => {
+  try {
+    if (!/^\d+$/.test(request.params.id)) return response.status(400).json({ error: "Invalid order ID." });
+    const { rows } = await pool.query(`
+      SELECT id::text, order_number AS "orderNumber", customer_name AS customer, email, phone,
+        address, city, postal_code AS "postalCode", items, subtotal::float AS total,
+        payment_status AS payment, fulfillment_status AS fulfillment,
+        payment_method AS "paymentMethod", created_at AS "createdAt"
+      FROM orders WHERE id=$1
+    `, [request.params.id]);
+    if (!rows[0]) return response.status(404).json({ error: "Order not found." });
+    response.json({ order: rows[0] });
+  } catch (error) {
+    next(error);
+  }
+});
+
 ordersRouter.patch("/:id", async (request, response, next) => {
   try {
     const payment = request.body?.payment;

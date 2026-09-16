@@ -7,7 +7,16 @@ categoriesRouter.use(requireAdmin);
 
 const fields = `
   SELECT c.id::text, c.name, c.slug, c.parent_id::text AS "parentId", c.description,
-         c.product_count AS products, c.status, c.type, c.image_url AS image,
+         (SELECT COUNT(*)::int FROM products p WHERE
+           (c.parent_id IS NULL AND EXISTS (
+             SELECT 1 FROM jsonb_array_elements_text(p.categories) product_category
+             WHERE LOWER(product_category)=LOWER(c.name)
+           )) OR
+           (c.parent_id IS NOT NULL AND EXISTS (
+             SELECT 1 FROM jsonb_array_elements_text(p.subcategories) product_subcategory
+             WHERE LOWER(product_subcategory)=LOWER(c.name)
+           ))) AS products,
+         c.status, c.type, c.image_url AS image,
          TO_CHAR(c.updated_at, 'Mon DD, YYYY') AS updated
   FROM categories c`;
 const validStatus = new Set(["Active", "Draft"]);

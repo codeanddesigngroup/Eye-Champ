@@ -7,11 +7,15 @@ brandsRouter.use(requireAdmin);
 
 const validStatus = new Set(["Active", "Draft"]);
 const slugify = (value) => value.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-const fields = `SELECT id::text, name, slug, description, product_count AS products, status,
-  featured, origin, image_url AS image, TO_CHAR(updated_at, 'Mon DD, YYYY') AS updated FROM brands`;
+const fields = `SELECT b.id::text, b.name, b.slug, b.description,
+  (SELECT COUNT(*)::int FROM products p
+    WHERE EXISTS (SELECT 1 FROM jsonb_array_elements_text(p.brands) product_brand
+      WHERE LOWER(product_brand)=LOWER(b.name))) AS products,
+  b.status, b.featured, b.origin, b.image_url AS image,
+  TO_CHAR(b.updated_at, 'Mon DD, YYYY') AS updated FROM brands b`;
 
 brandsRouter.get("/", async (_request, response, next) => {
-  try { const { rows } = await pool.query(`${fields} ORDER BY updated_at DESC`); response.json({ brands: rows }); }
+  try { const { rows } = await pool.query(`${fields} ORDER BY b.updated_at DESC`); response.json({ brands: rows }); }
   catch (error) { next(error); }
 });
 
