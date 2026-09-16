@@ -75,9 +75,10 @@ export default function Home() {
         <div>
           <h2>BUY ONE,<br />GET ONE 20% OFF</h2>
           <p>Use code <b>GET20</b></p>
-          <Link className="btn" href="/product">SHOP NOW</Link>
+          <Link className="btn" href="/all-glasses">SHOP NOW</Link>
         </div>
       </section>
+      
       <section className="shape-shop">
         <div className="section-title left">
           <h2>SHOP BY FRAME SHAPE</h2>

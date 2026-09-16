@@ -7,7 +7,7 @@ const catalogs = {
   women: { title: "Women's Glasses", query: { gender: "Women" } },
   "under-5000": { title: "Glasses Under Rs. 5000", query: { maxPrice: "5000" } },
   "new-arrivals": { title: "New Arrivals", query: { collection: "New Arrivals" } },
-  "best-sellers": { title: "Best Sellers", query: { collection: "Best Sellers" } },
+  "best-sellers": { title: "All Best Sellers", query: { collection: "Best Sellers" } },
   "top-rated": { title: "Top Rated Glasses", query: { collection: "Top Rated" } },
   rectangle: { title: "Rectangle Glasses", query: { shape: "Rectangle" } },
   "mix-material": { title: "Mix Material Glasses", query: { material: "Mix Material" } },

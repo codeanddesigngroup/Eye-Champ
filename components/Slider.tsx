@@ -43,7 +43,7 @@ export default function Slider() {
           </div>
         </div>
         <div className="best-sellers-actions">
-          <Link href="/shop-all" className="best-sellers-shop">Shop all</Link>
+          <Link href="/all-glasses/best-sellers" className="best-sellers-shop">Shop all</Link>
         </div>
       </div>
 
