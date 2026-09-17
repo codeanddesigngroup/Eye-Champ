@@ -8,11 +8,15 @@ collectionsRouter.use(requireAdmin);
 const validStatus = new Set(["Active", "Draft"]);
 const validMethod = new Set(["Smart", "Manual"]);
 const slugify = (value) => value.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-const fields = `SELECT id::text, name, slug, description, product_count AS products, status,
-  method, image_url AS image, rule, TO_CHAR(updated_at, 'Mon DD, YYYY') AS updated FROM collections`;
+const fields = `SELECT c.id::text, c.name, c.slug, c.description,
+  (SELECT COUNT(*)::int FROM products p
+    WHERE EXISTS (SELECT 1 FROM jsonb_array_elements_text(p.collections) product_collection
+      WHERE LOWER(product_collection)=LOWER(c.name))) AS products,
+  c.status, c.method, c.image_url AS image, c.rule,
+  TO_CHAR(c.updated_at, 'Mon DD, YYYY') AS updated FROM collections c`;
 
 collectionsRouter.get("/", async (_request, response, next) => {
-  try { const { rows } = await pool.query(`${fields} ORDER BY updated_at DESC`); response.json({ collections: rows }); }
+  try { const { rows } = await pool.query(`${fields} ORDER BY c.updated_at DESC`); response.json({ collections: rows }); }
   catch (error) { next(error); }
 });
 
