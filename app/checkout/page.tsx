@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useState, type FormEvent } from "react";
 import "./checkout.css";
 
-type Item = { id: string; productId?: string; name: string; frameColor: string; framePrice: number; lensPrice: number; quantity: number; [key: string]: unknown };
+type Item = { id: string; productId?: string; name: string; frameColor: string; framePrice: number; lensPrice: number; quantity: number;[key: string]: unknown };
 
 export default function CheckoutPage() {
   const [items, setItems] = useState<Item[]>([]);

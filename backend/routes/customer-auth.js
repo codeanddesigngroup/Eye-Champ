@@ -21,6 +21,9 @@ function mailer() {
     port,
     secure: process.env.SMTP_SECURE === "true" || port === 465,
     auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 15000,
   });
 }
 
@@ -47,7 +50,8 @@ customerAuthRouter.post("/request-otp", requestLimiter, async (request, response
       });
     } catch (error) {
       await pool.query("DELETE FROM customer_otp_challenges WHERE id=$1", [id]);
-      throw error;
+      console.error("Customer OTP email delivery failed", { code: error.code, command: error.command, responseCode: error.responseCode });
+      return response.status(503).json({ error: "Verification email could not be sent. Check the SMTP email and app password, then try again." });
     }
     response.json({ challengeId: id, email, expiresIn: 600 });
   } catch (error) { next(error); }
@@ -93,6 +97,18 @@ customerAuthRouter.post("/logout", async (request, response, next) => {
   try {
     const token = request.cookies[cookieName];
     if (token) await pool.query("DELETE FROM customer_sessions WHERE token_hash=$1", [hash(token)]);
+    response.clearCookie(cookieName, { path: "/" });
+    response.json({ ok: true });
+  } catch (error) { next(error); }
+});
+
+customerAuthRouter.post("/logout-all", async (request, response, next) => {
+  try {
+    const token = request.cookies[cookieName];
+    if (token) {
+      const session = await pool.query("SELECT email FROM customer_sessions WHERE token_hash=$1 AND expires_at>NOW()", [hash(token)]);
+      if (session.rows[0]) await pool.query("DELETE FROM customer_sessions WHERE email=$1", [session.rows[0].email]);
+    }
     response.clearCookie(cookieName, { path: "/" });
     response.json({ ok: true });
   } catch (error) { next(error); }

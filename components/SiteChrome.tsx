@@ -11,7 +11,7 @@ import Topbar from "./Topbar";
 export default function SiteChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isLensSelection = pathname === "/product/select-lenses" || pathname.endsWith("/select-lenses");
-  const isCustomerLogin = pathname === "/login";
+  const isCustomerLogin = pathname === "/login" || pathname === "/profile";
   const hideChrome = isLensSelection || isCustomerLogin;
 
   return <>
