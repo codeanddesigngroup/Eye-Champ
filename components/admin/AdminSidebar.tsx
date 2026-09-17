@@ -14,7 +14,7 @@ const seenOrdersKey = "eye-champ-seen-order-count";
 const workspaceItems = [
   { label: "Overview", icon: Grid2X2, href: "/admin" },
   { label: "Orders", icon: ShoppingBag, href: "/admin/orders" },
-  { label: "Inventory", icon: Boxes, href: "/admin/inventory", badge: "4" },
+  { label: "Inventory", icon: Boxes, href: "/admin/inventory", badge: "" },
   { label: "Categories", icon: Layers3, href: "/admin/categories" },
   { label: "Collections", icon: LibraryBig, href: "/admin/collections" },
   { label: "Brands", icon: BadgeCheck, href: "/admin/brands" },
