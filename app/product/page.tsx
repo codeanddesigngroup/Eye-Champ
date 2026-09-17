@@ -29,12 +29,13 @@ function ProductImage({ view, className = "", src, database = false }: { view: s
 }
 function Rating({ value = 5 }: { value?: number }) { return <span className="stars">{[1, 2, 3, 4, 5].map(i => <Star key={i} fill={i <= value ? "currentColor" : "#c7d2d5"} color={i <= value ? "currentColor" : "#c7d2d5"} />)}</span> }
 function productColor(value:string){const normalized=value.toLowerCase().trim(),colors:Record<string,string>={black:"#111111",white:"#ffffff",blue:"#2158a6",navy:"#172d55",brown:"#795036",clear:"#eef4f4",transparent:"#eef4f4",gray:"#80878a",grey:"#80878a",silver:"#aeb7ba",red:"#ae4040",green:"#427055",pink:"#dc86a5",purple:"#744f91",orange:"#dc7b35",yellow:"#e5c642",gold:"#b79a53",cream:"#eee1bd","rose gold":"#b98276",tortoise:"radial-gradient(circle at 70% 25%,#edb02d 0 18%,#2a1708 23% 48%,#aa6819 52%)",tortoiseshell:"radial-gradient(circle at 70% 25%,#edb02d 0 18%,#2a1708 23% 48%,#aa6819 52%)",rainbow:"conic-gradient(#e44,#ec3,#4a6,#39d,#85c,#e44)",multicolor:"conic-gradient(#e44,#ec3,#4a6,#39d,#85c,#e44)",pattern:"repeating-linear-gradient(45deg,#222 0 4px,#ddd 4px 8px)"};if(/^(#[0-9a-f]{3,8}|rgb(a)?\(|hsl(a)?\()/i.test(normalized))return value;return colors[normalized]??"#d9e0e2"}
+const formatMoney=(currency:string,value:number)=>`${currency} ${Number(value||0).toFixed(2)}`;
 
 export default function ProductPage({databaseProduct}:{databaseProduct?:DatabaseProduct}={}) {
     const productSlider = useRef<SwiperInstance | null>(null);
     const photoSlider = useRef<SwiperInstance | null>(null);
     const gallerySlider = useRef<SwiperInstance | null>(null);
-    const [view, setView] = useState("front"), [liked, setLiked] = useState(false), [tab, setTab] = useState("Features"), [color, setColor] = useState(0), [photosOnly, setPhotosOnly] = useState(false), [sideView, setSideView] = useState(false), [sortOpen, setSortOpen] = useState(false), [sortOrder, setSortOrder] = useState("Newest"), [reviewsOpen, setReviewsOpen] = useState(true);
+    const [view, setView] = useState("front"), [liked, setLiked] = useState(false), [tab, setTab] = useState("Features"), [color, setColor] = useState(0), [photosOnly, setPhotosOnly] = useState(false), [sideView, setSideView] = useState(false), [sortOpen, setSortOpen] = useState(false), [sortOrder, setSortOrder] = useState("Newest"), [reviewsOpen, setReviewsOpen] = useState(true), [currency, setCurrency] = useState("PKR");
     const slideProducts = (direction: number) => direction < 0 ? productSlider.current?.slidePrev() : productSlider.current?.slideNext();
     const sortedReviews = [...reviews].sort((a, b) => sortOrder === "Highest rating" ? b[0] - a[0] : sortOrder === "Lowest rating" ? a[0] - b[0] : sortOrder === "Most helpful" ? b[7] - a[7] : 0);
     const frameVariant=databaseProduct?.variants.find(variant=>variant.name.trim().toLowerCase()==="frame color"),frameColors=frameVariant?.values??[];
@@ -51,6 +52,7 @@ export default function ProductPage({databaseProduct}:{databaseProduct?:Database
     const showGallerySlider=!databaseProduct||databaseImages.length>1;
     const outOfStock=Boolean(databaseProduct&&databaseProduct.quantity<=0);
     useEffect(()=>{if(!databaseProduct)return;const refresh=()=>setLiked(getFavorites().some(item=>item.id===databaseProduct.id));refresh();window.addEventListener(favoritesUpdatedEvent,refresh);return()=>window.removeEventListener(favoritesUpdatedEvent,refresh)},[databaseProduct]);
+    useEffect(()=>{fetch("/api/products/settings",{cache:"no-store"}).then(async response=>{const result=await response.json() as {currency?:string};if(response.ok&&result.currency)setCurrency(result.currency)}).catch(()=>undefined)},[]);
     const toggleLiked=()=>{if(!databaseProduct)return setLiked(value=>!value);const slug=(value:string)=>value.toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");setLiked(toggleFavorite({...databaseProduct,price:salePrice,categorySlug:slug(databaseProduct.categories[0]||"shop-all"),subcategorySlug:slug(databaseProduct.subcategories[0]||"all")}))};
     return (
         <main className="pdp productDetails">
@@ -72,7 +74,7 @@ export default function ProductPage({databaseProduct}:{databaseProduct?:Database
                     <div className="title-row">
                         <div>
                             <small>Starting at</small>
-                            <div className="product-price-line"><div className={`price ${hasDiscount?"discounted":""}`}>Rs {salePrice.toFixed(2)}</div>{hasDiscount&&<span className="original-price">Rs {originalPrice.toFixed(2)}</span>}</div>
+                            <div className="product-price-line"><div className={`price ${hasDiscount?"discounted":""}`}>{formatMoney(currency,salePrice)}</div>{hasDiscount&&<span className="original-price">{formatMoney(currency,originalPrice)}</span>}</div>
                             {hasDiscount&&<strong className="price-off">{Number.isInteger(discountPercent)?discountPercent:discountPercent.toFixed(1)}% off</strong>}
                         </div>
                         <a className="score" href="#reviews"><Star fill="currentColor" /> <b>4.7</b> <u>221 reviews</u></a>

@@ -3,6 +3,17 @@ import { pool } from "../db.js";
 
 export const storefrontProductsRouter = Router();
 
+storefrontProductsRouter.get("/settings", async (_request, response, next) => {
+  try {
+    const { rows } = await pool.query("SELECT value FROM store_settings WHERE key='general'");
+    response.json({
+      currency: rows[0]?.value?.currency || "PKR",
+      storeStatus: rows[0]?.value?.storeStatus || "Live",
+      storeName: rows[0]?.value?.storeName || "Eye Champ",
+    });
+  } catch (error) { next(error); }
+});
+
 storefrontProductsRouter.get("/detail/:slug", async (request, response, next) => {
   try {
     const { rows } = await pool.query(`SELECT id::text, title, slug, description, price::float, discount_percent::float AS "discountPercent", quantity,
