@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Heart, SlidersHorizontal, Star } from "lucide-react";
 import ProductFilters, { type ProductFilterSelection, type ProductFilterTitle } from "@/components/ProductFilters";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { favoritesUpdatedEvent, getFavorites, toggleFavorite } from "@/lib/favorites";
 import "./shop-all.css";
 
@@ -51,10 +52,11 @@ type CatalogQuery = Partial<Record<"gender"|"collection"|"shape"|"material"|"bra
 
 export default function ShopAll({categorySlug="",subcategorySlug="",catalogTitle="The A-List Collection",catalogQuery={}}:{categorySlug?:string;subcategorySlug?:string;catalogTitle?:string;catalogQuery?:CatalogQuery}) {
   const [filtersOpen, setFiltersOpen] = useState(true), [sort, setSort] = useState("Relevance"), [filters, setFilters] = useState<ProductFilterSelection>({}), [faq, setFaq] = useState<number | null>(null), [density, setDensity] = useState<"roomy" | "compact">("compact");
+  const [missing, setMissing] = useState(false);
   const [products, setProducts] = useState<Product[]>([]), [loading, setLoading] = useState(true), [loadError, setLoadError] = useState("");
   const [activeOptions, setActiveOptions] = useState<{collections:string[];brands:string[]}>({ collections:[], brands:[] });
   const catalogQueryString=new URLSearchParams(catalogQuery as Record<string,string>).toString();
-  useEffect(() => { const params=new URLSearchParams(catalogQueryString);if(categorySlug){params.set("category",categorySlug);params.set("subcategory",subcategorySlug)}const query=params.size?`?${params.toString()}`:""; fetch(`/api/products${query}`, { cache: "no-store" }).then(async response => { const result = await response.json() as { products?: Product[]; error?: string }; if (!response.ok) throw new Error(result.error); setProducts(result.products ?? []) }).catch(error => setLoadError(error instanceof Error ? error.message : "Could not load products.")).finally(() => setLoading(false)) }, [categorySlug,subcategorySlug,catalogQueryString]);
+  useEffect(() => { const params=new URLSearchParams(catalogQueryString);if(categorySlug){params.set("category",categorySlug);params.set("subcategory",subcategorySlug)}const query=params.size?`?${params.toString()}`:""; fetch(`/api/products${query}`, { cache: "no-store" }).then(async response => { const result = await response.json() as { products?: Product[]; error?: string }; if (response.status === 404) { setMissing(true); return; } if (!response.ok) throw new Error(result.error); setProducts(result.products ?? []) }).catch(error => setLoadError(error instanceof Error ? error.message : "Could not load products.")).finally(() => setLoading(false)) }, [categorySlug,subcategorySlug,catalogQueryString]);
   useEffect(() => { fetch("/api/products/categories/navigation", { cache:"no-store" }).then(async response => { const result = await response.json() as { collections?:string[]; brands?:string[] }; if (!response.ok) throw new Error(); setActiveOptions({ collections:result.collections ?? [], brands:result.brands ?? [] }) }).catch(() => setActiveOptions({ collections:[], brands:[] })) }, []);
   const visible = useMemo(() => {
     const matches=(values:string[]|undefined,value:string|null|undefined)=>!values?.length||(value?values.some(item=>item.toLowerCase()===value.toLowerCase()):false);
@@ -75,6 +77,7 @@ export default function ShopAll({categorySlug="",subcategorySlug="",catalogTitle
     return list;
   },[products,filters,sort]);
   const toggleFilter=(group:ProductFilterTitle,value:string)=>setFilters(current=>{const values=current[group]??[];return {...current,[group]:values.includes(value)?values.filter(item=>item!==value):[...values,value]}});
+  if (missing) notFound();
   return <main className="plp">
     <section className="plp-hero">
       <div>

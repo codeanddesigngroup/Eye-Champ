@@ -93,7 +93,7 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
     if (!form) return null;
     const data = new FormData(form);
     return {
-      title: String(data.get("title") || ""), description,
+      title: String(data.get("title") || ""), description: form.querySelector(".np-rich-content")?.innerHTML ?? description,
       price: String(data.get("price") || ""), discountPercent: String(data.get("discountPercent") || "0"),
       taxable: false, sku: String(data.get("sku") || ""), barcode: "",
       trackQuantity: true, quantity: String(data.get("quantity") || "0"), continueSelling: false,
@@ -108,6 +108,19 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
     };
   };
   const draft = useProductDraft(!editId, readPayload);
+
+  const leaveCreation = async (event: { preventDefault: () => void }) => {
+    if (editId) return;
+    event.preventDefault();
+    if (saving) return;
+    setSaving(true);
+    try {
+      await draft.saveBeforeLeaving();
+      router.push("/admin/products");
+    } catch {
+      showAuthToast({ message: "Could not save draft. Please retry before leaving.", type: "error" });
+    } finally { setSaving(false); }
+  };
 
   const save = async (statusOverride?: "Draft") => {
     const form = document.getElementById("new-product-form") as HTMLFormElement | null;
@@ -217,7 +230,7 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
         <div className="np-content">
           <div className="np-pagehead">
             <div>
-              <Link href="/admin/products">
+              <Link href="/admin/products" onNavigate={leaveCreation}>
                 <ArrowLeft size={16} /> Products
               </Link>
               <h1>{editId ? "Edit product" : "Add new product"}</h1>
@@ -225,7 +238,7 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
               <p>Create a frame using the details shown on the product page.</p>
             </div>
             <div>
-              <Link href="/admin/products">{editId ? "Discard" : "Close"}</Link>
+              <Link href="/admin/products" onNavigate={leaveCreation}>{editId ? "Discard" : "Close"}</Link>
               <button type="button" className="np-draft" onClick={() => save("Draft")} disabled={saving}>
                 {saving ? "Saving..." : "Save as draft"}
               </button>

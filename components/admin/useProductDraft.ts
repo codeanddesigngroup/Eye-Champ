@@ -87,6 +87,11 @@ export default function useProductDraft(enabled: boolean, read: () => Payload | 
   const actions = useRef({ schedule, flush });
   useLayoutEffect(() => { actions.current = { schedule, flush }; });
 
+  useLayoutEffect(() => {
+    if (!enabled) return;
+    return () => { void actions.current.flush(true).catch(() => {}); };
+  }, [enabled]);
+
   useEffect(() => {
     if (!enabled) return;
     const current = state.current;
@@ -107,12 +112,14 @@ export default function useProductDraft(enabled: boolean, read: () => Payload | 
     form?.addEventListener("input", changed);
     form?.addEventListener("change", changed);
     window.addEventListener("pagehide", leaving);
+    window.addEventListener("popstate", leaving);
     document.addEventListener("visibilitychange", hidden);
     return () => {
       current.mounted = false;
       form?.removeEventListener("input", changed);
       form?.removeEventListener("change", changed);
       window.removeEventListener("pagehide", leaving);
+      window.removeEventListener("popstate", leaving);
       document.removeEventListener("visibilitychange", hidden);
       leaving();
     };
@@ -121,6 +128,7 @@ export default function useProductDraft(enabled: boolean, read: () => Payload | 
   return {
     message,
     flush: () => flush(false, true),
+    saveBeforeLeaving: () => flush(),
     finish: () => {
       state.current.finished = true;
       clearTimeout(state.current.timer);
