@@ -120,5 +120,32 @@ export async function initializeDatabase() {
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
     CREATE INDEX IF NOT EXISTS customer_sessions_expires_idx ON customer_sessions(expires_at);
+    CREATE TABLE IF NOT EXISTS discounts (
+      id BIGSERIAL PRIMARY KEY,
+      code VARCHAR(80) NOT NULL UNIQUE,
+      type VARCHAR(20) NOT NULL DEFAULT 'Percentage' CHECK (type IN ('Percentage','Fixed amount')),
+      value NUMERIC(12,2) NOT NULL CHECK (value >= 0),
+      status VARCHAR(20) NOT NULL DEFAULT 'Active' CHECK (status IN ('Active','Draft','Expired')),
+      starts_at TIMESTAMPTZ,
+      ends_at TIMESTAMPTZ,
+      usage_limit INTEGER CHECK (usage_limit IS NULL OR usage_limit >= 0),
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+    CREATE TABLE IF NOT EXISTS shipping_methods (
+      id BIGSERIAL PRIMARY KEY,
+      name VARCHAR(120) NOT NULL,
+      zone VARCHAR(120) NOT NULL DEFAULT 'Pakistan',
+      price NUMERIC(12,2) NOT NULL DEFAULT 0 CHECK (price >= 0),
+      estimated_days VARCHAR(80) NOT NULL DEFAULT '3-5 business days',
+      active BOOLEAN NOT NULL DEFAULT TRUE,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+    CREATE TABLE IF NOT EXISTS store_settings (
+      key VARCHAR(80) PRIMARY KEY,
+      value JSONB NOT NULL,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
   `);
 }

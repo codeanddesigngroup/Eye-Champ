@@ -19,7 +19,13 @@ const workspaceItems = [
   { label: "Collections", icon: LibraryBig, href: "/admin/collections" },
   { label: "Brands", icon: BadgeCheck, href: "/admin/brands" },
   { label: "Customers", icon: Users, href: "/admin/customers" },
-  { label: "Discounts", icon: Tag, href: "#" },
+  { label: "Discounts", icon: Tag, href: "/admin/discounts" },
+];
+
+const managementItems = [
+  { label: "Shipping", icon: Truck, href: "/admin/shipping" },
+  { label: "Finances", icon: CircleDollarSign, href: "/admin/finances" },
+  { label: "Settings", icon: Settings, href: "/admin/settings" },
 ];
 
 export default function AdminSidebar({ open, onClose }: AdminSidebarProps) {
@@ -62,9 +68,7 @@ export default function AdminSidebar({ open, onClose }: AdminSidebarProps) {
         <Link className={onProductRoute ? "active" : ""} href="/admin/products" onClick={onClose}><Glasses size={19}/><span>Products</span></Link>
         {workspaceItems.slice(2).map(({label,icon:Icon,href,badge}) => <Link className={pathname === href ? "active" : ""} href={href} key={label} onClick={onClose}><Icon size={19}/><span>{label}</span>{pathname !== href && badge && <em>{badge}</em>}</Link>)}
         <p>Management</p>
-        <a href="#"><Truck size={19}/><span>Shipping</span></a>
-        <a href="#"><CircleDollarSign size={19}/><span>Finances</span></a>
-        <a href="#"><Settings size={19}/><span>Settings</span></a>
+        {managementItems.map(({label,icon:Icon,href}) => <Link className={pathname === href ? "active" : ""} href={href} key={label} onClick={onClose}><Icon size={19}/><span>{label}</span></Link>)}
       </nav>
       <div className="admin-sidebar-store"><span>EC</span><div><strong>Eye Champ</strong><small><i/> Store is live</small></div><MoreHorizontal size={18}/></div>
     </aside>
