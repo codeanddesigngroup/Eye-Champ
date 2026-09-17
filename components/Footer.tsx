@@ -28,8 +28,8 @@ const shopByLinks: Record<string, string> = {
   "ALL SUNGLASSES": "/sunglasses/all",
   "ALL EYEGLASSES": "/eyeglasses/all",
   "POLARIZED": "/sunglasses/polarized-sunglasses",
-  "NEW ARRIVALS": "/shop-all",
-  "SPECIAL OFFERS": "/shop-all",
+  "NEW ARRIVALS": "/all-glasses/new-arrivals",
+  "SPECIAL OFFERS": "/all-glasses/on-sale",
 };
 
 const cards = [["JazzCash", styles.jazzcash], ["VISA", styles.visa], ["●●", styles.mastercard]];

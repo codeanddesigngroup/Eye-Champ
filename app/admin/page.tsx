@@ -2,93 +2,127 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import type { ReactNode } from "react";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminTopbar from "@/components/admin/AdminTopbar";
-import {
-  ArrowDownRight,
-  ArrowUpRight,
-  CircleDollarSign,
-  Download,
-  Eye,
-  MoreHorizontal,
-  Package,
-  Plus,
-  ShoppingBag,
-  Users,
-} from "lucide-react";
-import { useState } from "react";
+import { ArrowDownRight, ArrowUpRight, CircleDollarSign, Download, Eye, MoreHorizontal, Package, Plus, ShoppingBag, Users } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import "./admin.css";
 
-const styles: Record<string, string> = new Proxy({}, {
-  get: (_target, className) => String(className),
-});
+const styles: Record<string, string> = new Proxy({}, { get: (_target, className) => String(className) });
 
-const orders = [
-  { id: "#EC-1048", customer: "Aisha Khan", initials: "AK", product: "Avery / Crystal Rose", total: "$128.00", status: "Paid", fulfillment: "Unfulfilled", date: "Aug 25, 10:42 AM" },
-  { id: "#EC-1047", customer: "Marcus Chen", initials: "MC", product: "Riley / Matte Black", total: "$94.50", status: "Paid", fulfillment: "Processing", date: "Aug 25, 9:18 AM" },
-  { id: "#EC-1046", customer: "Sofia Martinez", initials: "SM", product: "Luna / Tortoiseshell", total: "$176.00", status: "Pending", fulfillment: "Unfulfilled", date: "Aug 24, 7:36 PM" },
-  { id: "#EC-1045", customer: "Noah Williams", initials: "NW", product: "Theo / Navy Blue", total: "$82.00", status: "Paid", fulfillment: "Fulfilled", date: "Aug 24, 5:11 PM" },
-];
+type DashboardOrder = { id:string; orderNumber:string; customer:string; product:string; total:number; payment:string; fulfillment:string; createdAt:string };
+type DashboardProduct = { id:string; name:string; sku:string; stock:number; image:string };
+type DashboardData = {
+  metrics:{ revenue:number; orders:number; customers:number; ordersToday:number; revenueToday:number; revenueChange:number; orderChange:number; customerChange:number };
+  revenueSeries:{ label:string; revenue:number }[];
+  recentOrders:DashboardOrder[];
+  lowStock:DashboardProduct[];
+};
 
-const inventory = [
-  { name: "Aviator Classic", sku: "EC-AV-014", stock: 4, image: "/images/Aviator.webp" },
-  { name: "Browline Bold", sku: "EC-BR-009", stock: 7, image: "/images/Browline.webp" },
-  { name: "Prada PR 17", sku: "EC-PR-022", stock: 9, image: "/images/Prada.webp" },
-];
+const emptyDashboard:DashboardData = {
+  metrics:{ revenue:0, orders:0, customers:0, ordersToday:0, revenueToday:0, revenueChange:0, orderChange:0, customerChange:0 },
+  revenueSeries:[],
+  recentOrders:[],
+  lowStock:[],
+};
+const money = (value:number) => `Rs ${Number(value || 0).toLocaleString("en-PK", { minimumFractionDigits:2, maximumFractionDigits:2 })}`;
+const initials = (name:string) => name.split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0]).join("").toUpperCase() || "C";
+const dateLabel = (value:string) => new Date(value).toLocaleString("en-US", { month:"short", day:"numeric", hour:"numeric", minute:"2-digit" });
+const changeText = (value:number) => `${Math.abs(Number(value || 0)).toFixed(1)}%`;
 
 export default function AdminDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [period, setPeriod] = useState("Last 7 days");
+  const [dashboard, setDashboard] = useState<DashboardData>(emptyDashboard);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  return (
-    <main className={styles.adminViewport}>
-      <AdminSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+  useEffect(() => {
+    fetch("/api/admin/dashboard", { credentials:"include", cache:"no-store" })
+      .then(async response => {
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || "Could not load dashboard.");
+        setDashboard({ ...emptyDashboard, ...result });
+      })
+      .catch(reason => setError(reason instanceof Error ? reason.message : "Could not load dashboard."))
+      .finally(() => setLoading(false));
+  }, []);
 
-      <section className={styles.workspace}>
-        <AdminTopbar onMenuOpen={() => setSidebarOpen(true)} />
+  const chart = useMemo(() => {
+    const values = dashboard.revenueSeries.length ? dashboard.revenueSeries : Array.from({ length:7 }, (_, index) => ({ label:["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][index], revenue:0 }));
+    const max = Math.max(...values.map(item => Number(item.revenue)), 1);
+    const points = values.map((item, index) => {
+      const x = values.length === 1 ? 700 : (index / (values.length - 1)) * 700;
+      const y = 180 - (Number(item.revenue) / max) * 150;
+      return { ...item, x, y };
+    });
+    const line = points.map((point, index) => `${index ? "L" : "M"}${point.x.toFixed(1)} ${point.y.toFixed(1)}`).join(" ");
+    const area = `${line} L700 210 L0 210Z`;
+    return { points, line, area, max };
+  }, [dashboard.revenueSeries]);
+  const today = new Date().toLocaleDateString("en-US", { weekday:"long", month:"long", day:"numeric" });
 
-        <div className={styles.content}>
-          <div className={styles.headingRow}>
-            <div><p>Tuesday, August 25</p><h1>Hello, Admin</h1><span>Here’s what’s happening with your store today.</span></div>
-            <div className={styles.headingActions}><button className={styles.secondaryButton}><Download size={17} /> Export report</button><Link className={styles.primaryButton} href="/admin/products/new"><Plus size={17} /> Add product</Link></div>
-          </div>
-
-          <section className={styles.metrics} aria-label="Store metrics">
-            <article><div className={styles.metricTop}><span className={styles.greenIcon}><CircleDollarSign /></span><small className={styles.up}><ArrowUpRight /> 12.5%</small></div><p>Total revenue</p><h2>$24,780.40</h2><span>vs. $22,027 last week</span></article>
-            <article><div className={styles.metricTop}><span className={styles.blueIcon}><ShoppingBag /></span><small className={styles.up}><ArrowUpRight /> 8.2%</small></div><p>Total orders</p><h2>384</h2><span>vs. 355 last week</span></article>
-            <article><div className={styles.metricTop}><span className={styles.purpleIcon}><Users /></span><small className={styles.up}><ArrowUpRight /> 6.8%</small></div><p>New customers</p><h2>126</h2><span>vs. 118 last week</span></article>
-            <article><div className={styles.metricTop}><span className={styles.orangeIcon}><Eye /></span><small className={styles.down}><ArrowDownRight /> 1.4%</small></div><p>Conversion rate</p><h2>3.48%</h2><span>vs. 3.53% last week</span></article>
-          </section>
-
-          <section className={styles.insightsGrid}>
-            <article className={styles.chartCard}>
-              <div className={styles.cardHeading}><div><h3>Revenue overview</h3><p>Your store’s revenue performance</p></div><select value={period} onChange={(event) => setPeriod(event.target.value)} aria-label="Revenue period"><option>Last 7 days</option><option>Last 30 days</option><option>This year</option></select></div>
-              <div className={styles.chartLegend}><span><i /> Revenue</span><strong>$24,780.40 <small>+12.5%</small></strong></div>
-              <div className={styles.chart} aria-label="Revenue chart from Monday through Sunday">
-                <div className={styles.yAxis}><span>$6k</span><span>$4k</span><span>$2k</span><span>$0</span></div>
-                <svg viewBox="0 0 700 210" preserveAspectRatio="none" role="img">
-                  <defs><linearGradient id="revenueFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor="#0d6666" stopOpacity=".24" /><stop offset="1" stopColor="#0d6666" stopOpacity="0" /></linearGradient></defs>
-                  <path className={styles.area} d="M0 164 C65 150 80 95 145 112 S230 147 290 98 S385 41 435 81 S520 130 575 72 S655 42 700 18 L700 210 L0 210Z" />
-                  <path className={styles.line} d="M0 164 C65 150 80 95 145 112 S230 147 290 98 S385 41 435 81 S520 130 575 72 S655 42 700 18" />
-                  <circle cx="700" cy="18" r="5" />
-                </svg>
-                <div className={styles.xAxis}>{["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(day => <span key={day}>{day}</span>)}</div>
-              </div>
-            </article>
-
-            <article className={styles.inventoryCard}>
-              <div className={styles.cardHeading}><div><h3>Inventory alerts</h3><p>Products running low on stock</p></div><button>View all</button></div>
-              <div className={styles.inventoryList}>{inventory.map(item => <div className={styles.inventoryItem} key={item.sku}><span className={styles.productThumb}><Image src={item.image} alt="" width={58} height={42} /></span><div><strong>{item.name}</strong><small>{item.sku}</small></div><span className={styles.stock}>{item.stock} left</span></div>)}</div>
-              <div className={styles.inventoryFoot}><Package size={17} /><span><strong>4 products</strong> need your attention</span><button>Manage inventory</button></div>
-            </article>
-          </section>
-
-          <section className={styles.ordersCard}>
-            <div className={styles.cardHeading}><div><h3>Recent orders</h3><p>Latest orders placed in your store</p></div><button>View all orders <span>→</span></button></div>
-            <div className={styles.tableWrap}><table><thead><tr><th>Order</th><th>Customer</th><th>Product</th><th>Total</th><th>Payment</th><th>Fulfillment</th><th>Date</th><th /></tr></thead><tbody>{orders.map(order => <tr key={order.id}><td><strong>{order.id}</strong></td><td><div className={styles.customer}><span>{order.initials}</span><strong>{order.customer}</strong></div></td><td>{order.product}</td><td><strong>{order.total}</strong></td><td><span className={`${styles.status} ${order.status === "Paid" ? styles.paid : styles.pending}`}>{order.status}</span></td><td><span className={`${styles.status} ${order.fulfillment === "Fulfilled" ? styles.fulfilled : order.fulfillment === "Processing" ? styles.processing : styles.unfulfilled}`}>{order.fulfillment}</span></td><td>{order.date}</td><td><button aria-label={`More options for ${order.id}`}><MoreHorizontal size={18} /></button></td></tr>)}</tbody></table></div>
-          </section>
+  return <main className={styles.adminViewport}>
+    <AdminSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+    <section className={styles.workspace}>
+      <AdminTopbar onMenuOpen={() => setSidebarOpen(true)} />
+      <div className={styles.content}>
+        <div className={styles.headingRow}>
+          <div><p>{today}</p><h1>Hello, Admin</h1><span>{loading ? "Loading your store dashboard..." : "Here's what's happening with your store today."}</span></div>
+          <div className={styles.headingActions}><button className={styles.secondaryButton}><Download size={17} /> Export report</button><Link className={styles.primaryButton} href="/admin/products/new"><Plus size={17} /> Add product</Link></div>
         </div>
-      </section>
-    </main>
-  );
+        {error && <div className={styles.dashboardError}>{error}</div>}
+
+        <section className={styles.metrics} aria-label="Store metrics">
+          <Metric icon={<CircleDollarSign />} iconClass={styles.greenIcon} label="Total revenue" value={money(dashboard.metrics.revenue)} change={dashboard.metrics.revenueChange} note={`${money(dashboard.metrics.revenueToday)} today`} />
+          <Metric icon={<ShoppingBag />} iconClass={styles.blueIcon} label="Total orders" value={dashboard.metrics.orders.toLocaleString()} change={dashboard.metrics.orderChange} note={`${dashboard.metrics.ordersToday} today`} />
+          <Metric icon={<Users />} iconClass={styles.purpleIcon} label="Customers" value={dashboard.metrics.customers.toLocaleString()} change={dashboard.metrics.customerChange} note="Unique order emails" />
+          <article><div className={styles.metricTop}><span className={styles.orangeIcon}><Eye /></span><small className={styles.up}><ArrowUpRight /> Live</small></div><p>Low stock items</p><h2>{dashboard.lowStock.length}</h2><span>Active products with 10 or fewer left</span></article>
+        </section>
+
+        <section className={styles.insightsGrid}>
+          <article className={styles.chartCard}>
+            <div className={styles.cardHeading}><div><h3>Revenue overview</h3><p>Your store's revenue performance</p></div><select value={period} onChange={(event) => setPeriod(event.target.value)} aria-label="Revenue period"><option>Last 7 days</option></select></div>
+            <div className={styles.chartLegend}><span><i /> Revenue</span><strong>{money(dashboard.metrics.revenue)} <small>{changeText(dashboard.metrics.revenueChange)}</small></strong></div>
+            <div className={styles.chart} aria-label="Revenue chart for the last 7 days">
+              <div className={styles.yAxis}><span>{money(chart.max)}</span><span>{money(chart.max * .66)}</span><span>{money(chart.max * .33)}</span><span>Rs 0</span></div>
+              <svg viewBox="0 0 700 210" preserveAspectRatio="none" role="img">
+                <defs><linearGradient id="revenueFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor="#0d6666" stopOpacity=".24" /><stop offset="1" stopColor="#0d6666" stopOpacity="0" /></linearGradient></defs>
+                <path className={styles.area} d={chart.area} />
+                <path className={styles.line} d={chart.line} />
+                {chart.points.length > 0 && <circle cx={chart.points.at(-1)?.x} cy={chart.points.at(-1)?.y} r="5" />}
+              </svg>
+              <div className={styles.xAxis}>{chart.points.map(day => <span key={day.label}>{day.label}</span>)}</div>
+            </div>
+          </article>
+
+          <article className={styles.inventoryCard}>
+            <div className={styles.cardHeading}><div><h3>Inventory alerts</h3><p>Products running low on stock</p></div><Link href="/admin/products">View all</Link></div>
+            <div className={styles.inventoryList}>{dashboard.lowStock.length ? dashboard.lowStock.map(item => <div className={styles.inventoryItem} key={item.id}><span className={styles.productThumb}>{item.image ? <Image src={item.image} alt="" width={58} height={42} /> : <Package size={20} />}</span><div><strong>{item.name}</strong><small>{item.sku}</small></div><span className={styles.stock}>{item.stock} left</span></div>) : <p className={styles.emptyInline}>No low-stock products.</p>}</div>
+            <div className={styles.inventoryFoot}><Package size={17} /><span><strong>{dashboard.lowStock.length} products</strong> need your attention</span><Link href="/admin/products">Manage inventory</Link></div>
+          </article>
+        </section>
+
+        <section className={styles.ordersCard}>
+          <div className={styles.cardHeading}><div><h3>Recent orders</h3><p>Latest orders placed in your store</p></div><Link href="/admin/orders">View all orders <span>→</span></Link></div>
+          <div className={styles.tableWrap}><table><thead><tr><th>Order</th><th>Customer</th><th>Product</th><th>Total</th><th>Payment</th><th>Fulfillment</th><th>Date</th><th /></tr></thead><tbody>{dashboard.recentOrders.map(order => <tr key={order.id}><td><Link href={`/admin/orders/${order.id}`}><strong>{order.orderNumber}</strong></Link></td><td><div className={styles.customer}><span>{initials(order.customer)}</span><strong>{order.customer}</strong></div></td><td>{order.product}</td><td><strong>{money(order.total)}</strong></td><td><span className={`${styles.status} ${statusClass(order.payment)}`}>{order.payment}</span></td><td><span className={`${styles.status} ${statusClass(order.fulfillment)}`}>{order.fulfillment}</span></td><td>{dateLabel(order.createdAt)}</td><td><Link href={`/admin/orders/${order.id}`} aria-label={`View ${order.orderNumber}`}><MoreHorizontal size={18} /></Link></td></tr>)}</tbody></table></div>
+          {!dashboard.recentOrders.length && <p className={styles.emptyInline}>No orders found in the database.</p>}
+        </section>
+      </div>
+    </section>
+  </main>;
+}
+
+function Metric({ icon, iconClass, label, value, change, note }:{ icon:ReactNode; iconClass:string; label:string; value:string; change:number; note:string }) {
+  const positive = Number(change || 0) >= 0;
+  return <article><div className={styles.metricTop}><span className={iconClass}>{icon}</span><small className={positive ? styles.up : styles.down}>{positive ? <ArrowUpRight /> : <ArrowDownRight />} {changeText(change)}</small></div><p>{label}</p><h2>{value}</h2><span>{note}</span></article>;
+}
+
+function statusClass(value:string) {
+  const key = value.toLowerCase();
+  if (key === "paid" || key === "fulfilled") return styles.paid;
+  if (key === "processing") return styles.processing;
+  if (key === "pending") return styles.pending;
+  return styles.unfulfilled;
 }

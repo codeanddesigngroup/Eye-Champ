@@ -17,6 +17,7 @@ import { checkoutRouter } from "./routes/checkout.js";
 import { ordersRouter } from "./routes/orders.js";
 import { customerAuthRouter } from "./routes/customer-auth.js";
 import { customersRouter } from "./routes/customers.js";
+import { dashboardRouter } from "./routes/dashboard.js";
 
 const app = express();
 const port = Number(process.env.BACKEND_PORT || 4000);
@@ -39,6 +40,7 @@ app.use("/api/admin/brands", brandsRouter);
 app.use("/api/admin/products", productsRouter);
 app.use("/api/admin/orders", ordersRouter);
 app.use("/api/admin/customers", customersRouter);
+app.use("/api/admin/dashboard", dashboardRouter);
 app.use("/api/admin/uploads", uploadsRouter);
 app.use("/api/products", storefrontProductsRouter);
 app.use("/api/checkout", checkoutRouter);
