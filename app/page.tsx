@@ -9,7 +9,15 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { CSSProperties } from "react";
 
-const shapes = ["Square", "Rectangle", "Round", "Cat eye", "Browline", "Aviator"];
+const shapes = [
+  { name: "Square", url: "/square" },
+  { name: "Rectangle", url: "/rectangle" },
+  { name: "Round", url: "/round" },
+  { name: "Cat eye", url: "/cateye" },
+  { name: "Browline", url: "/browline" },
+  { name: "Aviator", url: "/aviator" }
+];
+
 const shapeImages = ["/images/Square.webp", "/images/Rectangle.webp", "/images/Round.webp", "/images/cateye.png", "/images/Browline.webp", "/images/Aviator.webp"];
 const trendBanners = ["/images/trend-banners/1.png", "/images/trend-banners/2.png", "/images/trend-banners/3.png"];
 const mobileTrendBanners = ["/images/trend-banners/mobile/1.png", "/images/trend-banners/mobile/2.png", "/images/trend-banners/mobile/3.png"];
@@ -84,7 +92,28 @@ export default function Home() {
           <h2>SHOP BY FRAME SHAPE</h2>
           <p>Versatile shapes made for every mood and moment.</p>
         </div>
-        <div className="shape-grid">{shapes.map((shape, i) => <Link href="/product" key={shape}><div><img src={shapeImages[i]} alt={shape} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "1.25vw" }} /></div><b>{shape}</b></Link>)}</div></section></div>
+        <div className="shape-grid">
+          {shapes.map((shape, i) => (
+            <Link href={`/all-glasses${shape.url}`} key={shape.name}>
+              <div>
+                <img
+                  src={shapeImages[i]}
+                  alt={shape.name}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                    borderRadius: "1.25vw",
+                  }}
+                />
+              </div>
+              <b>{shape.name}</b>
+            </Link>
+          ))}
+        </div>
+
+      </section>
+    </div>
 
     <ImageSlider />
 

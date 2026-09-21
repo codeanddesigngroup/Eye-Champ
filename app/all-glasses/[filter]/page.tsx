@@ -9,11 +9,16 @@ const catalogs = {
   "new-arrivals": { title: "New Arrivals", query: { collection: "New Arrivals" } },
   "best-sellers": { title: "All Best Sellers", query: { collection: "Best Sellers" } },
   "top-rated": { title: "Top Rated Glasses", query: { collection: "Top Rated" } },
-  rectangle: { title: "Rectangle Glasses", query: { shape: "Rectangle" } },
   "mix-material": { title: "Mix Material Glasses", query: { material: "Mix Material" } },
   "ray-ban": { title: "Ray-Ban Glasses", query: { brand: "Ray-Ban" } },
   "full-rim": { title: "Full Rim Glasses", query: { rim: "Full Rim" } },
   "on-sale": { title: "Glasses On Sale", query: { onSale: "true" } },
+  rectangle: { title: "Rectangle Glasses", query: { shape: "Rectangle" } },
+  square: { title: "Square Glasses", query: { shape: "Square" } },
+  round: { title: "Round Glasses", query: { shape: "Round" } },
+  cateye: { title: "Cat eye Glasses", query: { shape: "Cat eye" } },
+  browline: { title: "Browline Glasses", query: { shape: "Browline" } },
+  aviator: { title: "Aviator Glasses", query: { shape: "Aviator" } },
 } as const;
 
 type CatalogSlug = keyof typeof catalogs;
