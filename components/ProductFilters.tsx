@@ -20,11 +20,12 @@ type ProductFiltersProps = {
   onToggle: (group: ProductFilterTitle, value: string) => void;
   onHide: () => void;
   activeOptions?: { collections: string[]; brands: string[] };
+  mobileOpen?: boolean;
 };
 
-export default function ProductFilters({ selected, onToggle, onHide, activeOptions }: ProductFiltersProps) {
+export default function ProductFilters({ selected, onToggle, onHide, activeOptions, mobileOpen = false }: ProductFiltersProps) {
   const groups = productFilterGroups.map(([title, items]) => [title, title === "Collections" ? activeOptions?.collections ?? [] : title === "Brand" ? activeOptions?.brands ?? [] : items] as const);
-  return <aside className="filters open">
+  return <aside className={`filters open ${mobileOpen ? "mobile-open" : ""}`}>
     <div className="filters-title">
       <h2>Filters</h2>
       <button className="hide-filters" onClick={onHide}><SlidersHorizontal /><span>Hide Filters</span></button>

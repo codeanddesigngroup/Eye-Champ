@@ -665,11 +665,12 @@
   }
 
   .plp-tools>span {
-    display: none
+    text-align: left;
+    font-size: 15px;
   }
 
   .filter-button {
-    display: flex
+    display: none
   }
 
   .plp-body {
@@ -682,7 +683,7 @@
   }
 
   .filters.open {
-    display: block;
+    display: none;
     position: fixed;
     z-index: 50;
     inset: 0 0 0 10%;
@@ -690,6 +691,10 @@
     background: #fff;
     padding: 20px 24px;
     box-shadow: -10px 0 30px #0004
+  }
+
+  .filters.open.mobile-open {
+    display: block;
   }
 
   .filters-title button {

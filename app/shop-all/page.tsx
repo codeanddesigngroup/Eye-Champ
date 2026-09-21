@@ -52,7 +52,7 @@ function GridIcon({ size }: { size: 2 | 3 }) { return <span className={`grid-ico
 type CatalogQuery = Partial<Record<"gender"|"collection"|"shape"|"material"|"brand"|"rim"|"maxPrice"|"onSale",string>>;
 
 export default function ShopAll({categorySlug="",subcategorySlug="",catalogTitle="The A-List Collection",catalogQuery={}}:{categorySlug?:string;subcategorySlug?:string;catalogTitle?:string;catalogQuery?:CatalogQuery}) {
-  const [filtersOpen, setFiltersOpen] = useState(true), [sort, setSort] = useState("Relevance"), [filters, setFilters] = useState<ProductFilterSelection>({}), [faq, setFaq] = useState<number | null>(null), [density, setDensity] = useState<"roomy" | "compact">("compact");
+  const [filtersOpen, setFiltersOpen] = useState(true), [mobileFiltersOpen, setMobileFiltersOpen] = useState(false), [sort, setSort] = useState("Relevance"), [filters, setFilters] = useState<ProductFilterSelection>({}), [faq, setFaq] = useState<number | null>(null), [density, setDensity] = useState<"roomy" | "compact">("compact");
   const [missing, setMissing] = useState(false);
   const [products, setProducts] = useState<Product[]>([]), [loading, setLoading] = useState(true), [loadError, setLoadError] = useState("");
   const [activeOptions, setActiveOptions] = useState<{collections:string[];brands:string[]}>({ collections:[], brands:[] });
@@ -95,7 +95,7 @@ export default function ShopAll({categorySlug="",subcategorySlug="",catalogTitle
     </div>
 
     <section className="plp-tools">
-      <button className="filter-button" onClick={() => setFiltersOpen(true)}><SlidersHorizontal /> Filter & Sort</button>
+      <button className="filter-button" onClick={() => { setFiltersOpen(true); setMobileFiltersOpen(true); }}><SlidersHorizontal /> Filter & Sort</button>
       <span>{visible.length ? `Showing 1-${visible.length} of ${products.length} results` : `Showing 0 of ${products.length} results`}</span>
       <div className="grid-switch">
         <button className={density === "roomy" ? "active" : ""} onClick={() => setDensity("roomy")} aria-label="Roomy grid"><GridIcon size={2} /></button>
@@ -105,7 +105,7 @@ export default function ShopAll({categorySlug="",subcategorySlug="",catalogTitle
     </section>
 
     <div className={`plp-body ${filtersOpen ? "" : "filters-hidden"}`}>
-      {filtersOpen && <ProductFilters selected={filters} onToggle={toggleFilter} onHide={() => setFiltersOpen(false)} activeOptions={activeOptions} />}
+      {filtersOpen && <ProductFilters selected={filters} onToggle={toggleFilter} onHide={() => { setFiltersOpen(false); setMobileFiltersOpen(false); }} activeOptions={activeOptions} mobileOpen={mobileFiltersOpen} />}
 
       <section className={`plp-grid ${density}`}>
         {loading && <p>Loading products...</p>}
