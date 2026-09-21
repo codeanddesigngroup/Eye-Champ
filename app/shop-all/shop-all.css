@@ -263,7 +263,7 @@
 .plp-heart {
   position: absolute;
   z-index: 2;
-  right: 9px;
+  /* right: 9px; */
   left: auto;
   top: 8px;
   bottom: auto;
@@ -646,7 +646,7 @@
   }
 
   .plp-hero>div:last-child {
-    padding: 28px;
+    /* padding: 28px; */
     text-align: center
   }
 
@@ -1232,7 +1232,9 @@
 
   .grid-switch .grid-icon { display: none; }
 
-  .grid-switch button { display: inline-flex; align-items: center; gap: 6px; }
+  .grid-switch button { display: inline-flex; align-items: center; gap: 6px; padding: 4px; opacity: .65; }
+  .grid-switch button.active { opacity: 1; }
+  .grid-switch button.active .mobile-grid-icon i { border-color: #111; background: #111; }
   .mobile-grid-label { display: inline; margin-right: auto; font-size: 13px; font-weight: 600; white-space: nowrap; }
 
   .mobile-grid-icon {
@@ -1511,4 +1513,15 @@
   .plp-tools .filter-button { grid-column: 1; grid-row: 1; }
   .plp-tools label { grid-column: 2; grid-row: 1; justify-self: end; }
   .plp-tools .grid-switch { grid-column: 1 / -1; grid-row: 2; justify-self: stretch; width: 100%; justify-content: flex-end; }
+
+  .plp-grid.roomy { gap: 34px; }
+  .plp-body.filters-hidden .plp-grid.roomy { grid-template-columns: minmax(0, 1fr); }
+  .plp-body.filters-hidden .plp-grid.compact { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .plp-grid.roomy .plp-photo { height: 310px; background: #fff; }
+  .plp-grid.roomy .plp-photo > img { width: 96%; height: 74%; object-fit: contain; }
+  .plp-grid.roomy .plp-card-line { display: flex; align-items: flex-start; gap: 12px; }
+  .plp-grid.roomy .plp-card-line > span { flex: none; margin-top: 14px; }
+  .plp-grid.roomy .plp-card p { margin-top: 9px; font-size: 14px; }
+  .plp-grid.roomy .plp-card > .plp-shape { display: block; margin-top: 7px; font-size: 13px; }
+  .plp-grid.roomy .plp-swatches { margin-top: 16px; }
 }

@@ -166,7 +166,20 @@
   font-size: 14px;
 }
 
-.linkGroup>a {
+.linkGroup h2 button {
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  font: inherit;
+  font-weight: inherit;
+}
+
+.linkGroup h2 button span { display: none; }
+
+.groupLinks>a {
   display: block;
   width: max-content;
   max-width: 100%;
@@ -351,23 +364,31 @@
     border-bottom: 1px solid #ddd;
   }
 
-  .linkGroup:not(.follow)::after {
-    content: "+";
-    position: absolute;
-    right: 2px;
-    top: 10px;
-    font-size: 20px;
-    font-weight: 300;
-  }
-
   .linkGroup h2 {
     margin: 0;
     font-size: 11px;
   }
 
-  .linkGroup>a {
+  .linkGroup h2 button {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+  }
+
+  .linkGroup h2 button span {
+    display: inline;
+    font-size: 20px;
+    line-height: 1;
+    font-weight: 400;
+  }
+
+  .linkGroup:not(.expanded) .groupLinks {
     display: none;
   }
+
+  .groupLinks { padding-top: 14px; }
+  .groupLinks>a { width: 100%; margin-bottom: 12px; font-size: 11px; }
 
   .follow {
     padding-top: 20px;

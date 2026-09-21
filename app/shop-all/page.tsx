@@ -57,6 +57,8 @@ export default function ShopAll({categorySlug="",subcategorySlug="",catalogTitle
   const [products, setProducts] = useState<Product[]>([]), [loading, setLoading] = useState(true), [loadError, setLoadError] = useState("");
   const [activeOptions, setActiveOptions] = useState<{collections:string[];brands:string[]}>({ collections:[], brands:[] });
   const [currency, setCurrency] = useState("PKR");
+  const [searchTerm, setSearchTerm] = useState("");
+  useEffect(() => { setSearchTerm(new URLSearchParams(window.location.search).get("search")?.trim() ?? ""); }, []);
   const catalogQueryString=new URLSearchParams(catalogQuery as Record<string,string>).toString();
   useEffect(() => { const params=new URLSearchParams(catalogQueryString);if(categorySlug){params.set("category",categorySlug);params.set("subcategory",subcategorySlug)}const query=params.size?`?${params.toString()}`:""; fetch(`/api/products${query}`, { cache: "no-store" }).then(async response => { const result = await response.json() as { products?: Product[]; error?: string }; if (response.status === 404) { setMissing(true); return; } if (!response.ok) throw new Error(result.error); setProducts(result.products ?? []) }).catch(error => setLoadError(error instanceof Error ? error.message : "Could not load products.")).finally(() => setLoading(false)) }, [categorySlug,subcategorySlug,catalogQueryString]);
   useEffect(() => { fetch("/api/products/categories/navigation", { cache:"no-store" }).then(async response => { const result = await response.json() as { collections?:string[]; brands?:string[] }; if (!response.ok) throw new Error(); setActiveOptions({ collections:result.collections ?? [], brands:result.brands ?? [] }) }).catch(() => setActiveOptions({ collections:[], brands:[] })) }, []);
@@ -71,7 +73,9 @@ export default function ShopAll({categorySlug="",subcategorySlug="",catalogTitle
       const priceMatch=!filters.Price?.length||filters.Price.some(range=>range==="Under 1000"?price<1000:range==="Under 2000"?price<2000:range==="Under 3000"?price<3000:range==="Above 5000"?price>5000:false);
       const frameColors=product.variants.find(variant=>variant.name.toLowerCase().includes("frame")&&variant.name.toLowerCase().includes("color"))?.values??[];
       const frameSizes=product.variants.filter(variant=>variant.name.toLowerCase().includes("size")).flatMap(variant=>variant.values);
-      return priceMatch&&matchesAny(filters.Size,frameSizes)&&matchesAny(filters.Gender,product.genders??[])&&matches(filters.Material,product.material)&&matchesAny(filters.Collections,product.collections??[])&&matches(filters.Shape,product.shape)&&matches(filters.Rim,product.rim)&&matchesAny(filters.Brand,product.brands??[])&&matchesAny(filters.Color,frameColors);
+      const searchableText=[product.title,product.shape,product.material,product.rim,...(product.genders??[]),...(product.categories??[]),...(product.subcategories??[]),...(product.collections??[]),...(product.brands??[]),...frameColors].join(" ").toLowerCase();
+      const searchMatch=searchTerm.toLowerCase().split(/\s+/).filter(Boolean).every(term=>searchableText.includes(term));
+      return searchMatch&&priceMatch&&matchesAny(filters.Size,frameSizes)&&matchesAny(filters.Gender,product.genders??[])&&matches(filters.Material,product.material)&&matchesAny(filters.Collections,product.collections??[])&&matches(filters.Shape,product.shape)&&matches(filters.Rim,product.rim)&&matchesAny(filters.Brand,product.brands??[])&&matchesAny(filters.Color,frameColors);
     });
     if(sort==="Relevance")list.sort((a,b)=>Number(b.quantity>0)-Number(a.quantity>0)||(catalogPosition.get(a.id)??0)-(catalogPosition.get(b.id)??0));
     if(sort==="Price Low to High")list.sort((a,b)=>Number(a.price)-Number(b.price));
@@ -79,7 +83,7 @@ export default function ShopAll({categorySlug="",subcategorySlug="",catalogTitle
     if(sort==="New Arrivals")list.sort((a,b)=>Number(inCollection(b,"New Arrivals"))-Number(inCollection(a,"New Arrivals"))||Date.parse(b.createdAt)-Date.parse(a.createdAt));
     if(sort==="Top Rated")list.sort((a,b)=>Number(inCollection(b,"Top Rated"))-Number(inCollection(a,"Top Rated"))||Number(b.quantity)-Number(a.quantity)||Date.parse(b.createdAt)-Date.parse(a.createdAt));
     return list;
-  },[products,filters,sort]);
+  },[products,filters,sort,searchTerm]);
   const toggleFilter=(group:ProductFilterTitle,value:string)=>setFilters(current=>{const values=current[group]??[];return {...current,[group]:values.includes(value)?values.filter(item=>item!==value):[...values,value]}});
   const activeFilters=productFilterGroups.flatMap(([group])=>(filters[group]??[]).map(value=>({group,value})));
   const selectedCount=activeFilters.length;

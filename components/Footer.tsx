@@ -1,8 +1,11 @@
+"use client";
+
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFacebookF, faInstagram, faSquareFontAwesomeStroke, faTwitter, faXTwitter, faYoutube } from "@fortawesome/free-brands-svg-icons";
 import { LockKeyhole, Truck } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { useState } from "react";
 import styles from "./Footer.module.css";
 
 const groups = [
@@ -35,6 +38,8 @@ const shopByLinks: Record<string, string> = {
 const cards = [["JazzCash", styles.jazzcash], ["VISA", styles.visa], ["●●", styles.mastercard]];
 
 export default function Footer() {
+  const [openGroups, setOpenGroups] = useState<string[]>([]);
+  const toggleGroup = (heading: string) => setOpenGroups(current => current.includes(heading) ? current.filter(item => item !== heading) : [...current, heading]);
   return <footer id="help" className={styles.footer}>
     <section className={styles.socialBanner} aria-label="Social media links">
       <FontAwesomeIcon className={styles.socialMark} icon={faSquareFontAwesomeStroke} aria-hidden="true" />
@@ -53,7 +58,7 @@ export default function Footer() {
       <div className={styles.paymentMarks} aria-label="Accepted payment methods">{cards.map(([label, className], i) => <span className={className} key={`${label}-${i}`}>{label === "JazzCash" ? <Image src="/images/payments/jazzcash.png" alt="JazzCash" width={24} height={24} /> : label}</span>)}</div>
     </section>
     <section className={styles.linksArea}><div className={styles.linkGrid}>
-      {groups.map(([heading, ...links]) => <div className={styles.linkGroup} key={heading}><h2>{heading}</h2>{links.map(label => shopByLinks[label] ? <Link href={shopByLinks[label]} key={label}>{label}</Link> : <a href="#top" key={label}>{label}</a>)}</div>)}
+      {groups.map(([heading, ...links], index) => <div className={`${styles.linkGroup} ${openGroups.includes(heading) ? styles.expanded : ""}`} key={heading}><h2><button type="button" aria-expanded={openGroups.includes(heading)} aria-controls={`footer-links-${index}`} onClick={() => toggleGroup(heading)}>{heading}<span aria-hidden="true">{openGroups.includes(heading) ? "−" : "+"}</span></button></h2><div id={`footer-links-${index}`} className={styles.groupLinks}>{links.map(label => shopByLinks[label] ? <Link href={shopByLinks[label]} key={label}>{label}</Link> : <a href="#top" key={label}>{label}</a>)}</div></div>)}
       <div className={`${styles.linkGroup} ${styles.follow}`}><h2>FOLLOW US</h2><div className={styles.socials}>
         <a href="#top" aria-label="Instagram"><FontAwesomeIcon icon={faInstagram} /></a><a href="#top" aria-label="YouTube"><FontAwesomeIcon icon={faYoutube} /></a><a href="#top" aria-label="X"><FontAwesomeIcon icon={faXTwitter} /></a><a href="#top" aria-label="Facebook"><FontAwesomeIcon icon={faFacebookF} /></a>
       </div></div>

@@ -13,7 +13,7 @@ const slides = [
     name: "cartier",
     alt: "Cartier eyewear campaign",
     desktop: "/images/brand-banners/cartier.webp",
-    mobile: "/images/brand-banners/mobile/cartier.png",
+    mobile: "/images/brand-banners/mobile/cartier.PNG",
   },
   {
     name: "emporio-armani",
@@ -25,7 +25,7 @@ const slides = [
     name: "gucci",
     alt: "Gucci eyewear campaign",
     desktop: "/images/brand-banners/gucci.webp",
-    mobile: "/images/brand-banners/mobile/gucci.png",
+    mobile: "/images/brand-banners/mobile/gucci.PNG",
   },
   {
     name: "mont-blanc",
@@ -37,25 +37,25 @@ const slides = [
     name: "moscot",
     alt: "Moscot eyewear campaign",
     desktop: "/images/brand-banners/moscot.webp",
-    mobile: "/images/brand-banners/mobile/moscot.png",
+    mobile: "/images/brand-banners/mobile/moscot.PNG",
   },
   {
     name: "oakley",
     alt: "Oakley eyewear campaign",
     desktop: "/images/brand-banners/oakley.png",
-    mobile: "/images/brand-banners/mobile/oakley.png",
+    mobile: "/images/brand-banners/mobile/oakley.PNG",
   },
   {
     name: "prada",
     alt: "Prada eyewear campaign",
     desktop: "/images/brand-banners/prada.webp",
-    mobile: "/images/brand-banners/mobile/prada.png",
+    mobile: "/images/brand-banners/mobile/prada.PNG",
   },
   {
     name: "ray-ban",
     alt: "Ray-Ban eyewear campaign",
     desktop: "/images/brand-banners/ray-ban.webp",
-    mobile: "/images/brand-banners/mobile/ray-ban.png",
+    mobile: "/images/brand-banners/mobile/ray-ban.PNG",
   },
   {
     name: "tom-ford",
@@ -67,7 +67,7 @@ const slides = [
     name: "versace",
     alt: "Versace eyewear campaign",
     desktop: "/images/brand-banners/versace.webp",
-    mobile: "/images/brand-banners/mobile/versace.png",
+    mobile: "/images/brand-banners/mobile/versace.PNG",
   },
 ] as const;
 

@@ -7,7 +7,6 @@ import { favoritesUpdatedEvent, getFavorites } from "@/lib/favorites";
 
 export default function Navbar() {
     const [menu, setMenu] = useState(false);
-    const [query, setQuery] = useState("");
     const [cartCount, setCartCount] = useState(0);
     const [favoriteCount, setFavoriteCount] = useState(0);
     const [categories, setCategories] = useState<Array<{ id: string; name: string; slug: string; parentId: string | null }>>([]);
@@ -31,7 +30,7 @@ export default function Navbar() {
         return () => { window.removeEventListener("storage", updateFavoriteCount); window.removeEventListener(favoritesUpdatedEvent, updateFavoriteCount); };
     }, []);
 
-    useEffect(() => { fetch("/api/products/categories/navigation").then(response => response.ok ? response.json() : Promise.reject()).then((result: { categories?: Array<{ id: string; name: string; slug: string; parentId: string | null }> }) => { const items = result.categories ?? []; setCategories(items); setExpandedCategoryIds(items.filter(item => item.parentId === null).map(item => item.id)); }).catch(() => setCategories([])) }, []);
+    useEffect(() => { fetch("/api/products/categories/navigation").then(response => response.ok ? response.json() : Promise.reject()).then((result: { categories?: Array<{ id: string; name: string; slug: string; parentId: string | null }> }) => setCategories(result.categories ?? [])).catch(() => setCategories([])) }, []);
     useEffect(() => {
         if (!menu) return;
         const closeOnEscape = (event: KeyboardEvent) => { if (event.key === "Escape") setMenu(false); };
@@ -45,7 +44,10 @@ export default function Navbar() {
                 <Link className="logo" href="/" aria-label="Eye Champ home">
                     <img src="/images/logo.png" alt="" />
                 </Link>
-                <label className="search"><Search size={18} /><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search our AI recommended frames" /></label>
+                <form className="search" action="/shop-all" method="get" role="search">
+                    <input name="search" type="search" aria-label="Search frames" placeholder="Search our AI recommended frames" required />
+                    <button type="submit" aria-label="Search products"><Search size={18} /></button>
+                </form>
                 <nav className="utility" aria-label="Account links">
                     <Link href="/login" aria-label="Customer login"><UserRound size={18} /><small>Login</small></Link>
                     <Link href="/favorites" aria-label={`Favorites with ${favoriteCount} products`}><Heart size={18} />{favoriteCount > 0 && <b className="cart-count">{favoriteCount}</b>}<small>Favorites</small></Link>
@@ -66,6 +68,7 @@ export default function Navbar() {
                     </div>
                 </div>)}
                 <Link href="/all-glasses/on-sale" onClick={() => setMenu(false)}>Sale</Link>
+                <Link href="/" onClick={() => setMenu(false)}>Help</Link>
             </nav>
 
             <nav className="main-nav" aria-label="Shop categories">
