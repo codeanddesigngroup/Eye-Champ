@@ -94,7 +94,7 @@ export default function ShopAll({categorySlug="",subcategorySlug="",catalogTitle
       </div>
     </section>
 
-    <div className="plp-chips" aria-label="Quick filters">
+    <div className={`plp-chips ${filtersOpen ? "" : "filters-collapsed"}`} aria-label="Quick filters">
       <div className="plp-quick-row">
         <button type="button" className="plp-quick-pill" onClick={()=>openFilters()}><SlidersHorizontal aria-hidden="true"/>Filters{selectedCount>0&&<b>{selectedCount}</b>}</button>
         <button type="button" className="plp-quick-pill" onClick={()=>openFilters("Shape")}>Shape{(filters.Shape?.length??0)>0&&<b>{filters.Shape?.length}</b>}<ChevronDown aria-hidden="true"/></button>

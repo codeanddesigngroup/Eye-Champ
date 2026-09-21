@@ -1491,6 +1491,11 @@
   .plp .plp-chips { display: none; }
   .plp .plp-chips:has(.plp-active-filters) { display: flex; }
   .plp .plp-chips .plp-quick-row { display: none; }
+  .plp .plp-chips.filters-collapsed { display: flex; }
+  .plp .plp-chips.filters-collapsed .plp-quick-row { display: flex; }
+  .plp .plp-chips.filters-collapsed .plp-quick-row .plp-quick-pill:not(:first-child),
+  .plp .plp-chips.filters-collapsed .plp-active-filters,
+  .plp .plp-chips.filters-collapsed .plp-quick-pill:first-child b { display: none; }
 }
 
 @media (max-width: 768px) {
