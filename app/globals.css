@@ -1729,7 +1729,7 @@ footer {
 
     .trend>div:last-child {
         position: absolute;
-        inset: 62% 1rem auto;
+        inset: 68% 1rem auto;
         padding: 0;
         display: flex;
         flex-direction: column;
@@ -1752,8 +1752,8 @@ footer {
     }
 
     .trend .btn {
-        padding: 0.75rem 1.25rem;
-        font-size: 0.95rem;
+        padding: 0.6rem 1rem;
+        font-size: 0.8rem;
     }
 
     .payments .payment-logos {
@@ -2219,7 +2219,7 @@ footer {
     }
 
     .trend h2 {
-        font-size: 27px;
+        font-size: 24px;
         color: #FFFF;
     }
 
