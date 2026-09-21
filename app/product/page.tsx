@@ -9,6 +9,7 @@ import "../product.css";
 import SelectLensesButton from "../../components/SelectLensesButton";
 import BuyNowButton from "../../components/BuyNowButton";
 import { favoritesUpdatedEvent, getFavorites, toggleFavorite } from "@/lib/favorites";
+import Link from "next/link";
 
 const views = ["front", "side", "angle", "sun", "folded"];
 const productAssets: Record<string, { src: string; width: number; height: number }> = {
@@ -21,39 +22,39 @@ const productAssets: Record<string, { src: string; width: number; height: number
 };
 const products = [["Rs 599.00", "4.7", "586", "front"], ["Rs 599.00", "4.6", "224", "side"], ["Rs 599.00", "4.5", "1961", "sun"], ["Rs 599.00", "4.5", "417", "angle"], ["Rs 599.00", "4.5", "221", "front"], ["Rs 599.00", "4.8", "312", "angle"], ["Rs 599.00", "4.6", "148", "side"], ["Rs 599.00", "4.9", "93", "sun"]];
 const reviews = [[5, "starseed03", "Great quality", "4 days ago", "I got them delivered earlier that expected. The frame was sturdy and of good quality.", "True to Size", "High", 0], [5, "Reviewer1948161032", "Great pair of glasses", "7 days ago", "The experience was great! The glasses are much better quality than the ones I usually get at Costco, and they were less expensive. I’m very happy with my purchase!", "True to Size", "Average", 0], [3, "Olivia", "Not true to color", "7 days ago", "I really love the size and shape of these frames, but if you’re someone who can’t wear really dark frames then these aren’t for you! I still like them overall.", "True to Size", "High", 1], [1, "craigbruckner", "Big ugly frames", "12 days ago", "These frames are way too big for my face. My wife laughed when she saw them. Oh well, I can wear them when I work outside as safety glasses.", "Loose", "Low", 0]] as const;
-export type DatabaseProduct = { id:string; title:string; slug:string; description:string; price:number; discountPercent:number; quantity:number; shape:string|null; material:string|null; rim:string|null; fit:string|null; weight:number|null; specialFeature:string|null; measurements:Record<string,string>; lensCompatibility:string[]; genders:string[]; categories:string[]; subcategories:string[]; collections:string[]; brands:string[]; media:Array<{name?:string;url:string;primary?:boolean}>; variants:Array<{name:string;values:string[];mediaByValue?:Record<string,Array<{name?:string;url:string}>>}> };
-function ProductImage({ view, className = "", src, database = false }: { view: string, className?: string, src?:string, database?:boolean }) {
+export type DatabaseProduct = { id: string; title: string; slug: string; description: string; price: number; discountPercent: number; quantity: number; shape: string | null; material: string | null; rim: string | null; fit: string | null; weight: number | null; specialFeature: string | null; measurements: Record<string, string>; lensCompatibility: string[]; genders: string[]; categories: string[]; subcategories: string[]; collections: string[]; brands: string[]; media: Array<{ name?: string; url: string; primary?: boolean }>; variants: Array<{ name: string; values: string[]; mediaByValue?: Record<string, Array<{ name?: string; url: string }>> }> };
+function ProductImage({ view, className = "", src, database = false }: { view: string, className?: string, src?: string, database?: boolean }) {
     const asset = productAssets[view] ?? productAssets.front;
-    if(database&&!src)return <div className={`sprite product-asset product-no-image ${className}`}>No image available</div>;
-    return <div className={`sprite product-asset ${className}`}><Image key={src??asset.src} src={src??asset.src} width={asset.width} height={asset.height} alt={`${view} product view`} unoptimized /></div>
+    if (database && !src) return <div className={`sprite product-asset product-no-image ${className}`}>No image available</div>;
+    return <div className={`sprite product-asset ${className}`}><Image key={src ?? asset.src} src={src ?? asset.src} width={asset.width} height={asset.height} alt={`${view} product view`} unoptimized /></div>
 }
 function Rating({ value = 5 }: { value?: number }) { return <span className="stars">{[1, 2, 3, 4, 5].map(i => <Star key={i} fill={i <= value ? "currentColor" : "#c7d2d5"} color={i <= value ? "currentColor" : "#c7d2d5"} />)}</span> }
-function productColor(value:string){const normalized=value.toLowerCase().trim(),colors:Record<string,string>={black:"#111111",white:"#ffffff",blue:"#2158a6",navy:"#172d55",brown:"#795036",clear:"#eef4f4",transparent:"#eef4f4",gray:"#80878a",grey:"#80878a",silver:"#aeb7ba",red:"#ae4040",green:"#427055",pink:"#dc86a5",purple:"#744f91",orange:"#dc7b35",yellow:"#e5c642",gold:"#b79a53",cream:"#eee1bd","rose gold":"#b98276",tortoise:"radial-gradient(circle at 70% 25%,#edb02d 0 18%,#2a1708 23% 48%,#aa6819 52%)",tortoiseshell:"radial-gradient(circle at 70% 25%,#edb02d 0 18%,#2a1708 23% 48%,#aa6819 52%)",rainbow:"conic-gradient(#e44,#ec3,#4a6,#39d,#85c,#e44)",multicolor:"conic-gradient(#e44,#ec3,#4a6,#39d,#85c,#e44)",pattern:"repeating-linear-gradient(45deg,#222 0 4px,#ddd 4px 8px)"};if(/^(#[0-9a-f]{3,8}|rgb(a)?\(|hsl(a)?\()/i.test(normalized))return value;return colors[normalized]??"#d9e0e2"}
-const formatMoney=(currency:string,value:number)=>`${currency} ${Number(value||0).toFixed(2)}`;
+function productColor(value: string) { const normalized = value.toLowerCase().trim(), colors: Record<string, string> = { black: "#111111", white: "#ffffff", blue: "#2158a6", navy: "#172d55", brown: "#795036", clear: "#eef4f4", transparent: "#eef4f4", gray: "#80878a", grey: "#80878a", silver: "#aeb7ba", red: "#ae4040", green: "#427055", pink: "#dc86a5", purple: "#744f91", orange: "#dc7b35", yellow: "#e5c642", gold: "#b79a53", cream: "#eee1bd", "rose gold": "#b98276", tortoise: "radial-gradient(circle at 70% 25%,#edb02d 0 18%,#2a1708 23% 48%,#aa6819 52%)", tortoiseshell: "radial-gradient(circle at 70% 25%,#edb02d 0 18%,#2a1708 23% 48%,#aa6819 52%)", rainbow: "conic-gradient(#e44,#ec3,#4a6,#39d,#85c,#e44)", multicolor: "conic-gradient(#e44,#ec3,#4a6,#39d,#85c,#e44)", pattern: "repeating-linear-gradient(45deg,#222 0 4px,#ddd 4px 8px)" }; if (/^(#[0-9a-f]{3,8}|rgb(a)?\(|hsl(a)?\()/i.test(normalized)) return value; return colors[normalized] ?? "#d9e0e2" }
+const formatMoney = (currency: string, value: number) => `${currency} ${Number(value || 0).toFixed(2)}`;
 
-export default function ProductPage({databaseProduct}:{databaseProduct?:DatabaseProduct}={}) {
+export default function ProductPage({ databaseProduct }: { databaseProduct?: DatabaseProduct } = {}) {
     const productSlider = useRef<SwiperInstance | null>(null);
     const photoSlider = useRef<SwiperInstance | null>(null);
     const gallerySlider = useRef<SwiperInstance | null>(null);
     const [view, setView] = useState("front"), [liked, setLiked] = useState(false), [tab, setTab] = useState("Features"), [color, setColor] = useState(0), [photosOnly, setPhotosOnly] = useState(false), [sideView, setSideView] = useState(false), [sortOpen, setSortOpen] = useState(false), [sortOrder, setSortOrder] = useState("Newest"), [reviewsOpen, setReviewsOpen] = useState(true), [currency, setCurrency] = useState("PKR");
     const slideProducts = (direction: number) => direction < 0 ? productSlider.current?.slidePrev() : productSlider.current?.slideNext();
     const sortedReviews = [...reviews].sort((a, b) => sortOrder === "Highest rating" ? b[0] - a[0] : sortOrder === "Lowest rating" ? a[0] - b[0] : sortOrder === "Most helpful" ? b[7] - a[7] : 0);
-    const frameVariant=databaseProduct?.variants.find(variant=>variant.name.trim().toLowerCase()==="frame color"),frameColors=frameVariant?.values??[];
-    const lensColors=databaseProduct?.variants.find(variant=>variant.name.toLowerCase()==="lens color")?.values??[];
-    const productSizes=databaseProduct?.variants.find(variant=>variant.name.toLowerCase()==="size")?.values??[];
-    const displayedLensCompatibility=databaseProduct?databaseProduct.lensCompatibility:["Sunglasses","EyeQLenz™","Transitions®","Specialty lenses","Blokz® blue-light blocking"];
-    const selectedFrameColor=frameColors[color]??"";
-    const rawDatabaseImages=(selectedFrameColor?frameVariant?.mediaByValue?.[selectedFrameColor]:undefined)??databaseProduct?.media??[];
-    const databaseImages=rawDatabaseImages.filter((image,index,images)=>images.findIndex(item=>item.url===image.url)===index);
-    const databaseImage=(index:number)=>databaseImages[index%Math.max(databaseImages.length,1)]?.url;
-    const originalPrice=Number(databaseProduct?.price??599),discountPercent=Number(databaseProduct?.discountPercent??0),hasDiscount=discountPercent>0;
-    const salePrice=originalPrice*(1-discountPercent/100);
-    const hasProductImages=!databaseProduct||databaseImages.length>0;
-    const showGallerySlider=!databaseProduct||databaseImages.length>1;
-    const outOfStock=Boolean(databaseProduct&&databaseProduct.quantity<=0);
-    useEffect(()=>{if(!databaseProduct)return;const refresh=()=>setLiked(getFavorites().some(item=>item.id===databaseProduct.id));refresh();window.addEventListener(favoritesUpdatedEvent,refresh);return()=>window.removeEventListener(favoritesUpdatedEvent,refresh)},[databaseProduct]);
-    useEffect(()=>{fetch("/api/products/settings",{cache:"no-store"}).then(async response=>{const result=await response.json() as {currency?:string};if(response.ok&&result.currency)setCurrency(result.currency)}).catch(()=>undefined)},[]);
-    const toggleLiked=()=>{if(!databaseProduct)return setLiked(value=>!value);const slug=(value:string)=>value.toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");setLiked(toggleFavorite({...databaseProduct,price:salePrice,categorySlug:slug(databaseProduct.categories[0]||"shop-all"),subcategorySlug:slug(databaseProduct.subcategories[0]||"all")}))};
+    const frameVariant = databaseProduct?.variants.find(variant => variant.name.trim().toLowerCase() === "frame color"), frameColors = frameVariant?.values ?? [];
+    const lensColors = databaseProduct?.variants.find(variant => variant.name.toLowerCase() === "lens color")?.values ?? [];
+    const productSizes = databaseProduct?.variants.find(variant => variant.name.toLowerCase() === "size")?.values ?? [];
+    const displayedLensCompatibility = databaseProduct ? databaseProduct.lensCompatibility : ["Sunglasses", "EyeQLenz™", "Transitions®", "Specialty lenses", "Blokz® blue-light blocking"];
+    const selectedFrameColor = frameColors[color] ?? "";
+    const rawDatabaseImages = (selectedFrameColor ? frameVariant?.mediaByValue?.[selectedFrameColor] : undefined) ?? databaseProduct?.media ?? [];
+    const databaseImages = rawDatabaseImages.filter((image, index, images) => images.findIndex(item => item.url === image.url) === index);
+    const databaseImage = (index: number) => databaseImages[index % Math.max(databaseImages.length, 1)]?.url;
+    const originalPrice = Number(databaseProduct?.price ?? 599), discountPercent = Number(databaseProduct?.discountPercent ?? 0), hasDiscount = discountPercent > 0;
+    const salePrice = originalPrice * (1 - discountPercent / 100);
+    const hasProductImages = !databaseProduct || databaseImages.length > 0;
+    const showGallerySlider = !databaseProduct || databaseImages.length > 1;
+    const outOfStock = Boolean(databaseProduct && databaseProduct.quantity <= 0);
+    useEffect(() => { if (!databaseProduct) return; const refresh = () => setLiked(getFavorites().some(item => item.id === databaseProduct.id)); refresh(); window.addEventListener(favoritesUpdatedEvent, refresh); return () => window.removeEventListener(favoritesUpdatedEvent, refresh) }, [databaseProduct]);
+    useEffect(() => { fetch("/api/products/settings", { cache: "no-store" }).then(async response => { const result = await response.json() as { currency?: string }; if (response.ok && result.currency) setCurrency(result.currency) }).catch(() => undefined) }, []);
+    const toggleLiked = () => { if (!databaseProduct) return setLiked(value => !value); const slug = (value: string) => value.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); setLiked(toggleFavorite({ ...databaseProduct, price: salePrice, categorySlug: slug(databaseProduct.categories[0] || "shop-all"), subcategorySlug: slug(databaseProduct.subcategories[0] || "all") })) };
     return (
         <main className="pdp productDetails">
             <section className="product-hero wrap">
@@ -61,30 +62,30 @@ export default function ProductPage({databaseProduct}:{databaseProduct?:Database
                     <button className="gallery-heart" onClick={toggleLiked} aria-label={liked ? "Remove from favorites" : "Add to favorites"}>
                         <Heart fill={liked ? "#0b6068" : "none"} />
                     </button>
-                    {hasProductImages?(showGallerySlider?<><button type="button" className="gallery-arrow left" onClick={() => gallerySlider.current?.slidePrev()}><ChevronLeft /></button>
-                    <Swiper className="gallery-main" loop speed={450} onSwiper={swiper => { gallerySlider.current = swiper }} onSlideChange={swiper => setView(views[swiper.realIndex]??"front")}>{databaseProduct?databaseImages.map((image,index)=><SwiperSlide key={`${image.url}-${index}`}><ProductImage view={views[index]??"front"} src={image.url} database/></SwiperSlide>):views.map(v=><SwiperSlide key={v}><ProductImage view={v}/></SwiperSlide>)}</Swiper>
-                    <button type="button" className="gallery-arrow right" onClick={() => gallerySlider.current?.slideNext()}><ChevronRight /></button>
-                    <div className="gallery-tools"><button>360°</button><button>▰</button></div>
-                    <div className="thumbnails">
-                        {databaseProduct?databaseImages.slice(0,4).map((image,index)=>{const imageView=views[index]??"front";return <button type="button" aria-label={`Show image ${index+1}`} className={view===imageView?"active":""} key={`${image.url}-${index}`} onClick={()=>gallerySlider.current?.slideToLoop(index)}><ProductImage view={imageView} src={image.url} database/></button>}):views.slice(0,4).map(v=><button type="button" aria-label={`Show ${v} view`} className={view===v?"active":""} key={v} onClick={()=>gallerySlider.current?.slideToLoop(views.indexOf(v))}><ProductImage view={v}/></button>)}
-                    </div></>:<div className="gallery-single-image"><ProductImage view="front" src={databaseImage(0)} database/></div>):<div className="gallery-empty">No image available</div>}
+                    {hasProductImages ? (showGallerySlider ? <><button type="button" className="gallery-arrow left" onClick={() => gallerySlider.current?.slidePrev()}><ChevronLeft /></button>
+                        <Swiper className="gallery-main" loop speed={450} onSwiper={swiper => { gallerySlider.current = swiper }} onSlideChange={swiper => setView(views[swiper.realIndex] ?? "front")}>{databaseProduct ? databaseImages.map((image, index) => <SwiperSlide key={`${image.url}-${index}`}><ProductImage view={views[index] ?? "front"} src={image.url} database /></SwiperSlide>) : views.map(v => <SwiperSlide key={v}><ProductImage view={v} /></SwiperSlide>)}</Swiper>
+                        <button type="button" className="gallery-arrow right" onClick={() => gallerySlider.current?.slideNext()}><ChevronRight /></button>
+                        <div className="gallery-tools"><button>360°</button><button>▰</button></div>
+                        <div className="thumbnails">
+                            {databaseProduct ? databaseImages.slice(0, 4).map((image, index) => { const imageView = views[index] ?? "front"; return <button type="button" aria-label={`Show image ${index + 1}`} className={view === imageView ? "active" : ""} key={`${image.url}-${index}`} onClick={() => gallerySlider.current?.slideToLoop(index)}><ProductImage view={imageView} src={image.url} database /></button> }) : views.slice(0, 4).map(v => <button type="button" aria-label={`Show ${v} view`} className={view === v ? "active" : ""} key={v} onClick={() => gallerySlider.current?.slideToLoop(views.indexOf(v))}><ProductImage view={v} /></button>)}
+                        </div></> : <div className="gallery-single-image"><ProductImage view="front" src={databaseImage(0)} database /></div>) : <div className="gallery-empty">No image available</div>}
                 </div>
                 <div className="product-info-panel">
-                    <h1>{databaseProduct?.title??"Tortoiseshell Square Glasses"}</h1>
+                    <h1>{databaseProduct?.title ?? "Tortoiseshell Square Glasses"}</h1>
                     <div className="title-row">
                         <div>
                             <small>Starting at</small>
-                            <div className="product-price-line"><div className={`price ${hasDiscount?"discounted":""}`}>{formatMoney(currency,salePrice)}</div>{hasDiscount&&<span className="original-price">{formatMoney(currency,originalPrice)}</span>}</div>
-                            {hasDiscount&&<strong className="price-off">{Number.isInteger(discountPercent)?discountPercent:discountPercent.toFixed(1)}% off</strong>}
+                            <div className="product-price-line"><div className={`price ${hasDiscount ? "discounted" : ""}`}>{formatMoney(currency, salePrice)}</div>{hasDiscount && <span className="original-price">{formatMoney(currency, originalPrice)}</span>}</div>
+                            {hasDiscount && <strong className="price-off">{Number.isInteger(discountPercent) ? discountPercent : discountPercent.toFixed(1)}% off</strong>}
                         </div>
                         <a className="score" href="#reviews"><Star fill="currentColor" /> <b>4.7</b> <u>221 reviews</u></a>
                     </div>
                     <div className="options-card">
-                        <div className="size-line"><b>Size:</b> {databaseProduct?(productSizes.join(", ")||"Not specified"):"large (52 □ 19 - 143)"}</div>
+                        <div className="size-line"><b>Size:</b> {databaseProduct ? (productSizes.join(", ") || "Not specified") : "large (52 □ 19 - 143)"}</div>
                         {/* <b className="size-pill">Large</b> */}
-                        {(!databaseProduct||frameColors.length>0)&&<><p><b>Frame color:</b> {selectedFrameColor||"Tortoiseshell"}</p><div className="swatches" aria-label="Frame colors">{(databaseProduct?frameColors:["tortoise","black","blue"]).map((c, i) => <button key={c} onClick={() => setColor(i)} style={{background:productColor(c)}} className={color === i ? "selected" : ""} aria-label={`Select frame color ${c}`} title={c}/>)}</div></>}</div>
-                    {outOfStock?<button className="select-lenses" type="button" disabled>Out of stock</button>:<><BuyNowButton productId={databaseProduct?.id} name={databaseProduct?.title} frameColor={selectedFrameColor||undefined} image={databaseImage(0)} framePrice={salePrice}/><SelectLensesButton product={databaseProduct?{productId:databaseProduct.id,name:databaseProduct.title,frameColor:selectedFrameColor,image:databaseImage(0)||"",framePrice:salePrice,lensColors}:undefined}/></>}
-                    <div className="pay-card">Pay over time with PayPal, Affirm or Afterpay. &nbsp;<u>Learn More</u><br />Use your insurance or FSA/HSA benefits. &nbsp;<u>Learn more</u></div>
+                        {(!databaseProduct || frameColors.length > 0) && <><p><b>Frame color:</b> {selectedFrameColor || "Tortoiseshell"}</p><div className="swatches" aria-label="Frame colors">{(databaseProduct ? frameColors : ["tortoise", "black", "blue"]).map((c, i) => <button key={c} onClick={() => setColor(i)} style={{ background: productColor(c) }} className={color === i ? "selected" : ""} aria-label={`Select frame color ${c}`} title={c} />)}</div></>}</div>
+                    {outOfStock ? <button className="select-lenses" type="button" disabled>Out of stock</button> : <><BuyNowButton productId={databaseProduct?.id} name={databaseProduct?.title} frameColor={selectedFrameColor || undefined} image={databaseImage(0)} framePrice={salePrice} /><SelectLensesButton product={databaseProduct ? { productId: databaseProduct.id, name: databaseProduct.title, frameColor: selectedFrameColor, image: databaseImage(0) || "", framePrice: salePrice, lensColors } : undefined} /></>}
+                    <div className="pay-card">Pay over time with PayPal, Affirm or Afterpay. &nbsp;<u><Link href={`/accepted-payment-methods`}>Learn More</Link></u><br />Use your insurance or FSA/HSA benefits. &nbsp;<u><Link href={`/accepted-payment-methods`}>Learn more</Link></u></div>
                     <div className="includes"><h3>ZENNI WOW PRICE INCLUDES:</h3><p>✓ High-quality frame<br />✓ Basic prescription lenses*<br />✓ Anti-scratch coating<br />✓ UV protection</p><i>*multifocal or readers lenses start at additional cost</i></div>
                     <div className="bought">
                         <h2>Customers also bought</h2>
@@ -98,11 +99,11 @@ export default function ProductPage({databaseProduct}:{databaseProduct?:Database
                     {["Features", "Description"].map(t => <button key={t} className={tab === t ? "active" : ""} onClick={() => setTab(t)}>{t}</button>)}
                 </div>
                 {tab === "Features" && <div className="feature-content wrap">
-                    <div className="frame-design"><h3>Frame design</h3><dl><dt>Shape</dt><dd><u>{databaseProduct?.shape??"Square"}</u></dd><dt>Feature</dt><dd><u>{databaseProduct?.specialFeature??"Spring Hinges, Universal Bridge Fit"}</u></dd><dt>Rim</dt><dd><u>{databaseProduct?.rim??"Full Rim"}</u></dd><dt>Material</dt><dd><u>{databaseProduct?.material??"Acetate"}</u></dd><dt>Weight</dt><dd>{databaseProduct?.weight?`${databaseProduct.weight} grams`:"(23 grams / 0.8 ounces)"}</dd></dl></div>
-                    <div className="lens-list"><h3>Lens compatibility</h3>{displayedLensCompatibility.length?displayedLensCompatibility.map(item => <p key={item}><span>✓</span><b>{item}</b></p>):<p>No lens compatibility specified.</p>}</div>
+                    <div className="frame-design"><h3>Frame design</h3><dl><dt>Shape</dt><dd><u>{databaseProduct?.shape ?? "Square"}</u></dd><dt>Feature</dt><dd><u>{databaseProduct?.specialFeature ?? "Spring Hinges, Universal Bridge Fit"}</u></dd><dt>Rim</dt><dd><u>{databaseProduct?.rim ?? "Full Rim"}</u></dd><dt>Material</dt><dd><u>{databaseProduct?.material ?? "Acetate"}</u></dd><dt>Weight</dt><dd>{databaseProduct?.weight ? `${databaseProduct.weight} grams` : "(23 grams / 0.8 ounces)"}</dd></dl></div>
+                    <div className="lens-list"><h3>Lens compatibility</h3>{displayedLensCompatibility.length ? displayedLensCompatibility.map(item => <p key={item}><span>✓</span><b>{item}</b></p>) : <p>No lens compatibility specified.</p>}</div>
                     <div className="special-list"><h3>What makes it special</h3><div><span>✓</span><p><b>Zenni Promise</b><br />Experience high quality frames at our most affordable prices.</p></div><div><span>✓</span><p><b>Made for all faces</b><br />Designed to accommodate many face shapes and sizes.</p></div><div><span>✓</span><p><b>Luxury Crafted</b><br />Handcrafted acetate delivers vibrant, fade-resistant colors with hypoallergenic durability.</p></div></div>
                 </div>}
-                {tab === "Description" && <div className="detail-content wrap"><div>{databaseProduct?<div dangerouslySetInnerHTML={{__html:databaseProduct.description||"<p>No description provided.</p>"}}/>:<><b>Design:</b><p>Discover timeless sophistication with these full rim square glasses, meticulously crafted from premium acetate to showcase a sleek design and impeccable craftsmanship.</p><b>Fit:</b><p>These glasses feature spring hinges and a universal bridge fit, ensuring superior comfort and a secure fit for everyday wear.</p><b>Recommendation:</b><p>These glasses offer a sophisticated and classic style, perfect for both men and women. With their square frame shape, they are ideal for individuals with heart and oval face shapes.</p></>}</div><ProductImage view="angle" src={databaseImage(2)} database={Boolean(databaseProduct)} /></div>}
+                {tab === "Description" && <div className="detail-content wrap"><div>{databaseProduct ? <div dangerouslySetInnerHTML={{ __html: databaseProduct.description || "<p>No description provided.</p>" }} /> : <><b>Design:</b><p>Discover timeless sophistication with these full rim square glasses, meticulously crafted from premium acetate to showcase a sleek design and impeccable craftsmanship.</p><b>Fit:</b><p>These glasses feature spring hinges and a universal bridge fit, ensuring superior comfort and a secure fit for everyday wear.</p><b>Recommendation:</b><p>These glasses offer a sophisticated and classic style, perfect for both men and women. With their square frame shape, they are ideal for individuals with heart and oval face shapes.</p></>}</div><ProductImage view="angle" src={databaseImage(2)} database={Boolean(databaseProduct)} /></div>}
             </section>
 
             <section className="recommend">

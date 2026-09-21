@@ -1784,6 +1784,19 @@ footer {
 }
 
 @media (max-width: 480px) {
+    .utility svg {
+        width: 30px;
+        height: 25px;
+    }
+
+    .seller-delivery {
+        font-size: 3.972vw !important;
+    }
+
+    .includes p {
+        font-size: 3.9vw;
+    }
+
     .hero-mobile {
         background: url('../public/images/hero-mobile.png');
         background-position: center;
@@ -2393,6 +2406,16 @@ footer {
     height: auto;
 }
 
+.seller-empty {
+    min-height: 12rem;
+    display: grid;
+    place-items: center;
+    margin: 0;
+    padding: 1rem;
+    color: #fff;
+    font-weight: 600;
+}
+
 /* Match Swiper's responsive layout before hydration to prevent a one-card flash. */
 .best-sellers-rail:not(.swiper-initialized) .swiper-slide {
     width: calc((100% - 4.444vw) / 5);
@@ -2659,7 +2682,7 @@ footer {
     .featured-slider .best-sellers-actions {
         position: absolute;
         z-index: 6;
-        bottom: 30px;
+        bottom: 13px;
         left: 20px;
     }
 

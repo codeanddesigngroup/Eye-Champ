@@ -1,34 +1,46 @@
 "use client";
 
-import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, ChevronRight, Heart, Plus, Star, Video } from "lucide-react";
-import { useRef, useState } from "react";
+import { ChevronLeft, ChevronRight, Heart, Plus } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import type { Swiper as SwiperInstance } from "swiper";
 import Link from "next/link";
 import "swiper/css";
 
-const products = [
-  { image: "/images/product/1.avif", price: "Rs 599.00", rating: "4.7", reviews: "221", shape: "Square", colors: ["tortoise", "black"] },
-  { image: "/images/product/2.avif", price: "Rs 599.00", rating: "4.5", reviews: "2K+", shape: "Square", delivery: true, colors: ["blue", "clear", "brown", "more"] },
-  { image: "/images/product/3.avif", price: "Rs 599.00", rating: "4.6", reviews: "224", shape: "Square", delivery: true, colors: ["black", "tortoise", "gray"] },
-  { image: "/images/product/4.avif", price: "Rs 599.00", rating: "4.7", reviews: "168", shape: "Rectangle", colors: ["black", "green"] },
-  { image: "/images/product/eyeglasses-front-view.avif", price: "Rs 599.00", rating: "4.5", reviews: "4K+", shape: "Rectangle", delivery: true, colors: ["silver", "multi", "pink", "more"] },
-  { image: "/images/product/eyeglasses-front-view.avif", price: "Rs 599.00", rating: "4.5", reviews: "4K+", shape: "Rectangle", delivery: true, colors: ["silver", "multi", "pink", "more"] },
-];
+type Product = { id: string; title: string; slug: string; price: number; discountPercent: number; shape: string | null; media: { url: string; primary?: boolean }[]; variants: { name: string; values: string[]; mediaByValue?: Record<string, { url: string }[]> }[]; categorySlug: string | null; subcategorySlug: string | null };
 
 export default function Slider() {
   const router = useRouter();
   const [category, setCategory] = useState<"Eyeglasses" | "Sunglasses">("Eyeglasses");
-  const [saved, setSaved] = useState<number[]>([]);
-  const [selectedColors, setSelectedColors] = useState<Record<number, number>>({});
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [saved, setSaved] = useState<string[]>([]);
+  const [selectedColors, setSelectedColors] = useState<Record<string, string>>({});
+  const [currency, setCurrency] = useState("PKR");
   const [atStart, setAtStart] = useState(true);
   const [atEnd, setAtEnd] = useState(false);
   const swiper = useRef<SwiperInstance | null>(null);
 
-  const toggleSaved = (index: number) => {
-    setSaved((current) => current.includes(index) ? current.filter((item) => item !== index) : [...current, index]);
+  useEffect(() => {
+    const controller = new AbortController();
+    setLoading(true);
+    setError(false);
+    setProducts([]);
+    fetch(`/api/products?category=${category.toLowerCase()}&collection=${encodeURIComponent("Best Sellers")}`, { signal: controller.signal })
+      .then(async response => { if (!response.ok) throw new Error("Could not load products"); return response.json() as Promise<{ products?: Product[] }> })
+      .then(result => setProducts(result.products ?? []))
+      .catch(() => { if (!controller.signal.aborted) setError(true) })
+      .finally(() => { if (!controller.signal.aborted) setLoading(false) });
+    return () => controller.abort();
+  }, [category]);
+
+  useEffect(() => { fetch("/api/products/settings").then(response => response.json()).then((result: { currency?: string }) => { if (result.currency) setCurrency(result.currency) }).catch(() => undefined) }, []);
+  useEffect(() => { swiper.current?.slideTo(0); setAtStart(true); }, [category]);
+
+  const toggleSaved = (id: string) => {
+    setSaved((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
   };
 
   return (
@@ -66,42 +78,46 @@ export default function Slider() {
             1600: { slidesPerView: 5, spaceBetween: 16 },
           }}
         >
-          {products.map((product, index) => (
-            <SwiperSlide key={`${category}-${index}`}>
+          {(loading || error || products.length === 0) && <SwiperSlide><p className="seller-empty">{loading ? "Loading products..." : error ? "Could not load products." : `No best-selling ${category.toLowerCase()} found.`}</p></SwiperSlide>}
+          {products.map((product) => {
+            const colors = product.variants?.find(variant => /frame.*color/i.test(variant.name));
+            const selectedColor = selectedColors[product.id] ?? colors?.values[0];
+            const image = (selectedColor && colors?.mediaByValue?.[selectedColor]?.[0]?.url) || product.media?.find(item => item.primary)?.url || product.media?.[0]?.url;
+            const href = `/${product.categorySlug ?? category.toLowerCase()}/${product.subcategorySlug ?? "all"}/${product.slug}`;
+            const price = `${currency} ${(Number(product.price) * (1 - Number(product.discountPercent || 0) / 100)).toFixed(2)}`;
+            return <SwiperSlide key={product.id}>
               <article
                 className="seller-card"
                 role="link"
                 tabIndex={0}
-                aria-label={`View ${product.shape} ${category.toLowerCase()} for ${product.price}`}
+                aria-label={`View ${product.title} for ${price}`}
                 onClick={(event) => {
-                  if (!(event.target as HTMLElement).closest("button, a")) router.push("/product");
+                  if (!(event.target as HTMLElement).closest("button, a")) router.push(href);
                 }}
                 onKeyDown={(event) => {
-                  if (event.key === "Enter") router.push("/product");
+                  if (event.key === "Enter" && event.target === event.currentTarget) router.push(href);
                 }}
               >
                 <div className="seller-visual">
                   <span className="seller-badge">Top rated</span>
-                  <button className={`seller-heart ${saved.includes(index) ? "saved" : ""}`} type="button" aria-label={saved.includes(index) ? "Remove from favorites" : "Add to favorites"} onClick={() => toggleSaved(index)}>
-                    <Heart fill={saved.includes(index) ? "currentColor" : "none"} />
+                  <button className={`seller-heart ${saved.includes(product.id) ? "saved" : ""}`} type="button" aria-label={saved.includes(product.id) ? "Remove from favorites" : "Add to favorites"} onClick={() => toggleSaved(product.id)}>
+                    <Heart fill={saved.includes(product.id) ? "currentColor" : "none"} />
                   </button>
-                  <Image src={product.image} alt={`${product.shape} ${category.toLowerCase()}`} width={520} height={280} sizes="(max-width: 600px) 82vw, (max-width: 1000px) 44vw, 20vw" unoptimized />
-                  {/* <button className="try-on" type="button"><Video fill="currentColor" aria-hidden="true" />Try on</button> */}
+                  {image ? <img src={image} alt={product.title} /> : <span>No image</span>}
                 </div>
                 <div className="seller-info">
                   <div className="seller-line">
-                    <strong>{product.price}</strong>
-                    {/* <span><Star fill="currentColor" aria-hidden="true" /> {product.rating} ({product.reviews})</span> */}
+                    <strong>{price}</strong>
                     </div>
-                  <p>{product.shape}</p>
-                  {product.delivery && <b className="seller-delivery">Get it as early as Fri, Aug 21</b>}
+                  <p>{product.title}</p>
                   <div className="seller-colors" aria-label="Available colors">
-                    {product.colors.map((color, colorIndex) => color === "more" ? <button type="button" className="color-more" aria-label="See more colors" key={`${color}-${colorIndex}`}><Plus /></button> : <button type="button" aria-label={`Select ${color} color`} aria-pressed={(selectedColors[index] ?? 0) === colorIndex} onClick={() => setSelectedColors((current) => ({ ...current, [index]: colorIndex }))} className={`color-dot ${color} ${(selectedColors[index] ?? 0) === colorIndex ? "selected" : ""}`} key={`${color}-${colorIndex}`} />)}
+                    {colors?.values.slice(0, 4).map(color => <button type="button" aria-label={`Select ${color} color`} aria-pressed={selectedColor === color} onClick={() => setSelectedColors(current => ({ ...current, [product.id]: color }))} className={`color-dot ${color.toLowerCase().replace(/\s+/g, "-")} ${selectedColor === color ? "selected" : ""}`} key={color} />)}
+                    {(colors?.values.length ?? 0) > 4 && <button type="button" className="color-more" aria-label="See more colors" onClick={() => router.push(href)}><Plus /></button>}
                   </div>
                 </div>
               </article>
-            </SwiperSlide>
-          ))}
+            </SwiperSlide>;
+          })}
         </Swiper>
         <button className="seller-nav seller-nav-next" type="button" aria-label="Next products" disabled={atEnd} onClick={() => swiper.current?.slideNext()}><ChevronRight /></button>
       </div>

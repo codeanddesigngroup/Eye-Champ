@@ -65,9 +65,14 @@ export default function Navbar() {
                     <div id={`mobile-category-${category.id}`} className="mobile-shop-menu-children" hidden={!expandedCategoryIds.includes(category.id)}>
                         <Link className="mobile-shop-menu-child" href={`/${category.slug}/all`} onClick={() => setMenu(false)}>All {category.name.toLowerCase()}</Link>
                         {categories.filter(child => child.parentId === category.id).map(child => <Link className="mobile-shop-menu-child" href={`/${category.slug}/${child.slug}`} onClick={() => setMenu(false)} key={child.id}>{child.name}</Link>)}
+                        {(["eyeglasses", "sunglasses"].includes(category.slug.toLowerCase()) || ["eyeglasses", "sunglasses"].includes(category.name.toLowerCase())) && <>
+                            {!categories.some(child => child.parentId === category.id && child.slug === "new-arrivals") && <Link className="mobile-shop-menu-child" href={`/${category.slug}/new-arrivals`} onClick={() => setMenu(false)}>New arrivals</Link>}
+                            {!categories.some(child => child.parentId === category.id && child.slug === "under-5000") && <Link className="mobile-shop-menu-child" href={`/${category.slug}/under-5000`} onClick={() => setMenu(false)}>Under 5000</Link>}
+                        </>}
                     </div>
                 </div>)}
                 <Link href="/all-glasses/on-sale" onClick={() => setMenu(false)}>Sale</Link>
+                <Link href="/" onClick={() => setMenu(false)}>Trending Now</Link>
                 <Link href="/" onClick={() => setMenu(false)}>Help</Link>
             </nav>
 
