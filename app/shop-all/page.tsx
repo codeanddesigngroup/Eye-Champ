@@ -115,7 +115,7 @@ export default function ShopAll({categorySlug="",subcategorySlug="",catalogTitle
         <button type="button" className={density === "roomy" ? "active" : ""} onClick={() => setDensity("roomy")} aria-label="One-column grid" aria-pressed={density === "roomy"}><GridIcon size={2} /><span className="mobile-grid-icon mobile-grid-roomy" aria-hidden="true"><i /><i /></span></button>
         <button type="button" className={density === "compact" ? "active" : ""} onClick={() => setDensity("compact")} aria-label="Two-column grid" aria-pressed={density === "compact"}><GridIcon size={3} /><span className="mobile-grid-icon mobile-grid-compact" aria-hidden="true"><i /><i /><i /><i /></span></button>
       </div>
-      <label>Sort By: <select value={sort} onChange={e => setSort(e.target.value)}>{["Relevance", "New Arrivals", "Top Rated", "Price Low to High", "Price High to Low"].map(x => <option key={x}>{x}</option>)}</select></label>
+      <label>Sort By: <span className="plp-sort-control"><select value={sort} onChange={e => setSort(e.target.value)}>{["Relevance", "New Arrivals", "Top Rated", "Price Low to High", "Price High to Low"].map(x => <option key={x}>{x}</option>)}</select><ChevronDown aria-hidden="true" /></span></label>
     </section>
 
     <div className={`plp-body ${filtersOpen ? "" : "filters-hidden"}`}>

@@ -1799,7 +1799,7 @@ footer {
 
     .mobile_logo{
         display: block;
-        width: 60% !important;
+        width: 45% !important;
     }
 
     .seller-delivery {
@@ -2770,7 +2770,7 @@ footer {
 
 @media (max-width: 480px) {
     #men span {
-        margin-right: 8vw;
+        margin-right: 5vw;
         font-size: 4.319vw;
     }
 
