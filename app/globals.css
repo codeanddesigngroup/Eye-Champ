@@ -1970,12 +1970,12 @@ footer {
     }
 
     .hero p {
-        margin: 5px 0;
+        margin: 10px 0;
     }
 
     .btn {
-        padding: 10px 20px;
-        font-size: 15px;
+        padding: 10px 15px;
+        font-size: 12px;
     }
 
     .gender-grid {
@@ -2756,6 +2756,16 @@ footer {
 }
 
 @media (max-width: 480px) {
+    #men span {
+        margin-right: 8vw;
+        font-size: 4.319vw;
+    }
+
+    #women span {
+    margin-right: 8.3vw;
+    font-size: 4.319vw;
+}
+
     .best-sellers {
         padding-top: 9vw;
     }

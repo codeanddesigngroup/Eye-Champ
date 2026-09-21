@@ -122,6 +122,7 @@ export default function Home() {
         <div key={`${trendBanners[trendIndex]}-${mobileTrendBanners[mobileTrendIndex]}`} className="trend-bg" style={{ "--trend-desktop-image": `url(${trendBanners[trendIndex]})`, "--trend-mobile-image": `url(${mobileTrendBanners[mobileTrendIndex]})` } as CSSProperties} /><div><h2>THE TREND SHOP</h2><p>Curated styles, fresh colors, and must-see edits.</p><Link className="btn" href="/shop-all">SHOP NOW</Link></div>
       </section>
     </div>
+    
     <UnderSlider />
   </main>;
 }
