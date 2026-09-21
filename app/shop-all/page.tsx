@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Heart, SlidersHorizontal, Star } from "lucide-react";
-import ProductFilters, { type ProductFilterSelection, type ProductFilterTitle } from "@/components/ProductFilters";
+import { ChevronDown, Heart, SlidersHorizontal, Star, X } from "lucide-react";
+import ProductFilters, { productFilterGroups, type ProductFilterSelection, type ProductFilterTitle } from "@/components/ProductFilters";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { favoritesUpdatedEvent, getFavorites, toggleFavorite } from "@/lib/favorites";
@@ -52,7 +52,7 @@ function GridIcon({ size }: { size: 2 | 3 }) { return <span className={`grid-ico
 type CatalogQuery = Partial<Record<"gender"|"collection"|"shape"|"material"|"brand"|"rim"|"maxPrice"|"onSale",string>>;
 
 export default function ShopAll({categorySlug="",subcategorySlug="",catalogTitle="The A-List Collection",catalogQuery={}}:{categorySlug?:string;subcategorySlug?:string;catalogTitle?:string;catalogQuery?:CatalogQuery}) {
-  const [filtersOpen, setFiltersOpen] = useState(true), [mobileFiltersOpen, setMobileFiltersOpen] = useState(false), [sort, setSort] = useState("Relevance"), [filters, setFilters] = useState<ProductFilterSelection>({}), [faq, setFaq] = useState<number | null>(null), [density, setDensity] = useState<"roomy" | "compact">("compact");
+  const [filtersOpen, setFiltersOpen] = useState(true), [mobileFiltersOpen, setMobileFiltersOpen] = useState(false), [sort, setSort] = useState("Relevance"), [filters, setFilters] = useState<ProductFilterSelection>({}), [focusGroup, setFocusGroup] = useState<ProductFilterTitle | null>(null), [focusRequest, setFocusRequest] = useState(0), [faq, setFaq] = useState<number | null>(null), [density, setDensity] = useState<"roomy" | "compact">("compact");
   const [missing, setMissing] = useState(false);
   const [products, setProducts] = useState<Product[]>([]), [loading, setLoading] = useState(true), [loadError, setLoadError] = useState("");
   const [activeOptions, setActiveOptions] = useState<{collections:string[];brands:string[]}>({ collections:[], brands:[] });
@@ -70,7 +70,8 @@ export default function ShopAll({categorySlug="",subcategorySlug="",catalogTitle
       const price=Number(product.price);
       const priceMatch=!filters.Price?.length||filters.Price.some(range=>range==="Under 1000"?price<1000:range==="Under 2000"?price<2000:range==="Under 3000"?price<3000:range==="Above 5000"?price>5000:false);
       const frameColors=product.variants.find(variant=>variant.name.toLowerCase().includes("frame")&&variant.name.toLowerCase().includes("color"))?.values??[];
-      return priceMatch&&matchesAny(filters.Gender,product.genders??[])&&matches(filters.Material,product.material)&&matchesAny(filters.Collections,product.collections??[])&&matches(filters.Shape,product.shape)&&matches(filters.Rim,product.rim)&&matchesAny(filters.Brand,product.brands??[])&&matchesAny(filters.Color,frameColors);
+      const frameSizes=product.variants.filter(variant=>variant.name.toLowerCase().includes("size")).flatMap(variant=>variant.values);
+      return priceMatch&&matchesAny(filters.Size,frameSizes)&&matchesAny(filters.Gender,product.genders??[])&&matches(filters.Material,product.material)&&matchesAny(filters.Collections,product.collections??[])&&matches(filters.Shape,product.shape)&&matches(filters.Rim,product.rim)&&matchesAny(filters.Brand,product.brands??[])&&matchesAny(filters.Color,frameColors);
     });
     if(sort==="Relevance")list.sort((a,b)=>Number(b.quantity>0)-Number(a.quantity>0)||(catalogPosition.get(a.id)??0)-(catalogPosition.get(b.id)??0));
     if(sort==="Price Low to High")list.sort((a,b)=>Number(a.price)-Number(b.price));
@@ -80,6 +81,9 @@ export default function ShopAll({categorySlug="",subcategorySlug="",catalogTitle
     return list;
   },[products,filters,sort]);
   const toggleFilter=(group:ProductFilterTitle,value:string)=>setFilters(current=>{const values=current[group]??[];return {...current,[group]:values.includes(value)?values.filter(item=>item!==value):[...values,value]}});
+  const activeFilters=productFilterGroups.flatMap(([group])=>(filters[group]??[]).map(value=>({group,value})));
+  const selectedCount=activeFilters.length;
+  const openFilters=(group:ProductFilterTitle|null=null)=>{setFiltersOpen(true);setMobileFiltersOpen(true);setFocusGroup(group);setFocusRequest(current=>current+1)};
   if (missing) notFound();
   return <main className="plp">
     <section className="plp-hero">
@@ -90,12 +94,17 @@ export default function ShopAll({categorySlug="",subcategorySlug="",catalogTitle
       </div>
     </section>
 
-    <div className="plp-chips">
-      {["Frames"].map((x, i) => <button key={x} className={i === 0 ? "active" : ""}>{x}</button>)}
+    <div className="plp-chips" aria-label="Quick filters">
+      <div className="plp-quick-row">
+        <button type="button" className="plp-quick-pill" onClick={()=>openFilters()}><SlidersHorizontal aria-hidden="true"/>Filters{selectedCount>0&&<b>{selectedCount}</b>}</button>
+        <button type="button" className="plp-quick-pill" onClick={()=>openFilters("Shape")}>Shape{(filters.Shape?.length??0)>0&&<b>{filters.Shape?.length}</b>}<ChevronDown aria-hidden="true"/></button>
+        <button type="button" className="plp-quick-pill" onClick={()=>openFilters("Size")}>Size{(filters.Size?.length??0)>0&&<b>{filters.Size?.length}</b>}<ChevronDown aria-hidden="true"/></button>
+      </div>
+      {selectedCount>0&&<div className="plp-active-filters">{activeFilters.map(({group,value})=><button type="button" key={`${group}-${value}`} className="plp-active-chip" onClick={()=>toggleFilter(group,value)}>{value}<X aria-hidden="true"/></button>)}<button type="button" className="plp-clear-filters" onClick={()=>setFilters({})}>Clear all</button></div>}
     </div>
 
     <section className="plp-tools">
-      <button className="filter-button" onClick={() => { setFiltersOpen(true); setMobileFiltersOpen(true); }}><SlidersHorizontal /> Filter & Sort</button>
+      <button className="filter-button" onClick={() => openFilters()}><SlidersHorizontal /> Filter & Sort</button>
       <span>{visible.length ? `Showing 1-${visible.length} of ${products.length} results` : `Showing 0 of ${products.length} results`}</span>
       <div className="grid-switch">
         <button className={density === "roomy" ? "active" : ""} onClick={() => setDensity("roomy")} aria-label="Roomy grid"><GridIcon size={2} /></button>
@@ -105,7 +114,7 @@ export default function ShopAll({categorySlug="",subcategorySlug="",catalogTitle
     </section>
 
     <div className={`plp-body ${filtersOpen ? "" : "filters-hidden"}`}>
-      {filtersOpen && <ProductFilters selected={filters} onToggle={toggleFilter} onHide={() => { setFiltersOpen(false); setMobileFiltersOpen(false); }} activeOptions={activeOptions} mobileOpen={mobileFiltersOpen} />}
+      {filtersOpen && <ProductFilters selected={filters} onToggle={toggleFilter} onHide={() => { setFiltersOpen(false); setMobileFiltersOpen(false); setFocusGroup(null); }} activeOptions={activeOptions} mobileOpen={mobileFiltersOpen} focusGroup={focusGroup} focusRequest={focusRequest} />}
 
       <section className={`plp-grid ${density}`}>
         {loading && <p>Loading products...</p>}

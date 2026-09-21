@@ -1356,3 +1356,101 @@
   background: conic-gradient(#ff6a53 0 25%, #11a58d 0 50%, #ffc52b 0 75%, #2182be 0);
   border: 0
 }
+
+/* Quick filters and selected-filter chips */
+.plp .plp-chips {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 14px;
+  overflow: visible;
+  padding: 16px 10px;
+  background: #fff;
+}
+
+.plp-quick-row,
+.plp-active-filters {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.plp-quick-menu-wrap { position: relative; }
+
+.plp .plp-chips .plp-quick-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 30px;
+  padding: 2px 5px;
+  border: 1px solid #101820;
+  border-radius: 999px;
+  background: #fff;
+  color: #101820;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.plp-quick-pill svg { width: 15px; height: 15px; }
+.plp-quick-pill b {
+  display: grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 50%;
+  background: #101820;
+  color: #fff;
+  font-size: 11px;
+}
+
+.plp-quick-menu {
+  position: absolute;
+  z-index: 55;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 180px;
+  max-height: 280px;
+  overflow-y: auto;
+  padding: 8px;
+  border: 1px solid #d4dce0;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 8px 24px #0002;
+}
+
+.plp-quick-menu label { display: flex; align-items: center; gap: 9px; padding: 7px; white-space: nowrap; font-size: 13px; cursor: pointer; }
+.plp-quick-menu input { accent-color: #101820; }
+
+.plp .plp-chips .plp-active-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 9px;
+  border: 0;
+  border-radius: 999px;
+  background: #101820;
+  color: #fff;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.plp-active-chip svg { width: 13px; height: 13px; }
+.plp .plp-chips .plp-clear-filters {
+  display: inline-block;
+  padding: 5px 8px;
+  border: 0;
+  background: transparent;
+  color: #101820;
+  text-decoration: underline;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}

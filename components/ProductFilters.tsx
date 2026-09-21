@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { ChevronDown, SlidersHorizontal } from "lucide-react";
 export const productFilterGroups = [
   ["Gender", ["Men", "Women"]],
@@ -7,6 +8,7 @@ export const productFilterGroups = [
   ["Material", ["Plastic", "Metal", "Mix material", "Acetate"]],
   ["Collections", ["Under 5000", "New Arrivals", "Best Sellers", "Top Rated"]],
   ["Shape", ["Square", "Rectangle", "Round", "Cat eye", "Browline", "Aviator"]],
+  ["Size", ["Small", "Medium", "Large", "Extra Large"]],
   ["Rim", ["Full rim", "Half rim", "Rimless"]],
   ["Brand", ["Ray-Ban", "Cartier", "Montblanc", "Tom Ford", "Moscot", "Oakley", "Prada", "Emporio Armani", "Versace", "Gucci"]],
   ["Color", ["Black", "Pink", "Clear", "Blue", "Tortoiseshell", "Purple", "Green", "Red", "Rainbow", "Gold", "Brown", "White", "Pattern", "Cream", "Multicolor", "Orange", "Gray", "Yellow", "Silver", "Rose Gold"]],
@@ -21,11 +23,21 @@ type ProductFiltersProps = {
   onHide: () => void;
   activeOptions?: { collections: string[]; brands: string[] };
   mobileOpen?: boolean;
+  focusGroup?: ProductFilterTitle | null;
+  focusRequest?: number;
 };
 
-export default function ProductFilters({ selected, onToggle, onHide, activeOptions, mobileOpen = false }: ProductFiltersProps) {
+export default function ProductFilters({ selected, onToggle, onHide, activeOptions, mobileOpen = false, focusGroup, focusRequest }: ProductFiltersProps) {
+  const panelRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (!focusGroup) return;
+    const section = Array.from(panelRef.current?.querySelectorAll<HTMLDetailsElement>("details[data-filter-group]") ?? []).find(item => item.dataset.filterGroup === focusGroup);
+    if (!section) return;
+    section.open = true;
+    section.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, [focusGroup, focusRequest, mobileOpen]);
   const groups = productFilterGroups.map(([title, items]) => [title, title === "Collections" ? activeOptions?.collections ?? [] : title === "Brand" ? activeOptions?.brands ?? [] : items] as const);
-  return <aside className={`filters open ${mobileOpen ? "mobile-open" : ""}`}>
+  return <aside ref={panelRef} className={`filters open ${mobileOpen ? "mobile-open" : ""}`}>
     <div className="filters-title">
       <h2>Filters</h2>
       <button className="hide-filters" onClick={onHide}><SlidersHorizontal /><span>Hide Filters</span></button>
@@ -35,7 +47,7 @@ export default function ProductFilters({ selected, onToggle, onHide, activeOptio
 }
 
 function FilterGroup({ title, items, selected, onToggle }: { title: ProductFilterTitle; items: readonly string[]; selected: string[]; onToggle: (value: string) => void }) {
-  return <details open={title === "Shape" || title === "Color" ? true : undefined}>
+  return <details data-filter-group={title} open={title === "Shape" || title === "Color" ? true : undefined}>
     <summary><span>{title}</span><ChevronDown /></summary>
     <div>{items.map(item => <label key={item}>
       <input type="checkbox" checked={selected.includes(item)} onChange={() => onToggle(item)} />
