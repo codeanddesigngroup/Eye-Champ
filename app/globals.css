@@ -85,6 +85,10 @@ input {
     width: 80%;
 }
 
+.mobile_logo{
+    display: none;
+}
+
 .search {
     border: 0.069vw solid #777;
     height: 3.056vw;
@@ -1785,8 +1789,17 @@ footer {
 
 @media (max-width: 480px) {
     .utility svg {
-        width: 30px;
+        width: 25px;
         height: 25px;
+    }
+
+    .desktop_logo{
+        display: none;
+    }
+
+    .mobile_logo{
+        display: block;
+        width: 60% !important;
     }
 
     .seller-delivery {
@@ -1842,8 +1855,8 @@ footer {
         justify-self: start;
         font-size: 0;
         padding: 0;
-        width: 24px;
-        height: 24px;
+        width: 30px;
+        height: 45px;
     }
 
     .menu::before {
@@ -1851,19 +1864,19 @@ footer {
         font-size: 18px;
     }
 
-    .logo {
+    /* .logo {
         grid-area: logo;
         justify-self: start;
         width: 54px;
         height: 30px;
         overflow: hidden;
-    }
+    } */
 
-    .logo img {
+    /* .logo img {
         width: 54px;
         height: 36px;
         object-fit: cover;
-    }
+    } */
 
     .search {
         grid-area: search;
@@ -2139,7 +2152,7 @@ footer {
     }
 
     .image-slide {
-        height: 500px;
+        height: 400px;
         aspect-ratio: auto;
         border-radius: 14px;
     }
@@ -3206,8 +3219,8 @@ footer {
     }
 
     .site-header .menu svg {
-        width: 22px;
-        height: 22px;
+        width: 30px;
+        height: 30px;
     }
 
     .mobile-menu-backdrop {
