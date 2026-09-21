@@ -1113,7 +1113,8 @@
   }
 
   .plp-faq {
-    grid-column: 2
+    grid-column: 2;
+    grid-row: 5;
   }
 
   .plp-news {
@@ -1219,10 +1220,41 @@
   background: #111
 }
 
+.mobile-grid-icon { display: none; }
+.mobile-grid-label { display: none; }
+
 @media(max-width:768px) {
   .grid-switch {
-    display: none
+    display: flex;
+    justify-self: center;
+    gap: 8px;
   }
+
+  .grid-switch .grid-icon { display: none; }
+
+  .grid-switch button { display: inline-flex; align-items: center; gap: 6px; }
+  .mobile-grid-label { display: inline; margin-right: auto; font-size: 13px; font-weight: 600; white-space: nowrap; }
+
+  .mobile-grid-icon {
+    display: grid;
+    width: 28px;
+    height: 36px;
+    gap: 3px;
+  }
+
+  .mobile-grid-roomy { grid-template-columns: 1fr; grid-template-rows: repeat(2, 1fr); }
+  .mobile-grid-compact { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); }
+  .mobile-grid-icon i { border: 1px solid #111; background: #fff; }
+  .mobile-grid-compact i { border-color: #7d878a; background: #7d878a; }
+
+  .plp-tools { grid-template-columns: auto 1fr auto; gap: 8px; }
+  .plp-grid.roomy { grid-template-columns: minmax(0, 1fr); }
+  .plp-grid.compact { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media(max-width:440px) {
+  .plp-tools { grid-template-columns: 1fr auto; height: auto; min-height: 64px; padding-block: 8px; }
+  .plp-tools label { grid-column: 1 / -1; justify-self: end; }
 }
 
 .shape-icon {
@@ -1453,4 +1485,25 @@
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
+}
+
+@media (min-width: 769px) {
+  .plp .plp-chips { display: none; }
+  .plp .plp-chips:has(.plp-active-filters) { display: flex; }
+  .plp .plp-chips .plp-quick-row { display: none; }
+}
+
+@media (max-width: 768px) {
+  .plp-tools {
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    height: auto;
+    min-height: 64px;
+    gap: 10px 8px;
+    padding-block: 10px;
+  }
+
+  .plp-tools .filter-button { grid-column: 1; grid-row: 1; }
+  .plp-tools label { grid-column: 2; grid-row: 1; justify-self: end; }
+  .plp-tools .grid-switch { grid-column: 1 / -1; grid-row: 2; justify-self: stretch; width: 100%; justify-content: flex-end; }
 }

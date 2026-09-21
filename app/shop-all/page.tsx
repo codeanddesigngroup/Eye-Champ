@@ -107,8 +107,9 @@ export default function ShopAll({categorySlug="",subcategorySlug="",catalogTitle
       <button className="filter-button" onClick={() => openFilters()}><SlidersHorizontal /> Filter & Sort</button>
       <span>{visible.length ? `Showing 1-${visible.length} of ${products.length} results` : `Showing 0 of ${products.length} results`}</span>
       <div className="grid-switch">
-        <button className={density === "roomy" ? "active" : ""} onClick={() => setDensity("roomy")} aria-label="Roomy grid"><GridIcon size={2} /></button>
-        <button className={density === "compact" ? "active" : ""} onClick={() => setDensity("compact")} aria-label="Compact grid"><GridIcon size={3} /></button>
+        <span className="mobile-grid-label">Grid View</span>
+        <button type="button" className={density === "roomy" ? "active" : ""} onClick={() => setDensity("roomy")} aria-label="One-column grid" aria-pressed={density === "roomy"}><GridIcon size={2} /><span className="mobile-grid-icon mobile-grid-roomy" aria-hidden="true"><i /><i /></span></button>
+        <button type="button" className={density === "compact" ? "active" : ""} onClick={() => setDensity("compact")} aria-label="Two-column grid" aria-pressed={density === "compact"}><GridIcon size={3} /><span className="mobile-grid-icon mobile-grid-compact" aria-hidden="true"><i /><i /><i /><i /></span></button>
       </div>
       <label>Sort By: <select value={sort} onChange={e => setSort(e.target.value)}>{["Relevance", "New Arrivals", "Top Rated", "Price Low to High", "Price High to Low"].map(x => <option key={x}>{x}</option>)}</select></label>
     </section>
