@@ -13,6 +13,9 @@ const defaultSettings = {
   currency: "PKR",
   storeStatus: "Live",
   orderNotifications: true,
+  promoEnabled: true,
+  promoText: "Buy one, get one 20% off.",
+  promoCode: "GET20",
 };
 
 settingsRouter.get("/", async (_request, response, next) => {
@@ -32,6 +35,9 @@ settingsRouter.put("/", async (request, response, next) => {
       currency: String(body.currency ?? defaultSettings.currency).trim() || defaultSettings.currency,
       storeStatus: String(body.storeStatus ?? defaultSettings.storeStatus) === "Paused" ? "Paused" : "Live",
       orderNotifications: body.orderNotifications !== false,
+      promoEnabled: body.promoEnabled !== false,
+      promoText: String(body.promoText ?? defaultSettings.promoText).trim().slice(0, 200),
+      promoCode: String(body.promoCode ?? defaultSettings.promoCode).trim().slice(0, 40),
     };
     const { rows } = await pool.query(`INSERT INTO store_settings(key,value) VALUES('general',$1::jsonb)
       ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value, updated_at=NOW()

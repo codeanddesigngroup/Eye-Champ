@@ -52,6 +52,9 @@ storefrontProductsRouter.get("/settings", async (_request, response, next) => {
       currency: rows[0]?.value?.currency || "PKR",
       storeStatus: rows[0]?.value?.storeStatus || "Live",
       storeName: rows[0]?.value?.storeName || "Eye Champ",
+      promoEnabled: rows[0]?.value?.promoEnabled !== false,
+      promoText: rows[0]?.value?.promoText ?? "Buy one, get one 20% off.",
+      promoCode: rows[0]?.value?.promoCode ?? "GET20",
     });
   } catch (error) { next(error); }
 });
