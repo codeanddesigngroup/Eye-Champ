@@ -70,7 +70,7 @@ export default function AdminSidebar({ open, onClose }: AdminSidebarProps) {
         <p>Management</p>
         {managementItems.map(({label,icon:Icon,href}) => <Link className={pathname === href ? "active" : ""} href={href} key={label} onClick={onClose}><Icon size={19}/><span>{label}</span></Link>)}
       </nav>
-      <div className="admin-sidebar-store"><span>EC</span><div><strong>Eye Champ</strong><small><i/> Store is live</small></div><MoreHorizontal size={18}/></div>
+      <div className="admin-sidebar-store"><span>EC</span><div><strong>Eye Champ</strong><small><i/> Store is live</small></div></div>
     </aside>
     {open && <button className="admin-sidebar-scrim" onClick={onClose} aria-label="Close navigation"/>}
   </>;

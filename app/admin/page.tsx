@@ -7,6 +7,7 @@ import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminTopbar from "@/components/admin/AdminTopbar";
 import { ArrowDownRight, ArrowUpRight, CircleDollarSign, Download, Eye, MoreHorizontal, Package, Plus, ShoppingBag, Users } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { downloadCsv } from "@/lib/export-csv";
 import "./admin.css";
 
 const styles: Record<string, string> = new Proxy({}, { get: (_target, className) => String(className) });
@@ -65,6 +66,23 @@ export default function AdminDashboard() {
     return { points, line, area, max };
   }, [dashboard.revenueSeries]);
   const today = new Date().toLocaleDateString("en-US", { weekday:"long", month:"long", day:"numeric" });
+  const exportReport = () => {
+    const rows = dashboard.revenueSeries.map((item, index) => ({
+      period,
+      date:item.label,
+      revenue:item.revenue,
+      totalRevenue:index === 0 ? dashboard.metrics.revenue : "",
+      totalOrders:index === 0 ? dashboard.metrics.orders : "",
+      customers:index === 0 ? dashboard.metrics.customers : "",
+      ordersToday:index === 0 ? dashboard.metrics.ordersToday : "",
+      revenueToday:index === 0 ? dashboard.metrics.revenueToday : "",
+    }));
+    downloadCsv("eye-champ-dashboard-" + period.toLowerCase().replaceAll(" ", "-"), [
+      {label:"Period",value:row=>row.period},{label:"Date",value:row=>row.date},{label:"Revenue",value:row=>row.revenue},
+      {label:"Total revenue",value:row=>row.totalRevenue},{label:"Total orders",value:row=>row.totalOrders},
+      {label:"Customers",value:row=>row.customers},{label:"Orders today",value:row=>row.ordersToday},{label:"Revenue today",value:row=>row.revenueToday},
+    ], rows);
+  };
 
   return <main className={styles.adminViewport}>
     <AdminSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
@@ -73,7 +91,7 @@ export default function AdminDashboard() {
       <div className={styles.content}>
         <div className={styles.headingRow}>
           <div><p>{today}</p><h1>Hello, Admin</h1><span>{loading ? "Loading your store dashboard..." : "Here's what's happening with your store today."}</span></div>
-          <div className={styles.headingActions}><button className={styles.secondaryButton}><Download size={17} /> Export report</button><Link className={styles.primaryButton} href="/admin/products/new"><Plus size={17} /> Add product</Link></div>
+          <div className={styles.headingActions}><button className={styles.secondaryButton} onClick={exportReport}><Download size={17} /> Export report</button><Link className={styles.primaryButton} href="/admin/products/new"><Plus size={17} /> Add product</Link></div>
         </div>
         {error && <div className={styles.dashboardError}>{error}</div>}
 

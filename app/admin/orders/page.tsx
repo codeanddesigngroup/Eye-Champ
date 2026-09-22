@@ -5,6 +5,7 @@ import AdminTopbar from "@/components/admin/AdminTopbar";
 import { CalendarDays, ChevronDown, Download, Filter, MoreHorizontal, Search, ShoppingBag } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { showAuthToast } from "@/components/AuthToast";
+import { downloadCsv } from "@/lib/export-csv";
 import Link from "next/link";
 import "../products/new/new-product.css";
 import "./orders.css";
@@ -102,7 +103,7 @@ export default function OrdersPage() {
     <section className="np-workspace">
       <AdminTopbar onMenuOpen={() => setMenuOpen(true)} />
       <div className="orders-content">
-        <div className="orders-head"><div><p>Sales</p><h1>Orders</h1><span>Track, fulfill, and manage customer orders.</span></div><div><button><Download size={16} /> Export orders</button><button className="create-order"><ShoppingBag size={16} /> Create order</button></div></div>
+        <div className="orders-head"><div><p>Sales</p><h1>Orders</h1><span>Track, fulfill, and manage customer orders.</span></div><div><button onClick={() => downloadCsv("eye-champ-orders", [{label:"Order",value:o=>o.orderNumber},{label:"Date",value:o=>new Date(o.createdAt).toISOString()},{label:"Customer",value:o=>o.customer},{label:"Email",value:o=>o.email},{label:"Items",value:o=>o.items},{label:"Payment",value:o=>o.payment},{label:"Fulfillment",value:o=>o.fulfillment},{label:"Payment method",value:o=>o.paymentMethod},{label:"Total",value:o=>o.total}], shown)}><Download size={16} /> Export orders</button><button className="create-order"><ShoppingBag size={16} /> Create order</button></div></div>
         <section className="orders-summary">
           <article><span>Total orders</span><strong>{orders.length}</strong><small>All database orders</small></article>
           <article><span>Awaiting fulfillment</span><strong>{counts.unfulfilled}</strong><small><i className="orange" /> Ready to process</small></article>
