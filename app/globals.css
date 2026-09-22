@@ -2619,6 +2619,11 @@ footer {
     cursor: pointer;
 }
 
+.color-more:hover{
+    background-color: #000;
+    color: #fff;
+}
+
 .color-dot {
     transition: transform .16s ease, box-shadow .16s ease;
 }

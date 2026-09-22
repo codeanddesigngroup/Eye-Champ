@@ -99,12 +99,12 @@ export default function UnderSlider() {
               <p>{product.title}</p>
               {product.shape && <p>{product.shape}</p>}
               {frameColors && <div className="seller-colors" aria-label="Available colors">
-                {frameColors.values.slice(0, 4).map(color => <button type="button" key={color}
+                {frameColors.values.slice(0, 3).map(color => <button type="button" key={color}
                   className={`color-dot ${selectedColor === color ? "selected" : ""}`}
                   style={{ background: swatchColors[color.toLowerCase()] ?? color }}
                   aria-label={`Select ${color} color`} aria-pressed={selectedColor === color}
                   onClick={() => setSelectedColors(current => ({ ...current, [product.id]: color }))} />)}
-                {frameColors.values.length > 4 && <button type="button" className="color-more" aria-label="See more colors" onClick={() => router.push(href)}><Plus /></button>}
+                {frameColors.values.length > 3 && <button type="button" className="color-more" aria-label={`See ${frameColors.values.length - 3} more colors`} onClick={() => router.push(href)}><Plus /></button>}
               </div>}
             </div>
           </article></SwiperSlide>;

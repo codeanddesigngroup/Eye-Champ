@@ -111,8 +111,8 @@ export default function Slider() {
                     </div>
                   <p>{product.title}</p>
                   <div className="seller-colors" aria-label="Available colors">
-                    {colors?.values.slice(0, 4).map(color => <button type="button" aria-label={`Select ${color} color`} aria-pressed={selectedColor === color} onClick={() => setSelectedColors(current => ({ ...current, [product.id]: color }))} className={`color-dot ${color.toLowerCase().replace(/\s+/g, "-")} ${selectedColor === color ? "selected" : ""}`} key={color} />)}
-                    {(colors?.values.length ?? 0) > 4 && <button type="button" className="color-more" aria-label="See more colors" onClick={() => router.push(href)}><Plus /></button>}
+                    {colors?.values.slice(0, 3).map(color => <button type="button" aria-label={`Select ${color} color`} aria-pressed={selectedColor === color} onClick={() => setSelectedColors(current => ({ ...current, [product.id]: color }))} className={`color-dot ${color.toLowerCase().replace(/\s+/g, "-")} ${selectedColor === color ? "selected" : ""}`} key={color} />)}
+                    {(colors?.values.length ?? 0) > 3 && <button type="button" className="color-more" aria-label={`See ${(colors?.values.length ?? 3) - 3} more colors`} onClick={() => router.push(href)}><Plus /></button>}
                   </div>
                 </div>
               </article>
