@@ -1,0 +1,97 @@
+.account-orders > .account-status-box {
+  min-height: 0;
+}
+
+.account-status-box > h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.account-status-box > h2 > button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.account-status-box > h2 span {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.account-status-box > h2 small {
+  min-width: 23px;
+  height: 23px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #f0f1f1;
+  color: #666;
+  font-size: 11px;
+}
+
+.account-status-box > h2 svg {
+  width: 19px;
+  transition: transform .2s ease;
+}
+
+.account-status-box.is-open > h2 svg {
+  transform: rotate(180deg);
+}
+
+.account-status-details {
+  padding-top: 16px;
+}
+
+.account-status-empty {
+  margin: 0;
+  color: #858585;
+  font-size: 13px;
+}
+
+.account-order-entry {
+  position: relative;
+  padding-bottom: 45px;
+}
+
+.account-order-entry + .account-order-entry {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e7e7e7;
+}
+
+.account-order-entry > button {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  padding: 8px 12px;
+  border: 1px solid #d8d8d8;
+  border-radius: 9px;
+  background: #fff;
+  color: #005bd3;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.account-order-entry > button:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+.account-order-entry .account-order-details {
+  margin-top: 12px;
+}
+
+@media (max-width: 560px) {
+  .account-status-box {
+    padding-bottom: 16px !important;
+  }
+}

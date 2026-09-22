@@ -64,13 +64,16 @@ export default function ProductPage({ databaseProduct }: { databaseProduct?: Dat
     useEffect(() => { fetch("/api/products/settings", { cache: "no-store" }).then(async response => { const result = await response.json() as { currency?: string }; if (response.ok && result.currency) setCurrency(result.currency) }).catch(() => undefined) }, []);
     useEffect(() => {
         const controller = new AbortController();
+        setRecommendLoading(true);
+        setRecommendError(false);
+        setRecommended([]);
         fetch("/api/products", { signal: controller.signal, cache: "no-store" })
             .then(async response => { if (!response.ok) throw new Error("Could not load recommendations"); return response.json() as Promise<{ products?: RecommendedProduct[] }> })
             .then(result => {
                 const current = databaseProduct;
-                const ranked = (result.products ?? []).filter(item => item.id !== current?.id).map(item => ({
+                const sameCategory = (item: RecommendedProduct) => !current || item.categories?.some(value => current.categories?.some(other => other.toLowerCase() === value.toLowerCase()));
+                const ranked = (result.products ?? []).filter(item => item.id !== current?.id && sameCategory(item)).map(item => ({
                     item, score: current ?
-                        (item.categories?.some(value => current.categories?.some(other => other.toLowerCase() === value.toLowerCase())) ? 8 : 0) +
                         (item.subcategories?.some(value => current.subcategories?.some(other => other.toLowerCase() === value.toLowerCase())) ? 5 : 0) +
                         (item.shape && item.shape.toLowerCase() === current.shape?.toLowerCase() ? 4 : 0) +
                         (item.material && item.material.toLowerCase() === current.material?.toLowerCase() ? 2 : 0) +
