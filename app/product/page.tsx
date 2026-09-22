@@ -1,6 +1,6 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
-import { ChevronDown, ChevronLeft, ChevronRight, Heart, ShieldCheck, Star, ThumbsUp, Video } from "lucide-react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
+import { ChevronDown, ChevronLeft, ChevronRight, Heart, ShieldCheck, Star } from "lucide-react";
 import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
 import type { Swiper as SwiperInstance } from "swiper";
@@ -20,8 +20,8 @@ const productAssets: Record<string, { src: string; width: number; height: number
     folded: { src: "/images/product/3.avif", width: 84, height: 37 },
     case: { src: "/images/product/eyewear-case.avif", width: 84, height: 30 },
 };
-const products = [["Rs 599.00", "4.7", "586", "front"], ["Rs 599.00", "4.6", "224", "side"], ["Rs 599.00", "4.5", "1961", "sun"], ["Rs 599.00", "4.5", "417", "angle"], ["Rs 599.00", "4.5", "221", "front"], ["Rs 599.00", "4.8", "312", "angle"], ["Rs 599.00", "4.6", "148", "side"], ["Rs 599.00", "4.9", "93", "sun"]];
-const reviews = [[5, "starseed03", "Great quality", "4 days ago", "I got them delivered earlier that expected. The frame was sturdy and of good quality.", "True to Size", "High", 0], [5, "Reviewer1948161032", "Great pair of glasses", "7 days ago", "The experience was great! The glasses are much better quality than the ones I usually get at Costco, and they were less expensive. I’m very happy with my purchase!", "True to Size", "Average", 0], [3, "Olivia", "Not true to color", "7 days ago", "I really love the size and shape of these frames, but if you’re someone who can’t wear really dark frames then these aren’t for you! I still like them overall.", "True to Size", "High", 1], [1, "craigbruckner", "Big ugly frames", "12 days ago", "These frames are way too big for my face. My wife laughed when she saw them. Oh well, I can wear them when I work outside as safety glasses.", "Loose", "Low", 0]] as const;
+type RecommendedProduct = { id: string; title: string; slug: string; price: number; discountPercent: number; shape: string | null; material: string | null; categories: string[]; subcategories: string[]; brands: string[]; categorySlug: string | null; subcategorySlug: string | null; media: Array<{ url: string; primary?: boolean }>; variants: Array<{ name: string; values: string[] }> };
+type ProductReview = { id: string; name: string; rating: number; title: string; body: string; fit: string | null; quality: string | null; photoUrl: string | null; createdAt: string };
 export type DatabaseProduct = { id: string; title: string; slug: string; description: string; price: number; discountPercent: number; quantity: number; shape: string | null; material: string | null; rim: string | null; fit: string | null; weight: number | null; specialFeature: string | null; measurements: Record<string, string>; lensCompatibility: string[]; genders: string[]; categories: string[]; subcategories: string[]; collections: string[]; brands: string[]; media: Array<{ name?: string; url: string; primary?: boolean }>; variants: Array<{ name: string; values: string[]; mediaByValue?: Record<string, Array<{ name?: string; url: string }>> }> };
 function ProductImage({ view, className = "", src, database = false }: { view: string, className?: string, src?: string, database?: boolean }) {
     const asset = productAssets[view] ?? productAssets.front;
@@ -37,8 +37,16 @@ export default function ProductPage({ databaseProduct }: { databaseProduct?: Dat
     const photoSlider = useRef<SwiperInstance | null>(null);
     const gallerySlider = useRef<SwiperInstance | null>(null);
     const [view, setView] = useState("front"), [liked, setLiked] = useState(false), [tab, setTab] = useState("Features"), [color, setColor] = useState(0), [photosOnly, setPhotosOnly] = useState(false), [sideView, setSideView] = useState(false), [sortOpen, setSortOpen] = useState(false), [sortOrder, setSortOrder] = useState("Newest"), [reviewsOpen, setReviewsOpen] = useState(true), [currency, setCurrency] = useState("PKR");
+    const [recommended, setRecommended] = useState<RecommendedProduct[]>([]), [recommendLoading, setRecommendLoading] = useState(true), [recommendError, setRecommendError] = useState(false), [savedRecommendations, setSavedRecommendations] = useState<string[]>([]);
+    const [reviews, setReviews] = useState<ProductReview[]>([]), [reviewsLoading, setReviewsLoading] = useState(true), [reviewsError, setReviewsError] = useState(false), [reviewPage, setReviewPage] = useState(1), [reviewFormOpen, setReviewFormOpen] = useState(false), [reviewSubmitting, setReviewSubmitting] = useState(false), [reviewMessage, setReviewMessage] = useState("");
     const slideProducts = (direction: number) => direction < 0 ? productSlider.current?.slidePrev() : productSlider.current?.slideNext();
-    const sortedReviews = [...reviews].sort((a, b) => sortOrder === "Highest rating" ? b[0] - a[0] : sortOrder === "Lowest rating" ? a[0] - b[0] : sortOrder === "Most helpful" ? b[7] - a[7] : 0);
+    const sortedReviews = reviews.filter(review => !photosOnly || Boolean(review.photoUrl)).sort((a, b) => sortOrder === "Highest rating" ? b.rating - a.rating : sortOrder === "Lowest rating" ? a.rating - b.rating : Date.parse(b.createdAt) - Date.parse(a.createdAt));
+    const reviewPhotos = reviews.filter(review => Boolean(review.photoUrl));
+    const ratingCounts = [5, 4, 3, 2, 1].map(stars => ({ stars, count: reviews.filter(review => review.rating === stars).length }));
+    const averageRating = reviews.length ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length : 0;
+    const averageScale = (values: string[], key: "fit" | "quality") => { const scores = reviews.map(review => values.indexOf(review[key] || "")).filter(index => index >= 0); return scores.length ? `${(scores.reduce((a, b) => a + b, 0) / scores.length) * 50}%` : "50%"; };
+    const reviewPageCount = Math.ceil(sortedReviews.length / 5);
+    const visibleReviews = sortedReviews.slice((reviewPage - 1) * 5, reviewPage * 5);
     const frameVariant = databaseProduct?.variants.find(variant => variant.name.trim().toLowerCase() === "frame color"), frameColors = frameVariant?.values ?? [];
     const lensColors = databaseProduct?.variants.find(variant => variant.name.toLowerCase() === "lens color")?.values ?? [];
     const productSizes = databaseProduct?.variants.find(variant => variant.name.toLowerCase() === "size")?.values ?? [];
@@ -54,6 +62,55 @@ export default function ProductPage({ databaseProduct }: { databaseProduct?: Dat
     const outOfStock = Boolean(databaseProduct && databaseProduct.quantity <= 0);
     useEffect(() => { if (!databaseProduct) return; const refresh = () => setLiked(getFavorites().some(item => item.id === databaseProduct.id)); refresh(); window.addEventListener(favoritesUpdatedEvent, refresh); return () => window.removeEventListener(favoritesUpdatedEvent, refresh) }, [databaseProduct]);
     useEffect(() => { fetch("/api/products/settings", { cache: "no-store" }).then(async response => { const result = await response.json() as { currency?: string }; if (response.ok && result.currency) setCurrency(result.currency) }).catch(() => undefined) }, []);
+    useEffect(() => {
+        const controller = new AbortController();
+        fetch("/api/products", { signal: controller.signal, cache: "no-store" })
+            .then(async response => { if (!response.ok) throw new Error("Could not load recommendations"); return response.json() as Promise<{ products?: RecommendedProduct[] }> })
+            .then(result => {
+                const current = databaseProduct;
+                const ranked = (result.products ?? []).filter(item => item.id !== current?.id).map(item => ({
+                    item, score: current ?
+                        (item.categories?.some(value => current.categories?.some(other => other.toLowerCase() === value.toLowerCase())) ? 8 : 0) +
+                        (item.subcategories?.some(value => current.subcategories?.some(other => other.toLowerCase() === value.toLowerCase())) ? 5 : 0) +
+                        (item.shape && item.shape.toLowerCase() === current.shape?.toLowerCase() ? 4 : 0) +
+                        (item.material && item.material.toLowerCase() === current.material?.toLowerCase() ? 2 : 0) +
+                        (item.brands?.some(value => current.brands?.some(other => other.toLowerCase() === value.toLowerCase())) ? 2 : 0) : 0
+                }));
+                ranked.sort((a, b) => b.score - a.score);
+                setRecommended(ranked.slice(0, 12).map(({ item }) => item));
+            })
+            .catch(() => { if (!controller.signal.aborted) setRecommendError(true); })
+            .finally(() => { if (!controller.signal.aborted) setRecommendLoading(false); });
+        return () => controller.abort();
+    }, [databaseProduct]);
+    useEffect(() => { const refresh = () => setSavedRecommendations(getFavorites().map(item => item.id)); refresh(); window.addEventListener(favoritesUpdatedEvent, refresh); window.addEventListener("storage", refresh); return () => { window.removeEventListener(favoritesUpdatedEvent, refresh); window.removeEventListener("storage", refresh); }; }, []);
+    useEffect(() => {
+        if (!databaseProduct) { setReviewsLoading(false); return; }
+        const controller = new AbortController();
+        fetch(`/api/products/${encodeURIComponent(databaseProduct.slug)}/reviews`, { signal: controller.signal, cache: "no-store" })
+            .then(async response => { if (!response.ok) throw new Error("Could not load reviews"); return response.json() as Promise<{ reviews?: ProductReview[] }> })
+            .then(result => setReviews(result.reviews ?? []))
+            .catch(() => { if (!controller.signal.aborted) setReviewsError(true); })
+            .finally(() => { if (!controller.signal.aborted) setReviewsLoading(false); });
+        return () => controller.abort();
+    }, [databaseProduct]);
+    useEffect(() => setReviewPage(1), [sortOrder, photosOnly]);
+    async function submitReview(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+        if (!databaseProduct) return;
+        setReviewSubmitting(true); setReviewMessage("");
+        const form = event.currentTarget;
+        const data = Object.fromEntries(new FormData(form));
+        try {
+            const response = await fetch(`/api/products/${encodeURIComponent(databaseProduct.slug)}/reviews`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
+            const result = await response.json() as { error?: string };
+            if (!response.ok) throw new Error(result.error || "Could not submit review.");
+            const updated = await fetch(`/api/products/${encodeURIComponent(databaseProduct.slug)}/reviews`, { cache: "no-store" });
+            const reviewResult = await updated.json() as { reviews?: ProductReview[] };
+            setReviews(reviewResult.reviews ?? []); setReviewFormOpen(false); setReviewPage(1);
+        } catch (error) { setReviewMessage(error instanceof Error ? error.message : "Could not submit review."); }
+        finally { setReviewSubmitting(false); }
+    }
     const toggleLiked = () => { if (!databaseProduct) return setLiked(value => !value); const slug = (value: string) => value.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); setLiked(toggleFavorite({ ...databaseProduct, price: salePrice, categorySlug: slug(databaseProduct.categories[0] || "shop-all"), subcategorySlug: slug(databaseProduct.subcategories[0] || "all") })) };
     return (
         <main className="pdp productDetails">
@@ -78,7 +135,7 @@ export default function ProductPage({ databaseProduct }: { databaseProduct?: Dat
                             <div className="product-price-line"><div className={`price ${hasDiscount ? "discounted" : ""}`}>{formatMoney(currency, salePrice)}</div>{hasDiscount && <span className="original-price">{formatMoney(currency, originalPrice)}</span>}</div>
                             {hasDiscount && <strong className="price-off">{Number.isInteger(discountPercent) ? discountPercent : discountPercent.toFixed(1)}% off</strong>}
                         </div>
-                        <a className="score" href="#reviews"><Star fill="currentColor" /> <b>4.7</b> <u>221 reviews</u></a>
+                        <a className="score" href="#reviews"><Star fill="currentColor" /> <b>{averageRating ? averageRating.toFixed(1) : "—"}</b> <u>{reviews.length} {reviews.length === 1 ? "review" : "reviews"}</u></a>
                     </div>
                     <div className="options-card">
                         <div className="size-line"><b>Size:</b> {databaseProduct ? (productSizes.join(", ") || "Not specified") : "large (52 □ 19 - 143)"}</div>
@@ -114,37 +171,54 @@ export default function ProductPage({ databaseProduct }: { databaseProduct?: Dat
                         <button type="button" aria-label="Next recommended products" onClick={() => slideProducts(1)}><ChevronRight /></button>
                     </div>
                 </div>
-                <Swiper className="product-row" onSwiper={swiper => { productSlider.current = swiper }} spaceBetween={38} slidesPerView={1.2} breakpoints={{ 600: { slidesPerView: 2.4, spaceBetween: 20 }, 900: { slidesPerView: 3.4, spaceBetween: 28 }, 1200: { slidesPerView: 5, spaceBetween: 38 } }}>{products.map((p, i) => <SwiperSlide key={i}><article className="product-card">
-                    <div className="card-photo">
-                        <Heart />
-                        <img src={'/images/product/1.avif'} />
-                    </div>
-                    <div className="card-meta">
-                        <b>{p[0]}</b>
-                        <span><Star fill="currentColor" /> {p[1]} ({p[2]})</span>
-                    </div>
-                    <p>Square</p>
-                    <strong>Get it as early as Thu, Aug 20</strong>
-                    <div className="mini-swatches"><i /><i /><i /></div>
-                </article></SwiperSlide>)}
+                <Swiper className="product-row" onSwiper={swiper => { productSlider.current = swiper }} spaceBetween={38} slidesPerView={1.2} breakpoints={{ 600: { slidesPerView: 2.4, spaceBetween: 20 }, 900: { slidesPerView: 3.4, spaceBetween: 28 }, 1200: { slidesPerView: 5, spaceBetween: 38 } }}>
+                    {(recommendLoading || recommendError || recommended.length === 0) && <SwiperSlide><p className="recommend-status">{recommendLoading ? "Loading similar products..." : recommendError ? "Could not load similar products." : "No other products available yet."}</p></SwiperSlide>}
+                    {recommended.map(p => {
+                        const href = `/${p.categorySlug || "shop-all"}/${p.subcategorySlug || "all"}/${p.slug}`;
+                        const price = Number(p.price) * (1 - Number(p.discountPercent || 0) / 100);
+                        const image = p.media?.find(item => item.primary)?.url || p.media?.[0]?.url;
+                        const colors = p.variants?.find(variant => variant.name.trim().toLowerCase() === "frame color")?.values ?? [];
+                        return <SwiperSlide key={p.id}><article className="product-card">
+                            <div className="card-photo">
+                                <Link href={href} aria-label={`View ${p.title}`}>{image ? <img src={image} alt={p.title} /> : <span>No image available</span>}</Link>
+                                <button type="button" className="recommend-heart" aria-label={savedRecommendations.includes(p.id) ? "Remove from favorites" : "Add to favorites"} onClick={() => toggleFavorite({ ...p, price })}><Heart fill={savedRecommendations.includes(p.id) ? "currentColor" : "none"} /></button>
+                            </div>
+                            <div className="card-meta"><b>{formatMoney(currency, price)}</b></div>
+                            <p><Link href={href}>{p.title}</Link></p>
+                            {p.shape && <small>{p.shape}</small>}
+                            {colors.length > 0 && <div className="mini-swatches" aria-label="Available frame colors">{colors.slice(0, 4).map(value => <i key={value} title={value} style={{ background: productColor(value) }} />)}</div>}
+                        </article></SwiperSlide>;
+                    })}
                 </Swiper>
             </section>
+
             <section id="reviews" className={`reviews wrap ${reviewsOpen ? "is-open" : "is-collapsed"}`}>
                 <h2><span>Customer Reviews</span><button type="button" aria-expanded={reviewsOpen} aria-label={reviewsOpen ? "Hide customer reviews" : "Show customer reviews"} onClick={() => setReviewsOpen(!reviewsOpen)}><ChevronDown /></button></h2>
-                <div className="photo-head">
+                {reviewPhotos.length > 0 && <><div className="photo-head">
                     <b>Customer Photos</b>
-                    <div><button type="button" aria-label="Previous customer photos" onClick={() => photoSlider.current?.slidePrev()}><ChevronLeft /></button><button type="button" aria-label="Next customer photos" onClick={() => photoSlider.current?.slideNext()}><ChevronRight /></button><u>View all photos</u></div>
+                    <div><button type="button" aria-label="Previous customer photos" onClick={() => photoSlider.current?.slidePrev()}><ChevronLeft /></button><button type="button" aria-label="Next customer photos" onClick={() => photoSlider.current?.slideNext()}><ChevronRight /></button><button type="button" onClick={() => { setPhotosOnly(true); document.getElementById("review-list")?.scrollIntoView({ behavior: "smooth" }); }}>View all photos</button></div>
                 </div>
-                <Swiper className="customer-photos" onSwiper={swiper => { photoSlider.current = swiper }} slidesPerView={1.5} spaceBetween={14} breakpoints={{ 480: { slidesPerView: 2.4, spaceBetween: 16 }, 768: { slidesPerView: 3.5, spaceBetween: 18 }, 1100: { slidesPerView: 5.2, spaceBetween: 22 } }}>
-                    {[1, 2, 3, 4, 5, 6, 7, 8].map((n, i) => <SwiperSlide key={n}><div className={`person person-${i % 6 + 1}`}></div></SwiperSlide>)}
-                </Swiper>
-                <div className="rating-box"><div><b>Overall Rating</b><div className="big-rating">4.7 <span><Rating /><small>Reviews</small></span></div><p>customers</p><button>Write a review</button></div><div><b>Rating Snapshot</b>{[[5, 185], [4, 24], [3, 6], [2, 3], [1, 3]].map(([s, n]) => <div className="bar" key={s}><u>{s} stars</u><i><em style={{ width: `${s === 5 ? 84 : s * 6}%` }} /></i><u>{n}</u></div>)}</div><div><b>Average Ratings</b><p>Fit</p><div className="scale"><i style={{ left: "55%" }} /></div><div className="scale-labels"><span>Tight</span><span>True to Size</span><span>Loose</span></div><p>Quality</p><div className="scale"><i style={{ left: "90%" }} /></div><div className="scale-labels"><span>Low</span><span>Average</span><span>High</span></div></div></div>
+                    <Swiper className="customer-photos" onSwiper={swiper => { photoSlider.current = swiper }} slidesPerView={1.5} spaceBetween={14} breakpoints={{ 480: { slidesPerView: 2.4, spaceBetween: 16 }, 768: { slidesPerView: 3.5, spaceBetween: 18 }, 1100: { slidesPerView: 5.2, spaceBetween: 22 } }}>
+                        {reviewPhotos.map(review => <SwiperSlide key={review.id}><img className="customer-review-photo" src={review.photoUrl!} alt={`Review photo by ${review.name}`} /></SwiperSlide>)}
+                    </Swiper></>}
+                <div className="rating-box"><div><b>Overall Rating</b><div className="big-rating">{averageRating ? averageRating.toFixed(1) : "—"} <span><Rating value={Math.round(averageRating)} /><small>{reviews.length} {reviews.length === 1 ? "review" : "reviews"}</small></span></div><p>customers</p>{databaseProduct && <button type="button" onClick={() => setReviewFormOpen(open => !open)}>Write a review</button>}</div><div><b>Rating Snapshot</b>{ratingCounts.map(({ stars, count }) => <div className="bar" key={stars}><u>{stars} stars</u><i><em style={{ width: `${reviews.length ? count / reviews.length * 100 : 0}%` }} /></i><u>{count}</u></div>)}</div><div><b>Average Ratings</b><p>Fit</p><div className="scale"><i style={{ left: averageScale(["Tight", "True to Size", "Loose"], "fit") }} /></div><div className="scale-labels"><span>Tight</span><span>True to Size</span><span>Loose</span></div><p>Quality</p><div className="scale"><i style={{ left: averageScale(["Low", "Average", "High"], "quality") }} /></div><div className="scale-labels"><span>Low</span><span>Average</span><span>High</span></div></div></div>
+                {reviewFormOpen && <form className="review-form" onSubmit={submitReview}>
+                    <h3>Review this product</h3><p>Sign in with the email used for your order. Only purchasers can post a review.</p>
+                    <label>Rating <select name="rating" required defaultValue=""><option value="" disabled>Select rating</option>{[5, 4, 3, 2, 1].map(value => <option key={value} value={value}>{value} stars</option>)}</select></label>
+                    <label>Title <input name="title" minLength={3} maxLength={160} required /></label>
+                    <label>Your review <textarea name="body" minLength={10} maxLength={3000} required /></label>
+                    <label>Fit <select name="fit"><option value="">Not rated</option>{["Tight", "True to Size", "Loose"].map(value => <option key={value}>{value}</option>)}</select></label>
+                    <label>Quality <select name="quality"><option value="">Not rated</option>{["Low", "Average", "High"].map(value => <option key={value}>{value}</option>)}</select></label>
+                    <label>Photo URL (optional) <input name="photoUrl" type="url" placeholder="https://example.com/photo.jpg" /></label>
+                    {reviewMessage && <p role="alert">{reviewMessage} {reviewMessage.includes("Sign in") && <Link href="/login">Sign in</Link>}</p>}
+                    <button type="submit" disabled={reviewSubmitting}>{reviewSubmitting ? "Submitting..." : "Submit review"}</button>
+                </form>}
                 <div className="sort">
-                    <div className="sort-menu"><button type="button" className="sort-trigger" aria-expanded={sortOpen} onClick={() => setSortOpen(!sortOpen)}>Sort by: {sortOrder} <ChevronDown /></button>{sortOpen && <div className="sort-options" role="menu">{["Newest", "Highest rating", "Lowest rating", "Most helpful"].map(option => <button type="button" role="menuitemradio" aria-checked={sortOrder === option} key={option} onClick={() => { setSortOrder(option); setSortOpen(false) }}><span className={sortOrder === option ? "selected" : ""} />{option}</button>)}</div>}</div>
-                    <label><input type="checkbox" checked={photosOnly} onChange={e => setPhotosOnly(e.target.checked)} /> Reviews with photos</label>
+                    <div className="sort-menu"><button type="button" className="sort-trigger" aria-expanded={sortOpen} onClick={() => setSortOpen(!sortOpen)}>Sort by: {sortOrder} <ChevronDown /></button>{sortOpen && <div className="sort-options" role="menu">{["Newest", "Highest rating", "Lowest rating"].map(option => <button type="button" role="menuitemradio" aria-checked={sortOrder === option} key={option} onClick={() => { setSortOrder(option); setSortOpen(false) }}><span className={sortOrder === option ? "selected" : ""} />{option}</button>)}</div>}</div>
+                    <label><input type="checkbox" checked={photosOnly} onChange={e => setPhotosOnly(e.target.checked)} disabled={reviewPhotos.length === 0} /> Reviews with photos</label>
                 </div>
-                <div className="review-list">{sortedReviews.map(r => <article key={r[1]}><div><Rating value={r[0]} /><p className="reviewer-line"><b>{r[1]}</b><ShieldCheck className="verified-icon" fill="currentColor" /><b>Verified customer</b></p><h3>{r[2]} <small>{r[3]}</small></h3><p>{r[4]}</p><footer><b>Was this review helpful?</b> <ThumbsUp /> {r[7]}</footer></div><aside><p><b>Fit:</b> {r[5]}</p><p><b>Quality:</b> {r[6]}</p></aside></article>)}</div>
-                <nav className="pagination"><button disabled><ChevronLeft /> Previous</button><b>1</b><span>2</span><span>3</span><span>…</span><span>56</span><button>Next <ChevronRight /></button></nav>
+                <div className="review-list" id="review-list">{reviewsLoading ? <p>Loading reviews...</p> : reviewsError ? <p>Could not load reviews.</p> : visibleReviews.length === 0 ? <p>{photosOnly ? "No reviews with photos yet." : "No customer reviews yet. Be the first to review this product."}</p> : visibleReviews.map(r => <article key={r.id}><div><Rating value={r.rating} /><p className="reviewer-line"><b>{r.name}</b><ShieldCheck className="verified-icon" fill="currentColor" /><b>Verified purchaser</b></p><h3>{r.title} <small>{new Date(r.createdAt).toLocaleDateString()}</small></h3><p>{r.body}</p>{r.photoUrl && <img className="review-inline-photo" src={r.photoUrl} alt={`Review photo by ${r.name}`} />}</div><aside>{r.fit && <p><b>Fit:</b> {r.fit}</p>}{r.quality && <p><b>Quality:</b> {r.quality}</p>}</aside></article>)}</div>
+                {reviewPageCount > 1 && <nav className="pagination" aria-label="Review pages"><button type="button" disabled={reviewPage === 1} onClick={() => setReviewPage(page => page - 1)}><ChevronLeft /> Previous</button><b>{reviewPage} / {reviewPageCount}</b><button type="button" disabled={reviewPage === reviewPageCount} onClick={() => setReviewPage(page => page + 1)}>Next <ChevronRight /></button></nav>}
             </section>
         </main>
     )

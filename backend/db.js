@@ -98,6 +98,21 @@ export async function initializeDatabase() {
       subtotal NUMERIC(12,2) NOT NULL CHECK (subtotal >= 0), payment_status VARCHAR(20) NOT NULL DEFAULT 'Pending',
       fulfillment_status VARCHAR(30) NOT NULL DEFAULT 'Unfulfilled', created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
+    CREATE TABLE IF NOT EXISTS product_reviews (
+      id BIGSERIAL PRIMARY KEY,
+      product_id BIGINT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+      customer_email VARCHAR(320) NOT NULL,
+      customer_name VARCHAR(120) NOT NULL,
+      rating SMALLINT NOT NULL CHECK (rating BETWEEN 1 AND 5),
+      title VARCHAR(160) NOT NULL,
+      body TEXT NOT NULL,
+      fit VARCHAR(30),
+      quality VARCHAR(30),
+      photo_url TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      UNIQUE(product_id, customer_email)
+    );
+    CREATE INDEX IF NOT EXISTS product_reviews_product_idx ON product_reviews(product_id, created_at DESC);
     ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_method VARCHAR(40) NOT NULL DEFAULT 'Cash on Delivery';
     ALTER TABLE products ADD COLUMN IF NOT EXISTS discount_percent NUMERIC(5,2) NOT NULL DEFAULT 0 CHECK (discount_percent >= 0 AND discount_percent <= 100);
     ALTER TABLE products ADD COLUMN IF NOT EXISTS draft_key UUID;

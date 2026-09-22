@@ -1,7 +1,49 @@
 import { Router } from "express";
+import { createHash } from "node:crypto";
+import rateLimit from "express-rate-limit";
 import { pool } from "../db.js";
 
 export const storefrontProductsRouter = Router();
+const reviewLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 5, standardHeaders: true, legacyHeaders: false });
+
+storefrontProductsRouter.get("/:slug/reviews", async (request, response, next) => {
+  try {
+    const product = await pool.query("SELECT id FROM products WHERE slug=$1 AND status='Active'", [request.params.slug]);
+    if (!product.rows[0]) return response.status(404).json({ error: "Product not found." });
+    const { rows } = await pool.query(`SELECT id::text, customer_name AS "name", rating, title, body, fit, quality,
+      photo_url AS "photoUrl", created_at AS "createdAt" FROM product_reviews WHERE product_id=$1 ORDER BY created_at DESC`, [product.rows[0].id]);
+    response.json({ reviews: rows });
+  } catch (error) { next(error); }
+});
+
+storefrontProductsRouter.post("/:slug/reviews", reviewLimiter, async (request, response, next) => {
+  try {
+    const token = request.cookies?.eye_champ_customer_session;
+    if (!token) return response.status(401).json({ error: "Sign in to write a review." });
+    const tokenHash = createHash("sha256").update(token).digest("hex");
+    const session = await pool.query("SELECT email FROM customer_sessions WHERE token_hash=$1 AND expires_at>NOW()", [tokenHash]);
+    if (!session.rows[0]) return response.status(401).json({ error: "Sign in to write a review." });
+    const product = await pool.query("SELECT id FROM products WHERE slug=$1 AND status='Active'", [request.params.slug]);
+    if (!product.rows[0]) return response.status(404).json({ error: "Product not found." });
+    const email = session.rows[0].email;
+    const purchase = await pool.query(`SELECT customer_name FROM orders WHERE LOWER(email)=LOWER($1)
+      AND EXISTS (SELECT 1 FROM jsonb_array_elements(items) AS item WHERE item->>'productId'=$2)
+      ORDER BY created_at DESC LIMIT 1`, [email, String(product.rows[0].id)]);
+    if (!purchase.rows[0]) return response.status(403).json({ error: "Only customers who purchased this product can review it." });
+    const rating = Number(request.body?.rating);
+    const title = String(request.body?.title ?? "").trim();
+    const body = String(request.body?.body ?? "").trim();
+    const fit = String(request.body?.fit ?? "").trim();
+    const quality = String(request.body?.quality ?? "").trim();
+    const photoUrl = String(request.body?.photoUrl ?? "").trim();
+    if (!Number.isInteger(rating) || rating < 1 || rating > 5 || title.length < 3 || title.length > 160 || body.length < 10 || body.length > 3000 || (fit && !["Tight", "True to Size", "Loose"].includes(fit)) || (quality && !["Low", "Average", "High"].includes(quality)) || (photoUrl && (photoUrl.length > 1000 || !/^https:\/\//i.test(photoUrl)))) return response.status(400).json({ error: "Check the rating, title, and review details." });
+    const { rows } = await pool.query(`INSERT INTO product_reviews(product_id,customer_email,customer_name,rating,title,body,fit,quality,photo_url)
+      VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) ON CONFLICT(product_id,customer_email) DO UPDATE SET
+      rating=EXCLUDED.rating,title=EXCLUDED.title,body=EXCLUDED.body,fit=EXCLUDED.fit,quality=EXCLUDED.quality,photo_url=EXCLUDED.photo_url,created_at=NOW()
+      RETURNING id::text`, [product.rows[0].id, email, purchase.rows[0].customer_name, rating, title, body, fit || null, quality || null, photoUrl || null]);
+    response.status(201).json({ id: rows[0].id });
+  } catch (error) { next(error); }
+});
 
 storefrontProductsRouter.get("/settings", async (_request, response, next) => {
   try {
