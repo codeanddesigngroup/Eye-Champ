@@ -9,6 +9,7 @@ export default function Navbar() {
     const [menu, setMenu] = useState(false);
     const [cartCount, setCartCount] = useState(0);
     const [favoriteCount, setFavoriteCount] = useState(0);
+    const [customerLoggedIn, setCustomerLoggedIn] = useState(false);
     const [categories, setCategories] = useState<Array<{ id: string; name: string; slug: string; parentId: string | null }>>([]);
     const [expandedCategoryIds, setExpandedCategoryIds] = useState<string[]>([]);
     useEffect(() => {
@@ -28,6 +29,14 @@ export default function Navbar() {
         window.addEventListener("storage", updateFavoriteCount);
         window.addEventListener(favoritesUpdatedEvent, updateFavoriteCount);
         return () => { window.removeEventListener("storage", updateFavoriteCount); window.removeEventListener(favoritesUpdatedEvent, updateFavoriteCount); };
+    }, []);
+
+    useEffect(() => {
+        const controller = new AbortController();
+        fetch("/api/customer-auth/me", { credentials: "include", cache: "no-store", signal: controller.signal })
+            .then(response => setCustomerLoggedIn(response.ok))
+            .catch(error => { if (error instanceof Error && error.name !== "AbortError") setCustomerLoggedIn(false); });
+        return () => controller.abort();
     }, []);
 
     useEffect(() => { fetch("/api/products/categories/navigation").then(response => response.ok ? response.json() : Promise.reject()).then((result: { categories?: Array<{ id: string; name: string; slug: string; parentId: string | null }> }) => setCategories(result.categories ?? [])).catch(() => setCategories([])) }, []);
@@ -50,7 +59,7 @@ export default function Navbar() {
                     <button type="submit" aria-label="Search products"><Search size={18} /></button>
                 </form>
                 <nav className="utility" aria-label="Account links">
-                    <Link href="/login" aria-label="Customer login"><UserRound size={18} /><small>Login</small></Link>
+                    <Link href={customerLoggedIn ? "/profile" : "/login"} aria-label={customerLoggedIn ? "Customer profile" : "Customer login"}><UserRound size={18} /><small>{customerLoggedIn ? "Profile" : "Login"}</small></Link>
                     <Link href="/favorites" aria-label={`Favorites with ${favoriteCount} products`}><Heart size={18} />{favoriteCount > 0 && <b className="cart-count">{favoriteCount}</b>}<small>Favorites</small></Link>
                     <a href="#help" aria-label="Help"><HelpCircle size={18} /><small>Help</small></a>
                     <Link href="/cart" aria-label={`Cart with ${cartCount} items`}><ShoppingCart size={18} />{cartCount > 0 && <b className="cart-count">{cartCount}</b>}<small>Cart</small></Link>

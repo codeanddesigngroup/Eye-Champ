@@ -95,9 +95,16 @@ storefrontProductsRouter.get("/", async (request, response, next) => {
     }
     const { rows } = await pool.query(`SELECT p.id::text, p.title, p.slug, p.price::float, p.discount_percent::float AS "discountPercent", p.quantity, p.shape, p.material, p.rim,
       p.genders, p.categories, p.subcategories, p.collections, p.brands, p.media, p.variants, p.created_at AS "createdAt",
+      reviews.rating, COALESCE(reviews.review_count, 0)::int AS "reviewCount",
       (SELECT c.slug FROM categories c WHERE c.parent_id IS NULL AND LOWER(c.name)=LOWER(p.categories->>0) LIMIT 1) AS "categorySlug",
       (SELECT c.slug FROM categories c WHERE c.parent_id IS NOT NULL AND LOWER(c.name)=LOWER(p.subcategories->>0) LIMIT 1) AS "subcategorySlug"
-      FROM products p WHERE p.status = 'Active'
+      FROM products p
+      LEFT JOIN (
+        SELECT product_id, ROUND(AVG(rating)::numeric, 1)::float AS rating, COUNT(*)::int AS review_count
+        FROM product_reviews
+        GROUP BY product_id
+      ) reviews ON reviews.product_id = p.id
+      WHERE p.status = 'Active'
       AND ($1 = '' OR p.categories ? $1)
       AND ($2 = '' OR p.subcategories ? $2)
       AND ($3 = '' OR EXISTS (SELECT 1 FROM jsonb_array_elements_text(p.genders) AS product_gender WHERE LOWER(product_gender) = LOWER($3)))

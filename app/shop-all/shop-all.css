@@ -520,8 +520,25 @@
 .plp-swatches .more-colors {
   display: grid;
   place-items: center;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+  border: 1px solid #667;
+  border-radius: 50%;
   background: #fff;
+  color: #111;
   cursor: pointer
+}
+
+.plp-swatches .more-colors svg {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2.5;
+}
+
+.plp-swatches .more-colors:hover{
+  background-color: #050505;
+  color: #fff;
 }
 
 .campaign {
