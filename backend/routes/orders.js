@@ -67,3 +67,12 @@ ordersRouter.patch("/:id", async (request, response, next) => {
     next(error);
   }
 });
+
+ordersRouter.delete("/:id", async (request, response, next) => {
+  try {
+    if (!/^\d+$/.test(request.params.id)) return response.status(400).json({ error: "Invalid order ID." });
+    const { rows } = await pool.query("DELETE FROM orders WHERE id=$1 RETURNING id::text, order_number AS \"orderNumber\"", [request.params.id]);
+    if (!rows[0]) return response.status(404).json({ error: "Order not found." });
+    response.json({ order: rows[0] });
+  } catch (error) { next(error); }
+});

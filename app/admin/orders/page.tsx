@@ -23,6 +23,7 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [updating, setUpdating] = useState<string[]>([]);
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   useEffect(() => {
     fetch("/api/admin/orders", { credentials: "include" })
@@ -72,6 +73,29 @@ export default function OrdersPage() {
     if (updated !== selected.length) showAuthToast({ message:"Some orders could not be updated.", type:"error" });
     setSelected([]);
   };
+  const deleteSelected = async () => {
+    if (!selected.length) return;
+    setDeleteOpen(false);
+    const ids = [...selected];
+    setUpdating(current => [...new Set([...current, ...ids])]);
+    try {
+      const results = await Promise.all(ids.map(async id => {
+        const response = await fetch(`/api/admin/orders/${id}`, { method:"DELETE", credentials:"include" });
+        const result = await response.json() as { error?:string };
+        return { id, ok:response.ok, error:result.error };
+      }));
+      const deleted = results.filter(result => result.ok).map(result => result.id);
+      const failed = results.filter(result => !result.ok);
+      setOrders(current => current.filter(order => !deleted.includes(order.id)));
+      setSelected(failed.map(result => result.id));
+      if (deleted.length) showAuthToast({ message:`${deleted.length} ${deleted.length === 1 ? "order" : "orders"} deleted.`, type:"success" });
+      if (failed.length) showAuthToast({ message:failed[0].error || "Some orders could not be deleted.", type:"error" });
+    } catch {
+      showAuthToast({ message:"Could not delete selected orders.", type:"error" });
+    } finally {
+      setUpdating(current => current.filter(id => !ids.includes(id)));
+    }
+  };
 
   return <main className="np-admin orders-admin">
     <AdminSidebar open={menuOpen} onClose={() => setMenuOpen(false)} />
@@ -97,7 +121,7 @@ export default function OrdersPage() {
             <select value={payment} onChange={event => setPayment(event.target.value)}><option>All payments</option><option>Paid</option><option>Pending</option><option>Refunded</option></select>
             <select value={fulfillment} onChange={event => setFulfillment(event.target.value)}><option>All fulfillment</option><option>Unfulfilled</option><option>Processing</option><option>Fulfilled</option></select>
           </div>
-          {selected.length > 0 && <div className="orders-bulk"><strong>{selected.length} orders selected</strong><button onClick={markSelectedFulfilled} disabled={selected.some(id => updating.includes(id))}>Mark fulfilled</button><button>Print packing slips</button><button>Archive</button><button onClick={() => setSelected([])}>Clear</button></div>}
+          {selected.length > 0 && <div className="orders-bulk"><strong>{selected.length} orders selected</strong><button onClick={markSelectedFulfilled} disabled={selected.some(id => updating.includes(id))}>Mark fulfilled</button><button>Print packing slips</button><button>Archive</button><button className="delete-orders" onClick={() => setDeleteOpen(true)} disabled={selected.some(id => updating.includes(id))}>Delete</button><button onClick={() => setSelected([])}>Clear</button></div>}
           {loading && <div className="orders-empty"><p>Loading orders...</p></div>}
           {error && <div className="orders-empty"><h2>Unable to load orders</h2><p>{error}</p></div>}
           {!loading && !error && <div className="orders-table"><table><thead><tr><th><input type="checkbox" checked={shown.length > 0 && selected.length === shown.length} onChange={event => setSelected(event.target.checked ? shown.map(order => order.id) : [])} /></th><th>Order</th><th>Date</th><th>Customer</th><th>Payment</th><th>Fulfillment</th><th>Items</th><th>Payment method</th><th>Total</th><th /></tr></thead><tbody>
@@ -108,6 +132,12 @@ export default function OrdersPage() {
         </section>
       </div>
     </section>
+    {deleteOpen && <div className="order-delete-backdrop" role="presentation" onMouseDown={() => setDeleteOpen(false)}><section className="order-delete-modal" role="alertdialog" aria-modal="true" aria-labelledby="delete-order-title" aria-describedby="delete-order-description" onMouseDown={event => event.stopPropagation()}>
+      <span className="order-delete-icon">!</span>
+      <h2 id="delete-order-title">Delete selected {selected.length === 1 ? "order" : "orders"}?</h2>
+      <p id="delete-order-description">You are about to permanently delete {selected.length} {selected.length === 1 ? "order" : "orders"}. This action cannot be undone.</p>
+      <div><button type="button" onClick={() => setDeleteOpen(false)}>Cancel</button><button type="button" className="confirm-delete" onClick={deleteSelected}>Delete {selected.length === 1 ? "order" : "orders"}</button></div>
+    </section></div>}
   </main>;
 }
 

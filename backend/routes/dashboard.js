@@ -11,8 +11,10 @@ const pctChange = (current, previous) => {
   return ((current - previous) / previous) * 100;
 };
 
-dashboardRouter.get("/", async (_request, response, next) => {
+dashboardRouter.get("/", async (request, response, next) => {
   try {
+    const requestedDays = Number(request.query.days);
+    const days = [7, 15, 30].includes(requestedDays) ? requestedDays : 7;
     const [summary, revenueSeries, recentOrders, lowStock] = await Promise.all([
       pool.query(`
         SELECT
@@ -30,12 +32,12 @@ dashboardRouter.get("/", async (_request, response, next) => {
         FROM orders
       `),
       pool.query(`
-        SELECT TO_CHAR(day, 'Dy') AS label, COALESCE(SUM(o.subtotal), 0)::float AS revenue
-        FROM generate_series(CURRENT_DATE - INTERVAL '6 days', CURRENT_DATE, INTERVAL '1 day') day
+        SELECT TO_CHAR(day, 'Mon DD') AS label, COALESCE(SUM(o.subtotal), 0)::float AS revenue
+        FROM generate_series(CURRENT_DATE - ($1::int - 1) * INTERVAL '1 day', CURRENT_DATE, INTERVAL '1 day') day
         LEFT JOIN orders o ON o.created_at >= day AND o.created_at < day + INTERVAL '1 day'
         GROUP BY day
         ORDER BY day
-      `),
+      `, [days]),
       pool.query(`
         SELECT id::text, order_number AS "orderNumber", customer_name AS customer, items,
           subtotal::float AS total, payment_status AS payment, fulfillment_status AS fulfillment,

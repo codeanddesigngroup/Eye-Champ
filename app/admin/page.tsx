@@ -39,7 +39,10 @@ export default function AdminDashboard() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch("/api/admin/dashboard", { credentials:"include", cache:"no-store" })
+    const days = Number(period.match(/\d+/)?.[0] ?? 7);
+    setLoading(true);
+    setError("");
+    fetch(`/api/admin/dashboard?days=${days}`, { credentials:"include", cache:"no-store" })
       .then(async response => {
         const result = await response.json();
         if (!response.ok) throw new Error(result.error || "Could not load dashboard.");
@@ -47,7 +50,7 @@ export default function AdminDashboard() {
       })
       .catch(reason => setError(reason instanceof Error ? reason.message : "Could not load dashboard."))
       .finally(() => setLoading(false));
-  }, []);
+  }, [period]);
 
   const chart = useMemo(() => {
     const values = dashboard.revenueSeries.length ? dashboard.revenueSeries : Array.from({ length:7 }, (_, index) => ({ label:["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][index], revenue:0 }));
@@ -83,9 +86,9 @@ export default function AdminDashboard() {
 
         <section className={styles.insightsGrid}>
           <article className={styles.chartCard}>
-            <div className={styles.cardHeading}><div><h3>Revenue overview</h3><p>Your store's revenue performance</p></div><select value={period} onChange={(event) => setPeriod(event.target.value)} aria-label="Revenue period"><option>Last 7 days</option></select></div>
+            <div className={styles.cardHeading}><div><h3>Revenue overview</h3><p>Your store's revenue performance</p></div><select value={period} onChange={(event) => setPeriod(event.target.value)} aria-label="Revenue period"><option>Last 7 days</option><option>Last 15 days</option><option>Last 30 days</option></select></div>
             <div className={styles.chartLegend}><span><i /> Revenue</span><strong>{money(dashboard.metrics.revenue)} <small>{changeText(dashboard.metrics.revenueChange)}</small></strong></div>
-            <div className={styles.chart} aria-label="Revenue chart for the last 7 days">
+            <div className={styles.chart} aria-label={`Revenue chart for the ${period.toLowerCase()}`}>
               <div className={styles.yAxis}><span>{money(chart.max)}</span><span>{money(chart.max * .66)}</span><span>{money(chart.max * .33)}</span><span>Rs 0</span></div>
               <svg viewBox="0 0 700 210" preserveAspectRatio="none" role="img">
                 <defs><linearGradient id="revenueFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor="#0d6666" stopOpacity=".24" /><stop offset="1" stopColor="#0d6666" stopOpacity="0" /></linearGradient></defs>
@@ -93,7 +96,7 @@ export default function AdminDashboard() {
                 <path className={styles.line} d={chart.line} />
                 {chart.points.length > 0 && <circle cx={chart.points.at(-1)?.x} cy={chart.points.at(-1)?.y} r="5" />}
               </svg>
-              <div className={styles.xAxis}>{chart.points.map(day => <span key={day.label}>{day.label}</span>)}</div>
+              <div className={styles.xAxis}>{chart.points.map((day,index) => <span key={day.label+"-"+index}>{day.label}</span>)}</div>
             </div>
           </article>
 
