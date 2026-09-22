@@ -96,7 +96,7 @@ export default function AdminDashboard() {
         {error && <div className={styles.dashboardError}>{error}</div>}
 
         <section className={styles.metrics} aria-label="Store metrics">
-          <Metric icon={<CircleDollarSign />} iconClass={styles.greenIcon} label="Total revenue" value={money(dashboard.metrics.revenue)} change={dashboard.metrics.revenueChange} note={`${money(dashboard.metrics.revenueToday)} today`} />
+          <Metric icon={<CircleDollarSign />} iconClass={styles.greenIcon} label={`Revenue (${period.toLowerCase()})`} value={money(dashboard.metrics.revenue)} change={dashboard.metrics.revenueChange} note={`${money(dashboard.metrics.revenueToday)} today`} />
           <Metric icon={<ShoppingBag />} iconClass={styles.blueIcon} label="Total orders" value={dashboard.metrics.orders.toLocaleString()} change={dashboard.metrics.orderChange} note={`${dashboard.metrics.ordersToday} today`} />
           <Metric icon={<Users />} iconClass={styles.purpleIcon} label="Customers" value={dashboard.metrics.customers.toLocaleString()} change={dashboard.metrics.customerChange} note="Unique order emails" />
           <article><div className={styles.metricTop}><span className={styles.orangeIcon}><Eye /></span><small className={styles.up}><ArrowUpRight /> Live</small></div><p>Low stock items</p><h2>{dashboard.lowStock.length}</h2><span>Active products with 10 or fewer left</span></article>
