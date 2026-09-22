@@ -48,7 +48,7 @@ const hasProductImage = (body) => {
 
 productsRouter.get("/", async (_request, response, next) => {
   try {
-    const { rows } = await pool.query(`SELECT id::text, title, slug, sku, price::float, quantity, status,
+    const { rows } = await pool.query(`SELECT id::text, title, slug, sku, price::float, discount_percent::float AS "discountPercent", quantity, status,
       categories, media, variants, created_at AS "createdAt", updated_at AS "updatedAt" FROM products ORDER BY created_at DESC`);
     response.json({ products: rows });
   } catch (error) { next(error); }
