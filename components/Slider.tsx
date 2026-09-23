@@ -11,6 +11,24 @@ import "swiper/css";
 
 type Product = { id: string; title: string; slug: string; price: number; discountPercent: number; shape: string | null; media: { url: string; primary?: boolean }[]; variants: { name: string; values: string[]; mediaByValue?: Record<string, { url: string }[]> }[]; categorySlug: string | null; subcategorySlug: string | null };
 
+function swatchColor(value: string) {
+  const normalized = value.toLowerCase().trim();
+  const colors: Record<string, string> = {
+    black: "#111111", white: "#ffffff", clear: "#eef4f4", transparent: "#eef4f4",
+    blue: "#2158a6", navy: "#172d55", brown: "#795036", gray: "#80878a", grey: "#80878a",
+    silver: "linear-gradient(135deg,#f4f4f4,#949b9e)", red: "#ae4040", green: "#427055",
+    pink: "#dc86a5", purple: "#744f91", orange: "#dc7b35", yellow: "#e5c642",
+    gold: "#b79a53", cream: "#eee1bd", "rose gold": "#b98276",
+    tortoise: "radial-gradient(circle at 70% 25%,#edb02d 0 18%,#2a1708 23% 48%,#aa6819 52%)",
+    tortoiseshell: "radial-gradient(circle at 70% 25%,#edb02d 0 18%,#2a1708 23% 48%,#aa6819 52%)",
+    rainbow: "conic-gradient(#e44,#ec3,#4a6,#39d,#85c,#e44)",
+    multicolor: "conic-gradient(#e44,#ec3,#4a6,#39d,#85c,#e44)",
+    pattern: "repeating-linear-gradient(45deg,#111 0 2px,#eee 2px 5px,#999 5px 7px)",
+  };
+  if (/^(#[0-9a-f]{3,8}|rgb(a)?\(|hsl(a)?\()/i.test(normalized)) return value;
+  return colors[normalized] ?? normalized;
+}
+
 export default function Slider() {
   const router = useRouter();
   const [category, setCategory] = useState<"Eyeglasses" | "Sunglasses">("Eyeglasses");
@@ -126,7 +144,7 @@ export default function Slider() {
                     </div>
                   <p>{product.title}</p>
                   <div className="seller-colors" aria-label="Available colors">
-                    {colors?.values.slice(0, 3).map(color => <button type="button" aria-label={`Select ${color} color`} aria-pressed={selectedColor === color} onClick={() => setSelectedColors(current => ({ ...current, [product.id]: color }))} className={`color-dot ${color.toLowerCase().replace(/\s+/g, "-")} ${selectedColor === color ? "selected" : ""}`} key={color} />)}
+                    {colors?.values.slice(0, 3).map(color => <button type="button" aria-label={`Select ${color} color`} title={color} aria-pressed={selectedColor === color} onClick={() => setSelectedColors(current => ({ ...current, [product.id]: color }))} className={`color-dot ${selectedColor === color ? "selected" : ""}`} style={{ background: swatchColor(color) }} key={color} />)}
                     {(colors?.values.length ?? 0) > 3 && <button type="button" className="color-more" aria-label={`See ${(colors?.values.length ?? 3) - 3} more colors`} onClick={() => router.push(href)}><Plus /></button>}
                   </div>
                 </div>
