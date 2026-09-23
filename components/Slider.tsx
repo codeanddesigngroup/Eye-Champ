@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import type { Swiper as SwiperInstance } from "swiper";
 import Link from "next/link";
+import { favoritesUpdatedEvent, getFavorites, toggleFavorite } from "@/lib/favorites";
 import "swiper/css";
 
 type Product = { id: string; title: string; slug: string; price: number; discountPercent: number; shape: string | null; media: { url: string; primary?: boolean }[]; variants: { name: string; values: string[]; mediaByValue?: Record<string, { url: string }[]> }[]; categorySlug: string | null; subcategorySlug: string | null };
@@ -39,8 +40,22 @@ export default function Slider() {
   useEffect(() => { fetch("/api/products/settings").then(response => response.json()).then((result: { currency?: string }) => { if (result.currency) setCurrency(result.currency) }).catch(() => undefined) }, []);
   useEffect(() => { swiper.current?.slideTo(0); setAtStart(true); }, [category]);
 
-  const toggleSaved = (id: string) => {
-    setSaved((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
+  useEffect(() => {
+    const refreshSaved = () => setSaved(getFavorites().map(product => product.id));
+    refreshSaved();
+    window.addEventListener(favoritesUpdatedEvent, refreshSaved);
+    window.addEventListener("storage", refreshSaved);
+    return () => {
+      window.removeEventListener(favoritesUpdatedEvent, refreshSaved);
+      window.removeEventListener("storage", refreshSaved);
+    };
+  }, []);
+
+  const toggleSaved = (product: Product) => {
+    toggleFavorite({
+      ...product,
+      price: Number(product.price) * (1 - Number(product.discountPercent || 0) / 100),
+    });
   };
 
   return (
@@ -100,7 +115,7 @@ export default function Slider() {
               >
                 <div className="seller-visual">
                   <span className="seller-badge">Top rated</span>
-                  <button className={`seller-heart ${saved.includes(product.id) ? "saved" : ""}`} type="button" aria-label={saved.includes(product.id) ? "Remove from favorites" : "Add to favorites"} onClick={() => toggleSaved(product.id)}>
+                  <button className={`seller-heart ${saved.includes(product.id) ? "saved" : ""}`} type="button" aria-label={saved.includes(product.id) ? "Remove from favorites" : "Add to favorites"} onClick={() => toggleSaved(product)}>
                     <Heart fill={saved.includes(product.id) ? "currentColor" : "none"} />
                   </button>
                   {image ? <img src={image} alt={product.title} /> : <span>No image</span>}
