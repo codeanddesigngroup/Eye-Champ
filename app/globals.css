@@ -2947,8 +2947,11 @@ footer {
 
 /* Header mega menu */
 .main-nav {
-    position: relative;
-    z-index: 40;
+    position: sticky;
+    top: 0;
+    z-index: 60;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(16, 35, 40, .08);
 }
 
 .mega-trigger {
@@ -3103,6 +3106,12 @@ footer {
 
 .mega-products-rail {
     width: 100%;
+}
+
+.mega-products-status {
+    margin: 38px 0;
+    color: #68777b;
+    font-size: 12px;
 }
 
 .mega-product {

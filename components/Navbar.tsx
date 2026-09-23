@@ -12,6 +12,7 @@ export default function Navbar() {
     const [customerLoggedIn, setCustomerLoggedIn] = useState(false);
     const [categories, setCategories] = useState<Array<{ id: string; name: string; slug: string; parentId: string | null }>>([]);
     const [expandedCategoryIds, setExpandedCategoryIds] = useState<string[]>([]);
+    
     useEffect(() => {
         const updateCartCount = () => {
             const cart = JSON.parse(localStorage.getItem("eye-champ-cart") ?? "[]") as Array<{ quantity?: number }>;
@@ -55,7 +56,7 @@ export default function Navbar() {
                     <img className="mobile_logo" src="/images/mobile_logo.png" alt="" />
                 </Link>
                 <form className="search" action="/shop-all" method="get" role="search">
-                    <input name="search" type="search" aria-label="Search frames" placeholder="Search our AI recommended frames" required />
+                    <input name="search" type="search" aria-label="Search frames" placeholder="Search our recommended frames" required />
                     <button type="submit" aria-label="Search products"><Search size={18} /></button>
                 </form>
                 <nav className="utility" aria-label="Account links">
@@ -100,7 +101,7 @@ export default function Navbar() {
                                     {!children.some(child => child.slug === "under-5000") && <Link href={`/${main.slug}/under-5000`}>Under 5000</Link>}
                                 </>}
                             </div>
-                            <MegaMenuSlider />
+                            <MegaMenuSlider categorySlug={main.slug} />
                         </div>
                         </section>
                     </div>

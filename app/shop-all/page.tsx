@@ -92,7 +92,6 @@ export default function ShopAll({categorySlug="",subcategorySlug="",catalogTitle
   return <main className="plp">
     <section className="plp-hero">
       <div>
-        <small>BEST SELLERS</small>
         <h1>{catalogTitle}</h1>
         <p>Featuring fan favorites and breakout hits.</p>
       </div>
