@@ -1865,8 +1865,10 @@ svg.live-lens-tint .lens-shine.right {
 .gallery-single-image{width:88%;height:400px;margin:2vw auto 0;display:flex;align-items:center;justify-content:center;overflow:hidden}.gallery-single-image .product-asset{width:100%;height:100%}.gallery-single-image img{object-fit:contain}
 
 .recommend {
-    padding: 26px 24px 54px;
-    overflow: hidden
+    width: min(1392px, 100% - 64px);
+    margin: 5vw auto;
+    /* padding: 26px 24px 54px;
+    overflow: hidden */
 }
 
 .section-head {

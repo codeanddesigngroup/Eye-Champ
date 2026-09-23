@@ -37,7 +37,7 @@ export default function ProductPage({ databaseProduct }: { databaseProduct?: Dat
     const photoSlider = useRef<SwiperInstance | null>(null);
     const gallerySlider = useRef<SwiperInstance | null>(null);
     const [view, setView] = useState("front"), [liked, setLiked] = useState(false), [tab, setTab] = useState("Features"), [color, setColor] = useState(0), [photosOnly, setPhotosOnly] = useState(false), [sideView, setSideView] = useState(false), [sortOpen, setSortOpen] = useState(false), [sortOrder, setSortOrder] = useState("Newest"), [reviewsOpen, setReviewsOpen] = useState(true), [currency, setCurrency] = useState("PKR");
-    const [recommended, setRecommended] = useState<RecommendedProduct[]>([]), [recommendLoading, setRecommendLoading] = useState(true), [recommendError, setRecommendError] = useState(false), [savedRecommendations, setSavedRecommendations] = useState<string[]>([]);
+    const [recommended, setRecommended] = useState<RecommendedProduct[]>([]), [recommendLoading, setRecommendLoading] = useState(true), [recommendError, setRecommendError] = useState(false), [savedRecommendations, setSavedRecommendations] = useState<string[]>([]), [recommendCanNavigate, setRecommendCanNavigate] = useState(false);
     const [reviews, setReviews] = useState<ProductReview[]>([]), [reviewsLoading, setReviewsLoading] = useState(true), [reviewsError, setReviewsError] = useState(false), [reviewPage, setReviewPage] = useState(1), [reviewFormOpen, setReviewFormOpen] = useState(false), [reviewSubmitting, setReviewSubmitting] = useState(false), [reviewMessage, setReviewMessage] = useState("");
     const slideProducts = (direction: number) => direction < 0 ? productSlider.current?.slidePrev() : productSlider.current?.slideNext();
     const sortedReviews = reviews.filter(review => !photosOnly || Boolean(review.photoUrl)).sort((a, b) => sortOrder === "Highest rating" ? b.rating - a.rating : sortOrder === "Lowest rating" ? a.rating - b.rating : Date.parse(b.createdAt) - Date.parse(a.createdAt));
@@ -62,6 +62,13 @@ export default function ProductPage({ databaseProduct }: { databaseProduct?: Dat
     const outOfStock = Boolean(databaseProduct && databaseProduct.quantity <= 0);
     useEffect(() => { if (!databaseProduct) return; const refresh = () => setLiked(getFavorites().some(item => item.id === databaseProduct.id)); refresh(); window.addEventListener(favoritesUpdatedEvent, refresh); return () => window.removeEventListener(favoritesUpdatedEvent, refresh) }, [databaseProduct]);
     useEffect(() => { fetch("/api/products/settings", { cache: "no-store" }).then(async response => { const result = await response.json() as { currency?: string }; if (response.ok && result.currency) setCurrency(result.currency) }).catch(() => undefined) }, []);
+    useEffect(() => {
+        const frame = requestAnimationFrame(() => {
+            productSlider.current?.update();
+            setRecommendCanNavigate(Boolean(productSlider.current && !productSlider.current.isLocked));
+        });
+        return () => cancelAnimationFrame(frame);
+    }, [recommended, recommendLoading, recommendError]);
     useEffect(() => {
         const controller = new AbortController();
         setRecommendLoading(true);
@@ -169,12 +176,12 @@ export default function ProductPage({ databaseProduct }: { databaseProduct?: Dat
             <section className="recommend">
                 <div className="section-head">
                     <h2>You Might Also Like</h2>
-                    <div>
+                    {recommendCanNavigate && <div>
                         <button type="button" aria-label="Previous recommended products" onClick={() => slideProducts(-1)}><ChevronLeft /></button>
                         <button type="button" aria-label="Next recommended products" onClick={() => slideProducts(1)}><ChevronRight /></button>
-                    </div>
+                    </div>}
                 </div>
-                <Swiper className="product-row" onSwiper={swiper => { productSlider.current = swiper }} spaceBetween={38} slidesPerView={1.2} breakpoints={{ 600: { slidesPerView: 2.4, spaceBetween: 20 }, 900: { slidesPerView: 3.4, spaceBetween: 28 }, 1200: { slidesPerView: 5, spaceBetween: 38 } }}>
+                <Swiper className="product-row" watchOverflow onSwiper={swiper => { productSlider.current = swiper; setRecommendCanNavigate(!swiper.isLocked) }} onResize={swiper => setRecommendCanNavigate(!swiper.isLocked)} onBreakpoint={swiper => setRecommendCanNavigate(!swiper.isLocked)} onSlidesLengthChange={swiper => setRecommendCanNavigate(!swiper.isLocked)} spaceBetween={38} slidesPerView={1.2} breakpoints={{ 600: { slidesPerView: 2.4, spaceBetween: 20 }, 900: { slidesPerView: 3.4, spaceBetween: 28 }, 1200: { slidesPerView: 5, spaceBetween: 38 } }}>
                     {(recommendLoading || recommendError || recommended.length === 0) && <SwiperSlide><p className="recommend-status">{recommendLoading ? "Loading similar products..." : recommendError ? "Could not load similar products." : "No other products available yet."}</p></SwiperSlide>}
                     {recommended.map(p => {
                         const href = `/${p.categorySlug || "shop-all"}/${p.subcategorySlug || "all"}/${p.slug}`;
