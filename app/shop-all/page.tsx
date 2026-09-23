@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { ChevronDown, Heart, Plus, SlidersHorizontal, Star, X } from "lucide-react";
+import { ChevronDown, ChevronRight, Heart, House, Plus, SlidersHorizontal, Star, X } from "lucide-react";
 import ProductFilters, { productFilterGroups, type ProductFilterSelection, type ProductFilterTitle } from "@/components/ProductFilters";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -87,9 +87,16 @@ export default function ShopAll({categorySlug="",subcategorySlug="",catalogTitle
   const toggleFilter=(group:ProductFilterTitle,value:string)=>setFilters(current=>{const values=current[group]??[];return {...current,[group]:values.includes(value)?values.filter(item=>item!==value):[...values,value]}});
   const activeFilters=productFilterGroups.flatMap(([group])=>(filters[group]??[]).map(value=>({group,value})));
   const selectedCount=activeFilters.length;
+  const categoryName=categorySlug.split("-").filter(Boolean).map(word=>word.charAt(0).toUpperCase()+word.slice(1)).join(" ");
+  const hasSubcategory=Boolean(categorySlug&&catalogTitle.toLowerCase()!==categoryName.toLowerCase());
   const openFilters=(group:ProductFilterTitle|null=null)=>{setFiltersOpen(true);setMobileFiltersOpen(true);setFocusGroup(group);setFocusRequest(current=>current+1)};
   if (missing) notFound();
   return <main className="plp">
+    {categorySlug&&<nav className="plp-breadcrumb" aria-label="Breadcrumb">
+      <Link href="/" aria-label="Home"><House aria-hidden="true"/><span>Home</span></Link>
+      <ChevronRight aria-hidden="true"/>
+      {hasSubcategory?<><Link href={`/${categorySlug}/all`}>{categoryName}</Link><ChevronRight aria-hidden="true"/><span aria-current="page">{catalogTitle}</span></>:<span aria-current="page">{categoryName}</span>}
+    </nav>}
     <section className="plp-hero">
       <div>
         <h1>{catalogTitle}</h1>
