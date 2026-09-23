@@ -11,6 +11,7 @@ export default function CheckoutPage() {
   const [items, setItems] = useState<Item[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [orderNumber, setOrderNumber] = useState("");
+  const [confirmationEmail, setConfirmationEmail] = useState("");
 
   useEffect(() => setItems(JSON.parse(localStorage.getItem("eye-champ-cart") ?? "[]")), []);
   const subtotal = items.reduce((sum, item) => sum + (Number(item.framePrice) + Number(item.lensPrice ?? 0)) * item.quantity, 0);
@@ -30,13 +31,14 @@ export default function CheckoutPage() {
           paymentMethod: "Cash on Delivery",
         }),
       });
-      const result = await response.json() as { order?: { orderNumber: string }; error?: string };
+      const result = await response.json() as { order?: { orderNumber: string; emailSent?: boolean }; error?: string };
       if (!response.ok || !result.order) throw new Error(result.error || "Checkout failed.");
       localStorage.removeItem("eye-champ-cart");
       window.dispatchEvent(new Event("eye-champ-cart-updated"));
       setItems([]);
       setOrderNumber(result.order.orderNumber);
-      showAuthToast({ message: "Order placed successfully.", type: "success" });
+      setConfirmationEmail(result.order.emailSent ? String(data.get("email") ?? "") : "");
+      showAuthToast({ message: result.order.emailSent ? "Order placed and confirmation email sent." : "Order placed successfully.", type: "success" });
     } catch (error) {
       showAuthToast({ message: error instanceof Error ? error.message : "Checkout failed.", type: "error" });
     } finally {
@@ -44,7 +46,7 @@ export default function CheckoutPage() {
     }
   }
 
-  if (orderNumber) return <main className="checkout-page shell"><section className="checkout-success"><h1>Thank you for your order</h1><p>Your order number is <strong>{orderNumber}</strong>.</p><p>Payment method: <strong>Cash on Delivery</strong></p><Link href="/shop-all">Continue shopping</Link></section></main>;
+  if (orderNumber) return <main className="checkout-page shell"><section className="checkout-success"><h1>Thank you for your order</h1><p>Your order number is <strong>{orderNumber}</strong>.</p>{confirmationEmail && <p>A confirmation email was sent to <strong>{confirmationEmail}</strong>.</p>}<p>Payment method: <strong>Cash on Delivery</strong></p><Link href="/shop-all">Continue shopping</Link></section></main>;
 
   return <main className="checkout-page shell">
     <Link href="/cart">← Back to cart</Link>

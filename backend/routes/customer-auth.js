@@ -1,8 +1,8 @@
 import { createHash, randomBytes, randomInt, timingSafeEqual } from "node:crypto";
 import { Router } from "express";
 import rateLimit from "express-rate-limit";
-import nodemailer from "nodemailer";
 import { pool } from "../db.js";
+import { createMailer } from "../mailer.js";
 
 export const customerAuthRouter = Router();
 const cookieName = "eye_champ_customer_session";
@@ -13,27 +13,13 @@ const normalizeEmail = value => String(value ?? "").trim().toLowerCase();
 const requestLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 5, standardHeaders: true, legacyHeaders: false });
 const verifyLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 15, standardHeaders: true, legacyHeaders: false });
 
-function mailer() {
-  const port = Number(process.env.SMTP_PORT || 587);
-  if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) return null;
-  return nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port,
-    secure: process.env.SMTP_SECURE === "true" || port === 465,
-    auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    socketTimeout: 15000,
-  });
-}
-
 customerAuthRouter.post("/request-otp", requestLimiter, async (request, response, next) => {
   try {
     const email = normalizeEmail(request.body?.email);
     if (!/^\S+@\S+\.\S+$/.test(email)) return response.status(400).json({ error: "Enter a valid email address." });
     const existing = await pool.query("SELECT 1 FROM orders WHERE LOWER(email)=$1 LIMIT 1", [email]);
     if (!existing.rowCount) return response.status(404).json({ error: "No orders were found for this email address." });
-    const transport = mailer();
+    const transport = createMailer();
     if (!transport) return response.status(503).json({ error: "Email delivery is not configured. Add the SMTP settings to your .env file." });
 
     const id = randomBytes(32).toString("hex");
