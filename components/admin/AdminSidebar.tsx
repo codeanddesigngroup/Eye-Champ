@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { BadgeCheck, Boxes, CircleDollarSign, Glasses, Grid2X2, HelpCircle, Layers3, LibraryBig, MoreHorizontal, Settings, ShoppingBag, Tag, Truck, Users, X } from "lucide-react";
+import { BadgeCheck, Boxes, CircleDollarSign, Glasses, Grid2X2, HelpCircle, Layers3, LibraryBig, MessageSquareText, MoreHorizontal, Settings, ShoppingBag, Tag, Truck, Users, X } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import "./AdminSidebar.css";
@@ -19,6 +19,7 @@ const workspaceItems = [
   { label: "Collections", icon: LibraryBig, href: "/admin/collections" },
   { label: "Brands", icon: BadgeCheck, href: "/admin/brands" },
   { label: "Customers", icon: Users, href: "/admin/customers" },
+  { label: "Reviews", icon: MessageSquareText, href: "/admin/reviews" },
   { label: "Discounts", icon: Tag, href: "/admin/discounts" },
 ];
 

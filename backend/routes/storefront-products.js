@@ -11,7 +11,7 @@ storefrontProductsRouter.get("/:slug/reviews", async (request, response, next) =
     const product = await pool.query("SELECT id FROM products WHERE slug=$1 AND status='Active'", [request.params.slug]);
     if (!product.rows[0]) return response.status(404).json({ error: "Product not found." });
     const { rows } = await pool.query(`SELECT id::text, customer_name AS "name", rating, title, body, fit, quality,
-      photo_url AS "photoUrl", created_at AS "createdAt" FROM product_reviews WHERE product_id=$1 ORDER BY created_at DESC`, [product.rows[0].id]);
+      photo_url AS "photoUrl", created_at AS "createdAt" FROM product_reviews WHERE product_id=$1 AND moderation_status='Approved' ORDER BY created_at DESC`, [product.rows[0].id]);
     response.json({ reviews: rows });
   } catch (error) { next(error); }
 });
@@ -39,7 +39,7 @@ storefrontProductsRouter.post("/:slug/reviews", reviewLimiter, async (request, r
     if (!Number.isInteger(rating) || rating < 1 || rating > 5 || title.length < 3 || title.length > 160 || body.length < 10 || body.length > 3000 || (fit && !["Tight", "True to Size", "Loose"].includes(fit)) || (quality && !["Low", "Average", "High"].includes(quality)) || (photoUrl && (photoUrl.length > 1000 || !/^https:\/\//i.test(photoUrl)))) return response.status(400).json({ error: "Check the rating, title, and review details." });
     const { rows } = await pool.query(`INSERT INTO product_reviews(product_id,customer_email,customer_name,rating,title,body,fit,quality,photo_url)
       VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) ON CONFLICT(product_id,customer_email) DO UPDATE SET
-      rating=EXCLUDED.rating,title=EXCLUDED.title,body=EXCLUDED.body,fit=EXCLUDED.fit,quality=EXCLUDED.quality,photo_url=EXCLUDED.photo_url,created_at=NOW()
+      rating=EXCLUDED.rating,title=EXCLUDED.title,body=EXCLUDED.body,fit=EXCLUDED.fit,quality=EXCLUDED.quality,photo_url=EXCLUDED.photo_url,moderation_status='Pending',created_at=NOW()
       RETURNING id::text`, [product.rows[0].id, email, purchase.rows[0].customer_name, rating, title, body, fit || null, quality || null, photoUrl || null]);
     response.status(201).json({ id: rows[0].id });
   } catch (error) { next(error); }
@@ -101,7 +101,7 @@ storefrontProductsRouter.get("/", async (request, response, next) => {
       FROM products p
       LEFT JOIN (
         SELECT product_id, ROUND(AVG(rating)::numeric, 1)::float AS rating, COUNT(*)::int AS review_count
-        FROM product_reviews
+        FROM product_reviews WHERE moderation_status='Approved'
         GROUP BY product_id
       ) reviews ON reviews.product_id = p.id
       WHERE p.status = 'Active'

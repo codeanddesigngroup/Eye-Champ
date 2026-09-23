@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { ChevronLeft, ChevronRight, Heart, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, Heart, Plus, Star } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import type { Swiper as SwiperInstance } from "swiper";
@@ -9,7 +9,7 @@ import Link from "next/link";
 import { favoritesUpdatedEvent, getFavorites, toggleFavorite } from "@/lib/favorites";
 import "swiper/css";
 
-type Product = { id: string; title: string; slug: string; price: number; discountPercent: number; shape: string | null; media: { url: string; primary?: boolean }[]; variants: { name: string; values: string[]; mediaByValue?: Record<string, { url: string }[]> }[]; categorySlug: string | null; subcategorySlug: string | null };
+type Product = { id: string; title: string; slug: string; price: number; discountPercent: number; rating?: number; reviewCount?: number; shape: string | null; media: { url: string; primary?: boolean }[]; variants: { name: string; values: string[]; mediaByValue?: Record<string, { url: string }[]> }[]; categorySlug: string | null; subcategorySlug: string | null };
 
 function swatchColor(value: string) {
   const normalized = value.toLowerCase().trim();
@@ -141,6 +141,7 @@ export default function Slider() {
                 <div className="seller-info">
                   <div className="seller-line">
                     <strong>{price}</strong>
+                    {Number(product.reviewCount) > 0 && <span aria-label={`${Number(product.rating).toFixed(1)} out of 5 stars from ${product.reviewCount} reviews`}><Star fill="currentColor" /> {Number(product.rating).toFixed(1)} ({product.reviewCount})</span>}
                     </div>
                   <p>{product.title}</p>
                   <div className="seller-colors" aria-label="Available colors">

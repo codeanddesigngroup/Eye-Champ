@@ -23,6 +23,7 @@ import { discountsRouter } from "./routes/discounts.js";
 import { shippingRouter } from "./routes/shipping.js";
 import { financesRouter } from "./routes/finances.js";
 import { settingsRouter } from "./routes/settings.js";
+import { reviewsRouter } from "./routes/reviews.js";
 
 const app = express();
 const port = Number(process.env.BACKEND_PORT || 4000);
@@ -51,6 +52,7 @@ app.use("/api/admin/discounts", discountsRouter);
 app.use("/api/admin/shipping", shippingRouter);
 app.use("/api/admin/finances", financesRouter);
 app.use("/api/admin/settings", settingsRouter);
+app.use("/api/admin/reviews", reviewsRouter);
 app.use("/api/admin/uploads", uploadsRouter);
 app.use("/api/products", storefrontProductsRouter);
 app.use("/api/checkout", checkoutRouter);

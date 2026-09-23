@@ -3,14 +3,14 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, Heart, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, Heart, Plus, Star } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import type { Swiper as SwiperInstance } from "swiper";
 import { favoritesUpdatedEvent, getFavorites, toggleFavorite } from "@/lib/favorites";
 import "swiper/css";
 
 type Product = {
-  id: string; title: string; slug: string; price: number; discountPercent: number;
+  id: string; title: string; slug: string; price: number; discountPercent: number; rating?: number; reviewCount?: number;
   shape: string | null; categorySlug: string | null; subcategorySlug: string | null;
   media: { url: string; primary?: boolean }[];
   variants: { name: string; values: string[]; mediaByValue?: Record<string, { url: string }[]> }[];
@@ -95,7 +95,7 @@ export default function UnderSlider() {
               {image ? <img src={image} alt={product.title} /> : <span>No image</span>}
             </div>
             <div className="seller-info">
-              <div className="seller-line"><strong>{currency} {price.toFixed(2)}</strong></div>
+              <div className="seller-line"><strong>{currency} {price.toFixed(2)}</strong>{Number(product.reviewCount) > 0 && <span aria-label={`${Number(product.rating).toFixed(1)} out of 5 stars from ${product.reviewCount} reviews`}><Star fill="currentColor" /> {Number(product.rating).toFixed(1)} ({product.reviewCount})</span>}</div>
               <p>{product.title}</p>
               {product.shape && <p>{product.shape}</p>}
               {frameColors && <div className="seller-colors" aria-label="Available colors">
