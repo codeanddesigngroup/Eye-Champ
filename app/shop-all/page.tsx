@@ -87,11 +87,13 @@ export default function ShopAll({categorySlug="",subcategorySlug="",catalogTitle
   const toggleFilter=(group:ProductFilterTitle,value:string)=>setFilters(current=>{const values=current[group]??[];return {...current,[group]:values.includes(value)?values.filter(item=>item!==value):[...values,value]}});
   const activeFilters=productFilterGroups.flatMap(([group])=>(filters[group]??[]).map(value=>({group,value})));
   const selectedCount=activeFilters.length;
+  const displayTitle=searchTerm ? `Search Results for "${searchTerm}"` : catalogTitle;
   const categoryName=categorySlug.split("-").filter(Boolean).map(word=>word.charAt(0).toUpperCase()+word.slice(1)).join(" ");
   const hasSubcategory=Boolean(categorySlug&&catalogTitle.toLowerCase()!==categoryName.toLowerCase());
   const openFilters=(group:ProductFilterTitle|null=null)=>{setFiltersOpen(true);setMobileFiltersOpen(true);setFocusGroup(group);setFocusRequest(current=>current+1)};
   if (missing) notFound();
-  return <main className="plp">
+  const noResults=!loading&&!loadError&&visible.length===0;
+  return <main className={`plp ${noResults ? "no-results" : ""}`}>
     {categorySlug&&<nav className="plp-breadcrumb" aria-label="Breadcrumb">
       <Link href="/" aria-label="Home"><House aria-hidden="true"/><span>Home</span></Link>
       <ChevronRight aria-hidden="true"/>
@@ -99,7 +101,7 @@ export default function ShopAll({categorySlug="",subcategorySlug="",catalogTitle
     </nav>}
     <section className="plp-hero">
       <div>
-        <h1>{catalogTitle}</h1>
+        <h1>{displayTitle}</h1>
         <p>Featuring fan favorites and breakout hits.</p>
       </div>
     </section>

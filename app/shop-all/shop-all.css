@@ -36,7 +36,7 @@
   flex: none;
 }
 
-.plp-breadcrumb > svg {
+.plp-breadcrumb>svg {
   color: #7e8a8d;
 }
 
@@ -113,6 +113,7 @@
 .plp-hero>div:last-child {
   padding: 64px 7vw;
   color: #fff;
+  text-align: left;
 }
 
 .plp-hero small {
@@ -1187,6 +1188,10 @@
     margin: 0;
     top: 14px;
     max-height: calc(100vh - 28px)
+  }
+
+  .plp.no-results .filters {
+    max-height: 328px;
   }
 
   .plp-grid {
