@@ -585,6 +585,30 @@ input {
     top: 30%;
 }
 
+.hero-badge {
+    position: absolute;
+    right: 1.1vw;
+    bottom: 1.1vw;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: .45vw;
+    padding: .55vw .75vw;
+    border-radius: .45vw;
+    background: #050505;
+    color: #fff;
+    font-size: .78vw;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.hero-badge svg {
+    width: 1.05vw;
+    height: 1.05vw;
+    fill: #fff;
+    stroke: #fff;
+}
+
 .hero h1,
 .deal h2 {
     font-size: 3.125vw;
@@ -687,6 +711,53 @@ input {
 
 .gender-card .btn {
     margin-top: auto
+}
+
+#men .gender-badge,
+#women .gender-badge {
+    position: absolute;
+    z-index: 2;
+    bottom: 3.1vw;
+    display: inline-flex;
+    align-items: center;
+    gap: .45vw;
+    margin: 0;
+    padding: .55vw .75vw;
+    border-radius: .45vw;
+    background: #050505;
+    color: #fff;
+    font-size: .78vw;
+    font-weight: 800;
+    line-height: 1;
+}
+
+#men .gender-badge { left: 1.1vw; }
+#women .gender-badge { right: 1.1vw; }
+
+.gender-badge svg {
+    width: 1.05vw;
+    height: 1.05vw;
+    fill: #fff;
+    stroke: #fff;
+}
+
+@media (max-width: 768px) {
+    #men .gender-badge,
+    #women .gender-badge {
+        bottom: 10px;
+        gap: 5px;
+        padding: 7px 9px;
+        border-radius: 6px;
+        font-size: 11px;
+    }
+
+    #men .gender-badge { left: 10px; }
+    #women .gender-badge { right: 10px; }
+
+    .gender-badge svg {
+        width: 15px;
+        height: 15px;
+    }
 }
 
 
@@ -980,6 +1051,46 @@ input {
     background-repeat: no-repeat;
 }
 
+.deal-badge {
+    position: absolute;
+    right: 1.1vw;
+    bottom: 1.1vw;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: .45vw;
+    padding: .55vw .75vw;
+    border-radius: .45vw;
+    background: #050505;
+    color: #fff;
+    font-size: .78vw;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.deal-badge svg {
+    width: 1.05vw;
+    height: 1.05vw;
+    fill: #fff;
+    stroke: #fff;
+}
+
+@media (max-width: 768px) {
+    .deal-badge {
+        right: 10px;
+        bottom: 10px;
+        gap: 5px;
+        padding: 7px 9px;
+        border-radius: 6px;
+        font-size: 11px;
+    }
+
+    .deal-badge svg {
+        width: 15px;
+        height: 15px;
+    }
+}
+
 .deal>.sheet-photo {
     position: absolute;
     inset: 0 65% 0 0;
@@ -987,7 +1098,7 @@ input {
     background-position: 0 100%
 }
 
-.deal>div:last-child {
+.deal>.deal-content {
     position: absolute;
     inset: 0;
     display: flex;
@@ -1122,10 +1233,50 @@ input {
     animation: trendFade 0.8s ease-in-out;
 }
 
-.trend>div:last-child {
+.trend>.trend-content {
     position: relative;
     z-index: 1;
     padding: 6.597vw 3.819vw;
+}
+
+.trend-badge {
+    position: absolute;
+    right: 1.1vw;
+    bottom: 1.1vw;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: .45vw;
+    padding: .55vw .75vw;
+    border-radius: .45vw;
+    background: #050505;
+    color: #fff;
+    font-size: .78vw;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.trend-badge svg {
+    width: 1.05vw;
+    height: 1.05vw;
+    fill: #fff;
+    stroke: #fff;
+}
+
+@media (max-width: 768px) {
+    .trend-badge {
+        right: 10px;
+        bottom: 10px;
+        gap: 5px;
+        padding: 7px 9px;
+        border-radius: 6px;
+        font-size: 11px;
+    }
+
+    .trend-badge svg {
+        width: 15px;
+        height: 15px;
+    }
 }
 
 @keyframes trendFade {
@@ -1670,7 +1821,7 @@ footer {
         font-size: 0.7rem;
     }
 
-    .deal>div:last-child {
+    .deal>.deal-content {
         padding: 1.25rem;
     }
 
@@ -1727,7 +1878,7 @@ footer {
         padding: 0;
     }
 
-    .trend>div:last-child {
+    .trend>.trend-content {
         position: absolute;
         inset: 68% 1rem auto;
         padding: 0;
@@ -1953,6 +2104,20 @@ footer {
     .hero-copy {
         text-align: center;
         align-items: center;
+    }
+
+    .hero-badge {
+        right: 12px;
+        bottom: 12px;
+        gap: 6px;
+        padding: 8px 10px;
+        border-radius: 6px;
+        font-size: 12px;
+    }
+
+    .hero-badge svg {
+        width: 16px;
+        height: 16px;
     }
 
 
@@ -2212,7 +2377,7 @@ footer {
         padding: 0;
     }
 
-    .trend>div:last-child {
+    .trend>.trend-content {
         /* padding: 30px 22px; */
         text-align: center;
         /* width: 55%; */
@@ -2346,7 +2511,7 @@ footer {
 .best-sellers-tabs button.active {
     font-weight: 700;
     text-decoration: underline;
-    text-underline-offset: .139vw;
+    text-underline-offset: .5vw;
 }
 
 .best-sellers-actions {

@@ -6,6 +6,7 @@ import ImageSlider from "@/components/ImageSlider";
 import Slider from "@/components/Slider";
 import UnderSlider from "@/components/UnderSlider";
 import Link from "next/link";
+import { Tag } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { CSSProperties } from "react";
 
@@ -39,6 +40,7 @@ export default function Home() {
             <h2>MEN</h2>
             <Link className="btn" href="/all-glasses/men">SHOP NOW</Link>
           </div>
+          <span className="gender-badge"><Tag aria-hidden="true" />Frames</span>
         </article>
         <article className="gender-card" id="women">
           <div>
@@ -46,6 +48,7 @@ export default function Home() {
             <h2>WOMEN</h2>
             <Link className="btn" href="/all-glasses/women">SHOP NOW</Link>
           </div>
+          <span className="gender-badge"><Tag aria-hidden="true" />Frames</span>
         </article>
       </section>
     </div>
@@ -80,11 +83,12 @@ export default function Home() {
       </section>
 
       <section className="deal card">
-        <div>
+        <div className="deal-content">
           <h2>BUY ONE,<br />GET ONE 20% OFF</h2>
           <p>Use code <b>GET20</b></p>
           <Link className="btn" href="/all-glasses">SHOP NOW</Link>
         </div>
+        <span className="deal-badge"><Tag aria-hidden="true" />Frames</span>
       </section>
 
       <section className="shape-shop">
@@ -119,7 +123,7 @@ export default function Home() {
 
     <div className="page shell">
       <section className="trend card">
-        <div key={`${trendBanners[trendIndex]}-${mobileTrendBanners[mobileTrendIndex]}`} className="trend-bg" style={{ "--trend-desktop-image": `url(${trendBanners[trendIndex]})`, "--trend-mobile-image": `url(${mobileTrendBanners[mobileTrendIndex]})` } as CSSProperties} /><div><h2>THE TREND SHOP</h2><p>Curated styles, fresh colors, and must-see edits.</p><Link className="btn" href="/shop-all">SHOP NOW</Link></div>
+        <div key={`${trendBanners[trendIndex]}-${mobileTrendBanners[mobileTrendIndex]}`} className="trend-bg" style={{ "--trend-desktop-image": `url(${trendBanners[trendIndex]})`, "--trend-mobile-image": `url(${mobileTrendBanners[mobileTrendIndex]})` } as CSSProperties} /><div className="trend-content"><h2>THE TREND SHOP</h2><p>Curated styles, fresh colors, and must-see edits.</p><Link className="btn" href="/shop-all">SHOP NOW</Link></div><span className="trend-badge"><Tag aria-hidden="true" />Frames</span>
       </section>
     </div>
     
