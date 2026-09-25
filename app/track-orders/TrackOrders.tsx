@@ -23,11 +23,11 @@ export default function TrackOrders() {
   return <main id="top" className={styles.page}>
     <div className={styles.content}>
       <h1>MANAGE MY ORDER</h1>
-      <p className={styles.intro}>Enter your order number and the e-mail address used during the checkout process to access your order details.</p>
+      <p className={styles.intro}>Enter your order number and the email address used at checkout &mdash; we&apos;ll email you the latest status.</p>
       <form className={styles.form} onSubmit={search}>
         <label htmlFor="order-number">Order number*<input id="order-number" name="orderNumber" type="text" required maxLength={100} autoComplete="off" spellCheck={false} /></label>
         <label htmlFor="order-email">E-mail address*<input id="order-email" name="email" type="email" required maxLength={254} autoComplete="email" /></label>
-        <button type="submit" className={styles.search}>SEARCH</button>
+        <button type="submit" className={styles.search}>SUBMIT</button>
       </form>
       <div className={styles.assistance}>
         <p><button className={styles.signIn} type="button" onClick={() => setMessage("Customer sign-in and order history are not available yet. Please contact customer service for help with your order.")}>Sign in</button> to view your full order history.</p>

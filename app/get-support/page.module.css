@@ -45,3 +45,9 @@
   .contact { padding-top: 45px; }
 }
 @media (max-width: 380px) { .grid { grid-template-columns: 1fr; } }
+
+.answer { padding: 16px 0; }
+.answer + .answer { border-top: 1px solid #eee; }
+.answer h4 { font-size: 14px; line-height: 1.6; font-weight: 700; margin: 0 0 8px; }
+.accordion h3 button:disabled { cursor: default; }
+.accordion h3 button:disabled span { display: none; }

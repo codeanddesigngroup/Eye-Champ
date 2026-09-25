@@ -3,7 +3,7 @@ import StoreLocator from "./StoreLocator";
 
 export const metadata: Metadata = {
   title: "Store Locator | Eye Champ",
-  description: "Search for nearby eyewear stores and get help checking an online reseller.",
+  description: "Visit our Karachi store to browse frames in person and get expert fitting help. Find our address and get directions.",
 };
 
 export default function StoreLocatorPage() {

@@ -3,7 +3,7 @@ import TrackReturns from "./TrackReturns";
 
 export const metadata: Metadata = {
   title: "Track Returns | Eye Champ",
-  description: "Track your return using your return number and the email address used at checkout.",
+  description: "Track your return using your order number and the email address used at checkout.",
 };
 
 export default function TrackReturnsPage() {
