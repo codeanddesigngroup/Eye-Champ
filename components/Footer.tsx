@@ -10,13 +10,12 @@ import styles from "./Footer.module.css";
 
 const groups = [
   ["SHOP BY", "ALL SUNGLASSES", "ALL EYEGLASSES", "POLARIZED", "NEW ARRIVALS", "SPECIAL OFFERS"],
-  ["SHOPPING ONLINE", "SIZE GUIDE", "ACCEPTED PAYMENT METHODS", "PARTS & SERVICE", "SHIPPING AND DELIVERY POLICY", "CANCELLATION, RETURN & REFUND POLICY"],
-  ["ABOUT US", "OUR STORY", "BLOG"], ["DO IT IN PERSON", "STORE LOCATOR"],
-  ["HOW CAN WE HELP?", "GET SUPPORT", "CONTACT US", "TRACK ORDERS", "TRACK RETURNS", "FAQ"],
+  ["SHOPPING ONLINE", "SIZE GUIDE", "ACCEPTED PAYMENT METHODS", "SHIPPING AND DELIVERY POLICY", "CANCELLATION, RETURN & REFUND POLICY"],
+  ["ABOUT US", "OUR STORY", "FAQ"], ["DO IT IN PERSON", "STORE LOCATOR"],
+  ["HOW CAN WE HELP?", "GET SUPPORT", "CONTACT US", "TRACK ORDERS", "TRACK RETURNS"],
 ];
 const shopByLinks: Record<string, string> = {
   "OUR STORY": "/our-story",
-  "BLOG": "#top",
   "GET SUPPORT": "/get-support",
   "CONTACT US": "/contact-us",
   "TRACK ORDERS": "/track-orders",
@@ -25,7 +24,6 @@ const shopByLinks: Record<string, string> = {
   "STORE LOCATOR": "/store-locator",
   "SIZE GUIDE": "/size-guide",
   "ACCEPTED PAYMENT METHODS": "/accepted-payment-methods",
-  "PARTS & SERVICE": "/parts-and-service",
   "SHIPPING AND DELIVERY POLICY": "/shipping-and-delivery-policy",
   "CANCELLATION, RETURN & REFUND POLICY": "/cancellation-return-and-refund-policy",
   "ALL SUNGLASSES": "/sunglasses/all",
