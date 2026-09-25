@@ -1,7 +1,7 @@
 import Link from "next/link";
 import styles from "./page.module.css";
 
-const address = "No 18, Main Rashid Minhas Rd, Block 5 Gulshan-e-Iqbal, Karachi, 75300";
+const address = "Eye Champ, No 18, Main Rashid Minhas Rd, Block 5 Gulshan-e-Iqbal, Karachi, 75300, Pakistan";
 const mapQuery = encodeURIComponent(address);
 
 export default function StoreLocator() {
