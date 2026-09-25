@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
-import Feedback from "../accepted-payment-methods/Feedback";
 import shared from "../accepted-payment-methods/page.module.css";
 import styles from "./page.module.css";
 
@@ -108,7 +107,6 @@ export default function InternetPrivacyPolicyPage() {
           <p>EyeChamp may update this Privacy Policy when necessary. Updated versions will be published on this page with a revised effective date.</p>
         </section>
       </div>
-      {/* <Feedback negativeMessage="Visit Get Support to contact customer service about privacy questions." /> */}
     </article>
   </main>;
 }
