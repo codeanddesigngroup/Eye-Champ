@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
-import Feedback from "../accepted-payment-methods/Feedback";
 import styles from "../accepted-payment-methods/page.module.css";
 import serviceStyles from "./page.module.css";
 
@@ -34,7 +33,6 @@ export default function PartsAndServicePage() {
         <h2 id="liability-heading">OUR LIABILITY IN RELATION TO YOU</h2>
         <p>Nothing in this Warranty Policy shall be interpreted as intended to exclude or limit Luxottica&apos;s liability in the event of (a) death or personal injury caused by Luxottica&apos;s negligence; (b) fraud, false declarations or gross negligence; or (c) any liability that cannot be limited or excluded in accordance with the applicable law.</p>
       </section>
-      <Feedback negativeMessage="Please use the contact us link above for further assistance with parts and service." />
     </article>
   </main>;
 }
