@@ -63,7 +63,7 @@ export default function Footer() {
     </div>
     </section>
     <section className={styles.legal}>
-      <div className={styles.legalTop}><nav aria-label="Legal links"><Link href="/privacy-policy">privacy policy</Link><a href="#top">Sitemap</a><Link href="/terms-and-conditions">Terms and Conditions</Link></nav></div>
+      <div className={styles.legalTop}><nav aria-label="Legal links"><Link href="/privacy-policy">privacy policy</Link><Link href="/terms-and-conditions">Terms and Conditions</Link></nav></div>
       <div className={styles.disclaimer}>
         <p>
           Product images are for illustration purposes only; actual colour and finish may vary slightly on screen. Eye Champ is an independent multi-brand eyewear retailer based in Pakistan. All brand names and logos displayed are the property of their respective owners. © 2026 Eye Champ. All rights reserved.
