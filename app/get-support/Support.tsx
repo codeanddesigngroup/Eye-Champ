@@ -5,6 +5,7 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import { PackageSearch, PackageCheck, Store, CreditCard, HandHeart } from "lucide-react";
 import styles from "./page.module.css";
+import FAQTabs from "../faq/FAQTabs";
 
 const pages = [
   { title: "Track returns", href: "/track-returns", description: "Look up your return using your return number and checkout email address.", keywords: "track tracking return refund status number email" },
@@ -97,7 +98,6 @@ const groups = [
 export default function Support() {
   const [query, setQuery] = useState("");
   const [search, setSearch] = useState<string | null>(null);
-  const [open, setOpen] = useState<string[]>(["SHIPPING & RETURNS"]);
   const terms = (search ?? "").toLowerCase().split(/\s+/).filter(Boolean);
   const results = pages.filter(page => terms.some(term => `${page.title} ${page.description} ${page.keywords}`.toLowerCase().includes(term)));
 
@@ -125,10 +125,12 @@ export default function Support() {
 
     <section className={styles.helpPages} aria-labelledby="help-pages-heading">
       <div className={styles.sectionIntro}><h2 id="help-pages-heading">HELP PAGES</h2></div>
-      <div className={styles.accordions}>{groups.map((group, index) => {
-        const expanded = open.includes(group.title);
-        return <div className={styles.accordion} key={group.title}><h3><button id={`help-heading-${index}`} type="button" disabled={!group.questions.length} aria-expanded={expanded} aria-controls={`help-panel-${index}`} onClick={() => setOpen(current => expanded ? current.filter(item => item !== group.title) : [...current, group.title])}>{group.title}<span aria-hidden="true">{expanded ? "−" : "+"}</span></button></h3><div id={`help-panel-${index}`} role="region" aria-labelledby={`help-heading-${index}`} hidden={!expanded}>{group.questions.map(([question, answer]) => <div className={styles.answer} key={question}><h4>{question}</h4><p>{answer}</p></div>)}</div></div>;
-      })}</div>
+      <div className={styles.accordions}>
+        <FAQTabs categories={groups.map(group => ({
+          title: group.title,
+          questions: group.questions.map(([question, answer]) => ({ question, answer })),
+        }))} />
+      </div>
     </section>
 
     <section id="contact-support" className={styles.contact}><h2>NEED TO GET IN TOUCH?</h2><p>Need more assistance?<br />Send us a message and our dedicated team will be in touch.</p><a href="https://wa.me/923338888888" target="_blank" rel="noopener noreferrer" className={styles.button}>CONTACT US<span className={styles.srOnly}> (opens in a new tab)</span></a></section>

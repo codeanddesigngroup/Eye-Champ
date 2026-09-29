@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ChevronLeft, ChevronDown } from "lucide-react";
+import FAQTabs from "./FAQTabs";
 import shared from "../accepted-payment-methods/page.module.css";
 import styles from "./page.module.css";
 
@@ -36,16 +36,12 @@ const categories = [
 export default function FAQsPage() {
   return <main id="top" className={`${shared.page} ${styles.page}`}>
     <aside className={shared.sidebar} aria-label="Shopping help navigation">
-      <Link href="/get-support" className={shared.back} aria-label="Back to Get Support"><ChevronLeft size={22} strokeWidth={1.5} /></Link>
       <h2>FAQ</h2>
     </aside>
     <article className={shared.article}>
-      <nav className={shared.breadcrumb} aria-label="Breadcrumb"><Link href="/get-support">GET SUPPORT</Link><span aria-hidden="true"> / </span><span>Shopping online</span><span aria-hidden="true"> / </span><span aria-current="page">FAQ</span></nav>
+      <nav className={shared.breadcrumb} aria-label="Breadcrumb"><Link href="/get-support">Home</Link><span aria-hidden="true"> / </span><Link href="/faq">Faq</Link></nav>
       <h1>FAQ</h1>
-      <div className={styles.categories}>{categories.map(category => <details className={styles.category} key={category.title}>
-        <summary>{category.title}<ChevronDown size={15} aria-hidden="true" /></summary>
-        <div className={styles.answers}>{category.questions.map(item => <section key={item.question}><h2>{item.question}</h2><p>{item.answer}</p><Link href={item.href}>{item.label}</Link></section>)}</div>
-      </details>)}</div>
+      <FAQTabs categories={categories} />
     </article>
   </main>;
 }

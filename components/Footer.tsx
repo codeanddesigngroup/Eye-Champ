@@ -14,6 +14,7 @@ const groups = [
   ["ABOUT US", "OUR STORY", "FAQ"], ["DO IT IN PERSON", "STORE LOCATOR"],
   ["HOW CAN WE HELP?", "GET SUPPORT", "CONTACT US", "TRACK ORDERS", "TRACK RETURNS"],
 ];
+
 const shopByLinks: Record<string, string> = {
   "OUR STORY": "/our-story",
   "GET SUPPORT": "/get-support",

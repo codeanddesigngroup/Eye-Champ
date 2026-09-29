@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import model from "@/public/images/our-story/wfr_talent_d.avif";
+import model from "@/public/images/our-story/banner.webp";
 import styles from "./story.module.css";
 
 export const metadata: Metadata = {
@@ -44,8 +44,8 @@ export default function OurStoryPage() {
     <section className={styles.section}>
       <h2>Where we&apos;ve been</h2>
       <div className={styles.timeline}>
-        <article><h3>2022 ? Our first optical counter</h3><p>Opened with a small, carefully curated selection of genuine multi-brand frames ? no unauthorized stock, no guesswork.</p></article>
-        <article><h3>2026 ? Today ? A full online optical store</h3><p>Now shipping premium eyewear nationwide across Pakistan, with the same standards we started with in 2022.</p></article>
+        <article><h3>2022</h3><h3>Our first optical counter</h3><p>Opened with a small, carefully curated selection of genuine multi-brand frames ? no unauthorized stock, no guesswork.</p></article>
+        <article><h3>2026 - Today</h3><h3>A full online optical store</h3><p>Now shipping premium eyewear nationwide across Pakistan, with the same standards we started with in 2022.</p></article>
       </div>
     </section>
     <section className={styles.section}>

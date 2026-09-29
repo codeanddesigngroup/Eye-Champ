@@ -27,6 +27,7 @@ const emptyDashboard:DashboardData = {
   recentOrders:[],
   lowStock:[],
 };
+
 const money = (value:number) => `Rs ${Number(value || 0).toLocaleString("en-PK", { minimumFractionDigits:2, maximumFractionDigits:2 })}`;
 const initials = (name:string) => name.split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0]).join("").toUpperCase() || "C";
 const dateLabel = (value:string) => new Date(value).toLocaleString("en-US", { month:"short", day:"numeric", hour:"numeric", minute:"2-digit" });
