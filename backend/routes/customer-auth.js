@@ -74,7 +74,7 @@ customerAuthRouter.get("/me", async (request, response, next) => {
     const session = await pool.query("SELECT email FROM customer_sessions WHERE token_hash=$1 AND expires_at>NOW()", [hash(token)]);
     if (!session.rowCount) return response.status(401).json({ error: "Session expired." });
     const email = session.rows[0].email;
-    const { rows } = await pool.query(`SELECT order_number AS "orderNumber",customer_name AS name,phone,address,city,postal_code AS "postalCode",items,subtotal::float AS total,payment_status AS payment,fulfillment_status AS fulfillment,payment_method AS "paymentMethod",created_at AS "createdAt" FROM orders WHERE LOWER(email)=$1 ORDER BY created_at DESC`, [email]);
+    const { rows } = await pool.query(`SELECT order_number AS "orderNumber",customer_name AS name,phone,address,city,postal_code AS "postalCode",items,(subtotal + delivery_charge)::float AS total,payment_status AS payment,fulfillment_status AS fulfillment,payment_method AS "paymentMethod",created_at AS "createdAt" FROM orders WHERE LOWER(email)=$1 ORDER BY created_at DESC`, [email]);
     response.json({ customer: { email, name: rows[0]?.name ?? "Customer", phone: rows[0]?.phone ?? "", address: rows[0]?.address ?? "", city: rows[0]?.city ?? "", postalCode: rows[0]?.postalCode ?? "" }, orders: rows });
   } catch (error) { next(error); }
 });

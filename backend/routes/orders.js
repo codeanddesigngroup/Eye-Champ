@@ -21,7 +21,7 @@ ordersRouter.get("/", async (_request, response, next) => {
   try {
     const { rows } = await pool.query(`
       SELECT id::text, order_number AS "orderNumber", customer_name AS customer, email,
-        jsonb_array_length(items) AS items, subtotal::float AS total,
+        jsonb_array_length(items) AS items, (subtotal + delivery_charge)::float AS total,
         payment_status AS payment, fulfillment_status AS fulfillment,
         payment_method AS "paymentMethod", created_at AS "createdAt"
       FROM orders
@@ -74,7 +74,7 @@ ordersRouter.get("/:id", async (request, response, next) => {
     if (!/^\d+$/.test(request.params.id)) return response.status(400).json({ error: "Invalid order ID." });
     const { rows } = await pool.query(`
       SELECT id::text, order_number AS "orderNumber", customer_name AS customer, email, phone,
-        address, city, postal_code AS "postalCode", items, subtotal::float AS total,
+        address, city, postal_code AS "postalCode", items, (subtotal + delivery_charge)::float AS total,
         payment_status AS payment, fulfillment_status AS fulfillment,
         payment_method AS "paymentMethod", created_at AS "createdAt"
       FROM orders WHERE id=$1

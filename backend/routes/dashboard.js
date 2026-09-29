@@ -18,21 +18,21 @@ dashboardRouter.get("/", async (request, response, next) => {
     const [summary, revenueSeries, recentOrders, lowStock] = await Promise.all([
       pool.query(`
         SELECT
-          COALESCE(SUM(subtotal) FILTER (WHERE created_at >= CURRENT_DATE - ($1::int - 1) * INTERVAL '1 day'), 0)::float AS revenue,
+          COALESCE(SUM(subtotal + delivery_charge) FILTER (WHERE created_at >= CURRENT_DATE - ($1::int - 1) * INTERVAL '1 day'), 0)::float AS revenue,
           COUNT(*)::int AS orders,
           COUNT(DISTINCT LOWER(email))::int AS customers,
-          COALESCE(SUM(subtotal) FILTER (WHERE created_at >= CURRENT_DATE - ($1::int - 1) * INTERVAL '1 day'), 0)::float AS "revenueThisWeek",
-          COALESCE(SUM(subtotal) FILTER (WHERE created_at >= CURRENT_DATE - ($1::int * 2 - 1) * INTERVAL '1 day' AND created_at < CURRENT_DATE - ($1::int - 1) * INTERVAL '1 day'), 0)::float AS "revenueLastWeek",
+          COALESCE(SUM(subtotal + delivery_charge) FILTER (WHERE created_at >= CURRENT_DATE - ($1::int - 1) * INTERVAL '1 day'), 0)::float AS "revenueThisWeek",
+          COALESCE(SUM(subtotal + delivery_charge) FILTER (WHERE created_at >= CURRENT_DATE - ($1::int * 2 - 1) * INTERVAL '1 day' AND created_at < CURRENT_DATE - ($1::int - 1) * INTERVAL '1 day'), 0)::float AS "revenueLastWeek",
           COUNT(*) FILTER (WHERE created_at >= NOW() - INTERVAL '7 days')::int AS "ordersThisWeek",
           COUNT(*) FILTER (WHERE created_at >= NOW() - INTERVAL '14 days' AND created_at < NOW() - INTERVAL '7 days')::int AS "ordersLastWeek",
           COUNT(DISTINCT LOWER(email)) FILTER (WHERE created_at >= NOW() - INTERVAL '7 days')::int AS "customersThisWeek",
           COUNT(DISTINCT LOWER(email)) FILTER (WHERE created_at >= NOW() - INTERVAL '14 days' AND created_at < NOW() - INTERVAL '7 days')::int AS "customersLastWeek",
           COUNT(*) FILTER (WHERE created_at >= CURRENT_DATE)::int AS "ordersToday",
-          COALESCE(SUM(subtotal) FILTER (WHERE created_at >= CURRENT_DATE), 0)::float AS "revenueToday"
+          COALESCE(SUM(subtotal + delivery_charge) FILTER (WHERE created_at >= CURRENT_DATE), 0)::float AS "revenueToday"
         FROM orders
       `, [days]),
       pool.query(`
-        SELECT TO_CHAR(day, 'Mon DD') AS label, COALESCE(SUM(o.subtotal), 0)::float AS revenue
+        SELECT TO_CHAR(day, 'Mon DD') AS label, COALESCE(SUM(o.subtotal + o.delivery_charge), 0)::float AS revenue
         FROM generate_series(CURRENT_DATE - ($1::int - 1) * INTERVAL '1 day', CURRENT_DATE, INTERVAL '1 day') day
         LEFT JOIN orders o ON o.created_at >= day AND o.created_at < day + INTERVAL '1 day'
         GROUP BY day
@@ -40,7 +40,7 @@ dashboardRouter.get("/", async (request, response, next) => {
       `, [days]),
       pool.query(`
         SELECT id::text, order_number AS "orderNumber", customer_name AS customer, items,
-          subtotal::float AS total, payment_status AS payment, fulfillment_status AS fulfillment,
+          (subtotal + delivery_charge)::float AS total, payment_status AS payment, fulfillment_status AS fulfillment,
           created_at AS "createdAt"
         FROM orders
         ORDER BY created_at DESC

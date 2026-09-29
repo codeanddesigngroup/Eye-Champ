@@ -10,8 +10,9 @@ const money = (currency, value) => `${currency} ${Number(value || 0).toFixed(2)}
 checkoutRouter.post("/", async (request, response, next) => {
   const client = await pool.connect();
   try {
-    const { customer, items, paymentMethod } = request.body ?? {};
-    if (paymentMethod !== "Cash on Delivery") return response.status(400).json({ error: "Cash on Delivery is the only available payment method." });
+    const { customer, items, paymentMethod, billingAddress } = request.body ?? {};
+    if (!["Cash on Delivery", "Bank Transfer"].includes(paymentMethod)) return response.status(400).json({ error: "Select a valid payment method." });
+    if (billingAddress && !["name", "address", "city", "postalCode"].every(field => typeof billingAddress[field] === "string" && billingAddress[field].trim())) return response.status(400).json({ error: "Complete all billing address fields." });
     if (!customer?.name?.trim() || !customer?.email?.trim() || !customer?.phone?.trim() || !customer?.address?.trim() || !customer?.city?.trim() || !customer?.postalCode?.trim()) return response.status(400).json({ error: "Complete all checkout fields." });
     if (!Array.isArray(items) || !items.length) return response.status(400).json({ error: "Your cart is empty." });
 
@@ -32,9 +33,13 @@ checkoutRouter.post("/", async (request, response, next) => {
       if (product.quantity >= quantity) await client.query("UPDATE products SET quantity=quantity-$1,updated_at=NOW() WHERE id=$2", [quantity, product.id]);
     }
 
+    const deliveryCharge = paymentMethod === "Cash on Delivery" ? 199 : 0;
+    const total = Math.round((subtotal + deliveryCharge) * 100) / 100;
+    const paymentNote = paymentMethod === "Bank Transfer" ? "Payment pending. Your order will be processed after your bank transfer is confirmed." : total >= 20000 ? "Payment pending. Our team will contact you with bank transfer details. Please wait for confirmation before transferring payment." : "Pay in cash when your order is delivered.";
+    const billing = billingAddress || { name: customer.name, address: customer.address, city: customer.city, postalCode: customer.postalCode };
     const { rows } = await client.query(
-      "INSERT INTO orders(order_number,customer_name,email,phone,address,city,postal_code,items,subtotal,payment_method) VALUES (NULL,$1,$2,$3,$4,$5,$6,$7::jsonb,$8,$9) RETURNING id::text",
-      [customer.name.trim(), customer.email.trim().toLowerCase(), customer.phone.trim(), customer.address.trim(), customer.city.trim(), customer.postalCode.trim(), JSON.stringify(orderItems), subtotal, paymentMethod],
+      "INSERT INTO orders(order_number,customer_name,email,phone,address,city,postal_code,items,subtotal,payment_method,delivery_charge,billing_address) VALUES (NULL,$1,$2,$3,$4,$5,$6,$7::jsonb,$8,$9,$10,$11::jsonb) RETURNING id::text",
+      [customer.name.trim(), customer.email.trim().toLowerCase(), customer.phone.trim(), customer.address.trim(), customer.city.trim(), customer.postalCode.trim(), JSON.stringify(orderItems), subtotal, paymentMethod, deliveryCharge, JSON.stringify(billing)],
     );
     const orderNumber = `EC-${String(rows[0].id).padStart(6, "0")}`;
     await client.query("UPDATE orders SET order_number=$1 WHERE id=$2", [orderNumber, rows[0].id]);
@@ -56,8 +61,8 @@ checkoutRouter.post("/", async (request, response, next) => {
           from: process.env.EMAIL_FROM || process.env.SMTP_USER,
           to: customer.email.trim().toLowerCase(),
           subject: `${storeName} order confirmation ${orderNumber}`,
-          text: `Thank you for your order, ${customer.name.trim()}.\n\nOrder: ${orderNumber}\nPayment: ${paymentMethod}\n\n${textItems}\n\nTotal: ${money(currency, subtotal)}\n\nDelivery address:\n${customer.address.trim()}, ${customer.city.trim()} ${customer.postalCode.trim()}\nPhone: ${customer.phone.trim()}`,
-          html: `<div style="max-width:640px;margin:auto;color:#172b34;font-family:Arial,sans-serif"><h1 style="font-size:26px">Thank you for your order</h1><p>Hi ${escapeHtml(customer.name.trim())}, we received your order and will contact you when it is on its way.</p><div style="margin:24px 0;padding:16px;border-radius:10px;background:#f3f7f7"><strong>Order ${escapeHtml(orderNumber)}</strong><br><span>Payment: ${escapeHtml(paymentMethod)}</span></div><table style="width:100%;border-collapse:collapse"><thead><tr><th style="text-align:left">Item</th><th>Qty</th><th style="text-align:right">Amount</th></tr></thead><tbody>${itemRows}</tbody></table><p style="font-size:18px;text-align:right"><strong>Total: ${escapeHtml(money(currency, subtotal))}</strong></p><h2 style="font-size:16px">Delivery details</h2><p>${escapeHtml(customer.address.trim())}<br>${escapeHtml(customer.city.trim())}, ${escapeHtml(customer.postalCode.trim())}<br>${escapeHtml(customer.phone.trim())}</p></div>`,
+          text: `Thank you for your order, ${customer.name.trim()}.\n\nOrder: ${orderNumber}\nPayment: ${paymentMethod}\n\n${textItems}\n\nDelivery: ${money(currency, deliveryCharge)}\nTotal: ${money(currency, total)}\n${paymentNote}\n\nDelivery address:\n${customer.address.trim()}, ${customer.city.trim()} ${customer.postalCode.trim()}\nPhone: ${customer.phone.trim()}`,
+          html: `<div style="max-width:640px;margin:auto;color:#172b34;font-family:Arial,sans-serif"><h1 style="font-size:26px">Thank you for your order</h1><p>Hi ${escapeHtml(customer.name.trim())}, we received your order and will contact you when it is on its way.</p><div style="margin:24px 0;padding:16px;border-radius:10px;background:#f3f7f7"><strong>Order ${escapeHtml(orderNumber)}</strong><br><span>Payment: ${escapeHtml(paymentMethod)}</span></div><table style="width:100%;border-collapse:collapse"><thead><tr><th style="text-align:left">Item</th><th>Qty</th><th style="text-align:right">Amount</th></tr></thead><tbody>${itemRows}</tbody></table><p style="font-size:18px;text-align:right"><strong>Total: ${escapeHtml(money(currency, total))}</strong></p><p>Delivery: ${escapeHtml(money(currency, deliveryCharge))}</p><p>${escapeHtml(paymentNote)}</p><h2 style="font-size:16px">Delivery details</h2><p>${escapeHtml(customer.address.trim())}<br>${escapeHtml(customer.city.trim())}, ${escapeHtml(customer.postalCode.trim())}<br>${escapeHtml(customer.phone.trim())}</p></div>`,
         });
         emailSent = true;
       } catch (error) {
@@ -66,7 +71,7 @@ checkoutRouter.post("/", async (request, response, next) => {
     } else {
       console.warn("Order confirmation email skipped because SMTP is not configured", { orderNumber });
     }
-    response.status(201).json({ order: { id: rows[0].id, orderNumber, subtotal, paymentMethod, emailSent } });
+    response.status(201).json({ order: { id: rows[0].id, orderNumber, subtotal, deliveryCharge, total, paymentMethod, paymentNote, emailSent } });
   } catch (error) {
     await client.query("ROLLBACK");
     if (error.status) return response.status(error.status).json({ error: error.message });

@@ -144,3 +144,125 @@
         grid-column: auto
     }
 }
+
+.checkout-payment-options {
+    margin-top: 36px;
+}
+
+.checkout-choices {
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    overflow: hidden;
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+}
+
+.checkout-choices label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 15px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.checkout-choices label+label {
+    border-top: 1px solid #ddd;
+}
+
+.checkout-choices label.selected {
+    background: #f6f6f6;
+    outline: 1px solid #111;
+    outline-offset: -1px;
+}
+
+.checkout-choices input {
+    width: 18px;
+    height: 18px;
+    accent-color: #000;
+    flex-shrink: 0;
+}
+
+.checkout-choices b {
+    margin-left: auto;
+    white-space: nowrap;
+}
+
+.checkout-payment-options h2 {
+    margin: 30px 0 4px;
+    font-size: 23px;
+    font-weight: 700;
+}
+
+.checkout-prepaid {
+    color: #777;
+    margin: 0 0 14px;
+}
+
+.checkout-payment-details {
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    overflow: hidden;
+    font-size: 14px;
+}
+
+.checkout-payment-details h3 {
+    padding: 15px;
+    margin: 0;
+    border: 1px solid #111;
+    font-size: 14px;
+    border-radius: 12px 12px 0 0;
+}
+
+.checkout-payment-details>div {
+    padding: 15px;
+    line-height: 1.5;
+}
+
+.checkout-billing-heading {
+    margin: 28px 0 12px;
+    font-size: 18px;
+}
+
+.checkout-complete {
+    width: 100%;
+    margin-top: 36px;
+    padding: 16px;
+    border: 0;
+    border-radius: 12px;
+    background: #075aca;
+    color: white;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.checkout-complete:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+}
+
+.checkout-sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+}
+
+.checkout-page input:focus-visible,
+.checkout-complete:focus-visible {
+    outline: 2px solid #075aca;
+    outline-offset: 3px;
+}
+
+.checkout-page aside {
+    align-self: start;
+}
+
+@media(max-width:480px) {
+    .checkout-choices label {
+        font-size: 12px;
+        padding: 14px 10px;
+    }
+}
