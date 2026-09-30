@@ -25,6 +25,7 @@ export default function CheckoutPage() {
     });
     return () => { active = false; };
   }, []);
+
   const subtotal = items.reduce((sum, item) => sum + (Number(item.framePrice) + Number(item.lensPrice ?? 0)) * item.quantity, 0);
 
   const delivery = paymentMethod === "Cash on Delivery" ? 250 : 0;
@@ -40,10 +41,10 @@ export default function CheckoutPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          customer: { name: data.get("name"), email: data.get("email"), phone: data.get("phone"), address: data.get("address"), city: data.get("city"), postalCode: data.get("postalCode") },
+          customer: { name: [data.get("firstName"), data.get("lastName")].map(value => String(value ?? "").trim()).filter(Boolean).join(" "), email: data.get("email"), phone: data.get("phone"), address: [data.get("address"), data.get("apartment")].map(value => String(value ?? "").trim()).filter(Boolean).join(", "), city: data.get("city"), postalCode: data.get("postalCode") },
           items,
           paymentMethod,
-          billingAddress: sameBilling ? null : { name: data.get("billingName"), address: data.get("billingAddress"), city: data.get("billingCity"), postalCode: data.get("billingPostalCode") },
+          billingAddress: sameBilling ? null : { name: [data.get("billingFirstName"), data.get("billingLastName")].map(value => String(value ?? "").trim()).filter(Boolean).join(" "), address: [data.get("billingAddress"), data.get("billingApartment")].map(value => String(value ?? "").trim()).filter(Boolean).join(", "), city: data.get("billingCity"), postalCode: data.get("billingPostalCode") },
         }),
       });
       const result = await response.json() as { order?: { orderNumber: string; emailSent?: boolean; paymentNote?: string }; error?: string };
@@ -72,11 +73,13 @@ export default function CheckoutPage() {
         <section>
           <h2>Contact and shipping information</h2>
           <div className="checkout-fields">
-            <label>Full name<input name="name" required /></label>
+            <label>First name<input name="firstName" autoComplete="given-name" required /></label>
+            <label>Last name<input name="lastName" autoComplete="family-name" required /></label>
             <label>Email<input name="email" type="email" required /></label>
             <label>Phone<input name="phone" required /></label>
             <label>City<input name="city" required /></label>
-            <label>Address<textarea name="address" required /></label>
+            <label>Address<textarea name="address" autoComplete="address-line1" required /></label>
+            <label>Apartment - optional<input name="apartment" autoComplete="address-line2" /></label>
             <label>Postal code<input name="postalCode" required /></label>
           </div>
           <section className="checkout-payment-options" aria-label="Payment and delivery">
@@ -95,7 +98,7 @@ export default function CheckoutPage() {
               <label className={sameBilling ? "selected" : ""}><input type="radio" name="billing" checked={sameBilling} onChange={() => setSameBilling(true)} /><strong>Same as shipping address</strong></label>
               <label className={!sameBilling ? "selected" : ""}><input type="radio" name="billing" checked={!sameBilling} onChange={() => setSameBilling(false)} /><strong>Use a different billing address</strong></label>
             </fieldset>
-            {!sameBilling && <div className="checkout-fields"><label>Full name<input name="billingName" required /></label><label>City<input name="billingCity" required /></label><label>Address<textarea name="billingAddress" required /></label><label>Postal code<input name="billingPostalCode" required /></label></div>}
+            {!sameBilling && <div className="checkout-fields"><label>First name<input name="billingFirstName" autoComplete="billing given-name" required /></label><label>Last name<input name="billingLastName" autoComplete="billing family-name" required /></label><label>City<input name="billingCity" required /></label><label>Address<textarea name="billingAddress" autoComplete="billing address-line1" required /></label><label>Apartment - optional<input name="billingApartment" autoComplete="billing address-line2" /></label><label>Postal code<input name="billingPostalCode" required /></label></div>}
             <button className="checkout-complete" disabled={submitting}>{submitting ? "Placing order..." : "Complete order"}</button>
           </section>
         </section>
