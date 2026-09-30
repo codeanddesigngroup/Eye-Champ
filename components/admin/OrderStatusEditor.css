@@ -1,0 +1,70 @@
+.order-workflow {
+    min-width: 150px;
+    max-width: 280px;
+    white-space: normal;
+}
+
+.order-workflow>select,
+.order-workflow-fields input,
+.order-workflow-fields select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccd5da;
+    border-radius: 6px;
+    background: white;
+    color: #172b34;
+    font-size: 13px;
+}
+
+.order-workflow>small {
+    display: block;
+    margin-top: 5px;
+    color: #667579;
+    font-size: 11px;
+}
+
+.order-workflow-fields {
+    display: grid;
+    gap: 10px;
+    padding: 12px;
+    margin-top: 8px;
+    background: #f4f7f8;
+    border: 1px solid #dce3e5;
+    border-radius: 8px;
+    min-width: 220px;
+}
+
+.order-workflow-fields label {
+    display: grid;
+    gap: 4px;
+    font-size: 12px;
+}
+
+.order-workflow-fields>div {
+    display: flex;
+    gap: 8px;
+}
+
+.order-workflow-fields button {
+    padding: 7px 12px;
+    border-radius: 5px;
+    border: 1px solid #ccd5da;
+    cursor: pointer;
+    background: white;
+}
+
+.order-workflow-fields button[type=submit] {
+    color: white;
+    background: #172b34;
+}
+
+.order-workflow :disabled {
+    opacity: .65;
+    cursor: default;
+}
+
+.order-workflow :focus-visible {
+    outline: 2px solid #09616a;
+    outline-offset: 2px;
+}
+.order-workflow .order-workflow-fields input { display: block; width: 100%; min-width: 0; height: 38px; box-sizing: border-box; }

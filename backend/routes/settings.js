@@ -1,3 +1,4 @@
+import { notificationDefaults } from "../order-emails.js";
 import { Router } from "express";
 import { hashPassword, verifyPassword } from "../auth.js";
 import { pool } from "../db.js";
@@ -7,6 +8,7 @@ export const settingsRouter = Router();
 settingsRouter.use(requireAdmin);
 
 const defaultSettings = {
+  ...notificationDefaults,
   storeName: "Eye Champ",
   supportEmail: "support@eyechamp.com",
   supportPhone: "",
@@ -28,7 +30,17 @@ settingsRouter.get("/", async (_request, response, next) => {
 settingsRouter.put("/", async (request, response, next) => {
   try {
     const body = request.body ?? {};
+    const notificationSettings = Object.fromEntries(Object.entries(notificationDefaults).map(([key, fallback]) => [key, String(body[key] ?? fallback).trim().slice(0, 500)]));
+    if (notificationSettings.orderReplyTo && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(notificationSettings.orderReplyTo)) return response.status(400).json({ error: "Enter a valid reply-to email." });
+    if (!notificationSettings.nonPrescriptionWindow || !notificationSettings.prescriptionWindow) return response.status(400).json({ error: "Both delivery windows are required." });
+    for (const key of ["trackingLinkPattern", "reviewLink"]) {
+      if (!notificationSettings[key]) continue;
+      try { const url = new URL(notificationSettings[key].replaceAll("{tracking_number}", "example")); if (!["https:", "http:"].includes(url.protocol)) throw new Error(); }
+      catch { return response.status(400).json({ error: "Use a valid http or https link for tracking and reviews." }); }
+    }
+    if (notificationSettings.trackingLinkPattern && !notificationSettings.trackingLinkPattern.includes("{tracking_number}")) return response.status(400).json({ error: "Tracking link must contain {tracking_number}." });
     const settings = {
+      ...notificationSettings,
       storeName: String(body.storeName ?? defaultSettings.storeName).trim() || defaultSettings.storeName,
       supportEmail: String(body.supportEmail ?? defaultSettings.supportEmail).trim(),
       supportPhone: String(body.supportPhone ?? "").trim(),

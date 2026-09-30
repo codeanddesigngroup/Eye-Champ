@@ -12,6 +12,7 @@ test("checkout computes delivery, preserves billing and validates payment method
     release() {},
     async query(sql, values) {
       if (sql.startsWith("SELECT id::text,title")) return { rows: [{ id: "1", title: "Frame", price: 1000, quantity: 10 }] };
+      if (sql === "SELECT * FROM orders WHERE id=$1") return { rows: [{ id:"7", customer_name:"Test", email:"test@example.com", order_number:"EC-000007", items:[], subtotal:2000, delivery_charge:0 }] };
       if (sql.startsWith("INSERT INTO orders")) { inserted = values; return { rows: [{ id: "7" }] }; }
       return { rows: [] };
     },

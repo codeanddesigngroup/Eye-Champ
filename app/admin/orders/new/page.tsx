@@ -81,7 +81,7 @@ export default function NewOrderPage() {
             <section className="new-order-card"><h2>Payment and fulfillment</h2><div className="new-order-grid">
               <label>Payment method<select value={form.paymentMethod} onChange={event=>setForm({...form,paymentMethod:event.target.value})}><option>Cash on Delivery</option><option>Bank Transfer</option><option>Card</option></select></label>
               <label>Payment status<select value={form.payment} onChange={event=>setForm({...form,payment:event.target.value})}><option>Pending</option><option>Paid</option><option>Refunded</option></select></label>
-              <label>Fulfillment status<select value={form.fulfillment} onChange={event=>setForm({...form,fulfillment:event.target.value})}><option>Unfulfilled</option><option>Processing</option><option>Fulfilled</option><option>Cancelled</option></select></label>
+              <label>Fulfillment status<select value={form.fulfillment} onChange={event=>setForm({...form,fulfillment:event.target.value})}><option>Unfulfilled</option></select></label>
             </div></section>
           </div>
           <aside className="new-order-summary"><ShoppingBag/><h2>Order summary</h2><div><span>Unit price</span><strong>Rs {unitPrice.toLocaleString(undefined,{minimumFractionDigits:2})}</strong></div><div><span>Quantity</span><strong>{form.quantity || 0}</strong></div><div className="total"><span>Total</span><strong>Rs {total.toLocaleString(undefined,{minimumFractionDigits:2})}</strong></div>{error&&<p role="alert">{error}</p>}<button type="submit" disabled={saving||loading||!form.productId}>{saving?"Creating...":"Create order"}</button></aside>

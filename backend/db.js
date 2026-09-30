@@ -1,3 +1,4 @@
+import "dotenv/config";
 import pg from "pg";
 
 const { Pool } = pg;
@@ -97,6 +98,24 @@ export async function initializeDatabase() {
       postal_code VARCHAR(30) NOT NULL, items JSONB NOT NULL DEFAULT '[]'::jsonb,
       subtotal NUMERIC(12,2) NOT NULL CHECK (subtotal >= 0), payment_status VARCHAR(20) NOT NULL DEFAULT 'Pending',
       fulfillment_status VARCHAR(30) NOT NULL DEFAULT 'Unfulfilled', created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+    ALTER TABLE orders ADD COLUMN IF NOT EXISTS is_prescription BOOLEAN NOT NULL DEFAULT false;
+    ALTER TABLE orders ADD COLUMN IF NOT EXISTS courier_name VARCHAR(160);
+    ALTER TABLE orders ADD COLUMN IF NOT EXISTS tracking_number VARCHAR(160);
+    ALTER TABLE orders ADD COLUMN IF NOT EXISTS status_reason VARCHAR(160);
+    ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_window TEXT;
+    UPDATE orders SET fulfillment_status='Dispatched' WHERE fulfillment_status='Fulfilled';
+    UPDATE orders SET is_prescription=true WHERE NOT is_prescription AND EXISTS (
+      SELECT 1 FROM jsonb_array_elements(items) item WHERE item->>'isPrescription'='true'
+      OR (jsonb_typeof(item->'prescription')='object' AND item->'prescription'<>'{}'::jsonb)
+      OR item->>'vision' IN ('single-vision','progressive','bifocal','reading')
+      OR (COALESCE(item->>'prescriptionMethod','')<>'' AND COALESCE(item->>'vision','')<>'non-prescription')
+    );
+    CREATE TABLE IF NOT EXISTS order_email_events (
+      id BIGSERIAL PRIMARY KEY, order_id BIGINT NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+      event VARCHAR(30) NOT NULL, payload JSONB NOT NULL, sent_at TIMESTAMPTZ,
+      attempts INT NOT NULL DEFAULT 0, next_attempt_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      last_error TEXT, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), UNIQUE(order_id,event)
     );
     CREATE TABLE IF NOT EXISTS product_reviews (
       id BIGSERIAL PRIMARY KEY,

@@ -91,7 +91,7 @@ export default function CheckoutPage() {
             <p className="checkout-prepaid">Enjoy Free Shipping on Prepaid orders</p>
             <div className="checkout-payment-details">
               <h3>{paymentMethod === "Cash on Delivery" ? "Cash on Delivery (COD)" : "Bank Transfer"}</h3>
-              {paymentMethod === "Cash on Delivery" ? <div><p>Cash on Delivery (COD) Order Confirmation</p><p>Rs. 250 shipping fee is required online to confirm your COD order.</p><p>Send Rs. 250 to: 0300000000</p><p>After payment, please send us a screenshot of the payment. Once we verify it, we’ll confirm and process your order.</p><p>Your remaining order amount will be payable on delivery.</p></div> : <div><p>Free delivery on prepaid orders.</p><p role="status">Pay by manual bank transfer. Your order remains payment pending until your transfer is confirmed.</p></div>}
+              {paymentMethod === "Cash on Delivery" ? <div><p>Cash on Delivery (COD) Order Confirmation</p><p>Rs. 250 shipping fee is required online to confirm your COD order.</p><p>Send Rs. 250 to: +92 331 8099594</p><p>After payment, please send us a screenshot of the payment. Once we verify it, we’ll confirm and process your order.</p><p>Your remaining order amount will be payable on delivery.</p></div> : <div><p>Free delivery on prepaid orders.</p><p role="status">Pay by manual bank transfer. Your order remains payment pending until your transfer is confirmed.</p></div>}
             </div>
             <h3 className="checkout-billing-heading">Billing address</h3>
             <fieldset className="checkout-choices"><legend className="checkout-sr-only">Billing address</legend>

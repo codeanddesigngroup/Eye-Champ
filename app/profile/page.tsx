@@ -13,9 +13,10 @@ type Order = { orderNumber: string; name: string; phone: string; address: string
 type Profile = { customer: { name: string; email: string; phone: string; address: string; city: string; postalCode: string }; orders: Order[] };
 
 const orderStatuses = [
-  { title: "Delivered", matches: (value: string) => value === "Fulfilled" },
+  { title: "Delivered", matches: (value: string) => value === "Delivered" },
+  { title: "Returned", matches: (value: string) => value === "Returned" },
   { title: "Canceled", matches: (value: string) => value === "Cancelled" || value === "Canceled" },
-  { title: "On its way", matches: (value: string) => value === "Processing" || value === "Unfulfilled" },
+  { title: "On its way", matches: (value: string) => value === "Processing" || value === "Unfulfilled" || value === "Dispatched" },
 ] as const;
 
 export default function ProfilePage() {

@@ -1,12 +1,14 @@
 import { Router } from "express";
 import { pool } from "../db.js";
+import { containsPrescription, validateTransition } from "../../lib/order-workflow.js";
+import { queueOrderEmail, deliverOrderEmails } from "../order-emails.js";
 import { requireAdmin } from "../middleware/require-admin.js";
 
 export const ordersRouter = Router();
 ordersRouter.use(requireAdmin);
 
 const paymentStatuses = new Set(["Pending", "Paid", "Refunded"]);
-const fulfillmentStatuses = new Set(["Unfulfilled", "Processing", "Fulfilled", "Cancelled"]);
+
 
 ordersRouter.get("/count", async (_request, response, next) => {
   try {
@@ -23,7 +25,7 @@ ordersRouter.get("/", async (_request, response, next) => {
       SELECT id::text, order_number AS "orderNumber", customer_name AS customer, email,
         jsonb_array_length(items) AS items, (subtotal + delivery_charge)::float AS total,
         payment_status AS payment, fulfillment_status AS fulfillment,
-        payment_method AS "paymentMethod", created_at AS "createdAt"
+        payment_method AS "paymentMethod", is_prescription AS "isPrescription", courier_name AS "courierName", tracking_number AS "trackingNumber", status_reason AS reason, created_at AS "createdAt"
       FROM orders
       ORDER BY created_at DESC
     `);
@@ -42,7 +44,8 @@ ordersRouter.post("/", async (request, response, next) => {
     const quantity = Number(body.quantity);
     const paymentMethod = String(body.paymentMethod ?? "Cash on Delivery");
     const payment = paymentStatuses.has(body.payment) ? body.payment : "Pending";
-    const fulfillment = fulfillmentStatuses.has(body.fulfillment) ? body.fulfillment : "Unfulfilled";
+    const fulfillment = "Unfulfilled";
+    if (body.fulfillment && body.fulfillment !== fulfillment) return response.status(400).json({ error: "Create the order as Unfulfilled, then update its status." });
     if (!customer.name?.trim() || !customer.email?.trim() || !customer.phone?.trim() || !customer.address?.trim() || !customer.city?.trim() || !customer.postalCode?.trim()) return response.status(400).json({ error: "Complete all customer and delivery fields." });
     if (!/^\d+$/.test(productId) || !Number.isInteger(quantity) || quantity < 1) return response.status(400).json({ error: "Select a product and valid quantity." });
     await client.query("BEGIN");
@@ -60,7 +63,9 @@ ordersRouter.post("/", async (request, response, next) => {
     const orderNumber = `EC-${String(rows[0].id).padStart(6, "0")}`;
     await client.query("UPDATE orders SET order_number=$1 WHERE id=$2", [orderNumber, rows[0].id]);
     await client.query("UPDATE products SET quantity=quantity-$1,updated_at=NOW() WHERE id=$2", [quantity, product.id]);
+    await queueOrderEmail(client, rows[0].id, "Received");
     await client.query("COMMIT");
+    void deliverOrderEmails().catch(console.error);
     response.status(201).json({ order:{ id:rows[0].id, orderNumber } });
   } catch (error) {
     await client.query("ROLLBACK");
@@ -76,7 +81,7 @@ ordersRouter.get("/:id", async (request, response, next) => {
       SELECT id::text, order_number AS "orderNumber", customer_name AS customer, email, phone,
         address, city, postal_code AS "postalCode", items, (subtotal + delivery_charge)::float AS total,
         payment_status AS payment, fulfillment_status AS fulfillment,
-        payment_method AS "paymentMethod", created_at AS "createdAt"
+        payment_method AS "paymentMethod", is_prescription AS "isPrescription", courier_name AS "courierName", tracking_number AS "trackingNumber", status_reason AS reason, created_at AS "createdAt"
       FROM orders WHERE id=$1
     `, [request.params.id]);
     if (!rows[0]) return response.status(404).json({ error: "Order not found." });
@@ -87,21 +92,41 @@ ordersRouter.get("/:id", async (request, response, next) => {
 });
 
 ordersRouter.patch("/:id", async (request, response, next) => {
+  const client = await pool.connect();
   try {
-    const payment = request.body?.payment;
-    const fulfillment = request.body?.fulfillment;
+    if (!/^\d+$/.test(request.params.id)) return response.status(400).json({ error: "Invalid order ID." });
+    const { payment, fulfillment, courierName, trackingNumber, reason, expectedFulfillment } = request.body ?? {};
     if (payment === undefined && fulfillment === undefined) return response.status(400).json({ error: "A payment or fulfillment status is required." });
     if (payment !== undefined && !paymentStatuses.has(payment)) return response.status(400).json({ error: "Invalid payment status." });
-    if (fulfillment !== undefined && !fulfillmentStatuses.has(fulfillment)) return response.status(400).json({ error: "Invalid fulfillment status." });
-    const { rows } = await pool.query(`UPDATE orders SET
-      payment_status=COALESCE($1,payment_status), fulfillment_status=COALESCE($2,fulfillment_status)
-      WHERE id=$3 RETURNING id::text, payment_status AS payment, fulfillment_status AS fulfillment`,
-      [payment ?? null, fulfillment ?? null, request.params.id]);
-    if (!rows[0]) return response.status(404).json({ error: "Order not found." });
-    response.json({ order: rows[0] });
+    await client.query("BEGIN");
+    const existing = await client.query("SELECT * FROM orders WHERE id=$1 FOR UPDATE", [request.params.id]);
+    const order = existing.rows[0];
+    if (!order) throw Object.assign(new Error("Order not found."), { status: 404 });
+    const prescription = order.is_prescription || containsPrescription(order.items);
+    if (fulfillment !== undefined) {
+      if (expectedFulfillment && expectedFulfillment !== order.fulfillment_status) throw Object.assign(new Error("This order was updated elsewhere. Reload it before changing status."), { status: 409 });
+      const error = validateTransition(order.fulfillment_status, fulfillment, prescription, { courierName, trackingNumber, reason });
+      if (error) throw Object.assign(new Error(error), { status: 400 });
+    }
+    const changed = fulfillment !== undefined && fulfillment !== order.fulfillment_status;
+    const dispatched = changed && fulfillment === "Dispatched";
+    const reasonChanged = changed && ["Cancelled", "Returned"].includes(fulfillment);
+    const { rows } = await client.query(`UPDATE orders SET
+      payment_status=COALESCE($1,payment_status), fulfillment_status=COALESCE($2,fulfillment_status),
+      is_prescription=$4, courier_name=COALESCE($5,courier_name), tracking_number=COALESCE($6,tracking_number),
+      status_reason=COALESCE($7,status_reason)
+      WHERE id=$3 RETURNING id::text, payment_status AS payment, fulfillment_status AS fulfillment,
+      is_prescription AS "isPrescription", courier_name AS "courierName", tracking_number AS "trackingNumber", status_reason AS reason`,
+      [payment ?? null, fulfillment ?? null, request.params.id, prescription, dispatched ? courierName.trim() : null, dispatched ? trackingNumber.trim() : null, reasonChanged ? reason : null]);
+    if (changed) await queueOrderEmail(client, order.id, fulfillment);
+    await client.query("COMMIT");
+    if (changed) void deliverOrderEmails().catch(console.error);
+    response.json({ order: rows[0], emailQueued: changed });
   } catch (error) {
+    await client.query("ROLLBACK");
+    if (error.status) return response.status(error.status).json({ error: error.message });
     next(error);
-  }
+  } finally { client.release(); }
 });
 
 ordersRouter.delete("/:id", async (request, response, next) => {

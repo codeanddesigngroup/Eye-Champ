@@ -1,4 +1,5 @@
 import "dotenv/config";
+import { deliverOrderEmails } from "./order-emails.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";
@@ -67,6 +68,9 @@ app.use((error, _request, response, _next) => {
 
 async function start() {
   await initializeDatabase();
+  const emailTimer = setInterval(() => { void deliverOrderEmails().catch(console.error); }, 60000);
+  emailTimer.unref();
+  void deliverOrderEmails().catch(console.error);
   if (process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD) {
     const passwordHash = await hashPassword(process.env.ADMIN_PASSWORD);
     await pool.query(`
