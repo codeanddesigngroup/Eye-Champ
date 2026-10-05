@@ -7,63 +7,74 @@ import Slider from "react-slick";
 import type { CustomArrowProps, Settings } from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import Link from "next/link";
 
 const slides = [
   {
+    slug: "/cartier",
     name: "cartier",
     alt: "Cartier eyewear campaign",
     desktop: "/images/brand-banners/cartier.webp",
     mobile: "/images/brand-banners/mobile/cartier.webp",
   },
   {
+    slug: "/emporio-armani",
     name: "emporio-armani",
     alt: "Emporio Armani eyewear campaign",
     desktop: "/images/brand-banners/emporio-armani.png",
     mobile: "/images/brand-banners/mobile/emporio-armani.webp",
   },
   {
+    slug: "/gucci",
     name: "gucci",
     alt: "Gucci eyewear campaign",
     desktop: "/images/brand-banners/gucci.webp",
     mobile: "/images/brand-banners/mobile/gucci.webp",
   },
   {
+    slug: "/montblanc",
     name: "mont-blanc",
     alt: "Montblanc eyewear campaign",
     desktop: "/images/brand-banners/mont-blanc.webp",
     mobile: "/images/brand-banners/mobile/mont-blanc.webp",
   },
   {
+    slug: "/moscot",
     name: "moscot",
     alt: "Moscot eyewear campaign",
     desktop: "/images/brand-banners/moscot.webp",
     mobile: "/images/brand-banners/mobile/moscot.webp",
   },
   {
+    slug: "/oakley",
     name: "oakley",
     alt: "Oakley eyewear campaign",
     desktop: "/images/brand-banners/oakley.png",
     mobile: "/images/brand-banners/mobile/oakley.webp",
   },
   {
+    slug: "/prada",
     name: "prada",
     alt: "Prada eyewear campaign",
     desktop: "/images/brand-banners/prada.webp",
     mobile: "/images/brand-banners/mobile/prada.webp",
   },
   {
+    slug: "/ray-ban",
     name: "ray-ban",
     alt: "Ray-Ban eyewear campaign",
     desktop: "/images/brand-banners/ray-ban.webp",
     mobile: "/images/brand-banners/mobile/ray-ban.webp",
   },
   {
+    slug: "/tom-ford",
     name: "tom-ford",
     alt: "Tom Ford eyewear campaign",
     desktop: "/images/brand-banners/tom-ford.png",
     mobile: "/images/brand-banners/mobile/tom-ford.webp",
   },
   {
+    slug: "/versace",
     name: "versace",
     alt: "Versace eyewear campaign",
     desktop: "/images/brand-banners/versace.webp",
@@ -135,6 +146,20 @@ export default function ImageSlider() {
         <Slider ref={desktopSlider} {...desktopSettings} className="image-slider">
           {slides.map((slide) => (
             <article key={slide.name} className="image-slide">
+              <Link href={`/all-glasses${slide.slug}`} aria-label={`View ${slide.name} eyewear`}>
+                <Image
+                  src={slide.desktop}
+                  alt={slide.alt}
+                  fill
+                  unoptimized
+                  sizes="38vw"
+                />
+              </Link>
+            </article>
+          ))}
+
+          {/* {slides.map((slide) => (
+            <article key={slide.name} className="image-slide">
               <Image
                 src={slide.desktop}
                 alt={slide.alt}
@@ -143,13 +168,27 @@ export default function ImageSlider() {
                 sizes="38vw"
               />
             </article>
-          ))}
+          ))} */}
         </Slider>
 
       </div>
       <div className="mobile-image-slider">
         <Slider ref={mobileSlider} {...mobileSettings} className="image-slider">
           {slides.map((slide) => (
+            <article key={slide.name} className="image-slide">
+              <Link href={`/all-glasses${slide.slug}`} aria-label={`View ${slide.name} eyewear`}>
+                <Image
+                  src={slide.mobile}
+                  alt={slide.alt}
+                  fill
+                  unoptimized
+                  sizes="76vw"
+                />
+              </Link>
+            </article>
+          ))}
+
+          {/* {slides.map((slide) => (
             <article key={slide.name} className="image-slide">
               <Image
                 src={slide.mobile}
@@ -159,7 +198,7 @@ export default function ImageSlider() {
                 sizes="76vw"
               />
             </article>
-          ))}
+          ))} */}
         </Slider>
 
       </div>
