@@ -157,18 +157,6 @@ export default function ImageSlider() {
               </Link>
             </article>
           ))}
-
-          {/* {slides.map((slide) => (
-            <article key={slide.name} className="image-slide">
-              <Image
-                src={slide.desktop}
-                alt={slide.alt}
-                fill
-                unoptimized
-                sizes="38vw"
-              />
-            </article>
-          ))} */}
         </Slider>
 
       </div>
@@ -187,18 +175,6 @@ export default function ImageSlider() {
               </Link>
             </article>
           ))}
-
-          {/* {slides.map((slide) => (
-            <article key={slide.name} className="image-slide">
-              <Image
-                src={slide.mobile}
-                alt={slide.alt}
-                fill
-                unoptimized
-                sizes="76vw"
-              />
-            </article>
-          ))} */}
         </Slider>
 
       </div>
