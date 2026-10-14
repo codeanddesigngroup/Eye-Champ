@@ -88,7 +88,14 @@ storefrontProductsRouter.get("/", async (request, response, next) => {
       if (!categoryRows[0]) return response.status(404).json({ error: "Category not found." });
       categoryName = categoryRows[0].name;
       if (subcategorySlug && subcategorySlug !== "all") {
-        const { rows: subcategoryRows } = await pool.query("SELECT name FROM categories WHERE slug=$1 AND parent_id=$2 AND status='Active'", [subcategorySlug, categoryRows[0].id]);
+        const { rows: subcategoryRows } = await pool.query(`WITH RECURSIVE descendants AS (
+          SELECT id, name, slug, status FROM categories WHERE parent_id=$2
+          UNION ALL
+          SELECT child.id, child.name, child.slug, child.status
+          FROM categories child JOIN descendants parent ON child.parent_id=parent.id
+          WHERE parent.status='Active'
+        )
+        SELECT name FROM descendants WHERE slug=$1 AND status='Active' LIMIT 1`, [subcategorySlug, categoryRows[0].id]);
         if (!subcategoryRows[0]) return response.status(404).json({ error: "Subcategory not found." });
         subcategoryName = subcategoryRows[0].name;
       }

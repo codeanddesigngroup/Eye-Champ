@@ -3353,6 +3353,12 @@ footer {
     text-decoration: underline;
 }
 
+.mega-column .mega-nested-category {
+    margin-left: 18px;
+    font-size: 14px;
+    color: #687174;
+}
+
 .mega-card {
     display: block;
     align-self: start;
@@ -3497,6 +3503,11 @@ footer {
         color: #555;
         font-size: 14px;
         font-weight: 400;
+    }
+
+    .mobile-shop-menu-children .mobile-shop-menu-nested {
+        padding-left: 32px;
+        color: #687174;
     }
 
     .mobile-shop-menu-account {

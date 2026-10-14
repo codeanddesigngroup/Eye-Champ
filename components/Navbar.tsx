@@ -75,7 +75,10 @@ export default function Navbar() {
                     <button type="button" className="mobile-shop-menu-heading" aria-expanded={expandedCategoryIds.includes(category.id)} aria-controls={`mobile-category-${category.id}`} onClick={() => setExpandedCategoryIds(current => current.includes(category.id) ? current.filter(id => id !== category.id) : [...current, category.id])}>{category.name}<span aria-hidden="true">{expandedCategoryIds.includes(category.id) ? "−" : "+"}</span></button>
                     <div id={`mobile-category-${category.id}`} className="mobile-shop-menu-children" hidden={!expandedCategoryIds.includes(category.id)}>
                         <Link className="mobile-shop-menu-child" href={`/${category.slug}/all`} onClick={() => setMenu(false)}>All {category.name.toLowerCase()}</Link>
-                        {categories.filter(child => child.parentId === category.id).map(child => <Link className="mobile-shop-menu-child" href={`/${category.slug}/${child.slug}`} onClick={() => setMenu(false)} key={child.id}>{child.name}</Link>)}
+                        {categories.filter(child => child.parentId === category.id).map(child => <div key={child.id}>
+                            <Link className="mobile-shop-menu-child" href={`/${category.slug}/${child.slug}`} onClick={() => setMenu(false)}>{child.name}</Link>
+                            {categories.filter(nested => nested.parentId === child.id).map(nested => <Link className="mobile-shop-menu-child mobile-shop-menu-nested" href={`/${category.slug}/${nested.slug}`} onClick={() => setMenu(false)} key={nested.id}>{nested.name}</Link>)}
+                        </div>)}
                         {(["eyeglasses", "sunglasses"].includes(category.slug.toLowerCase()) || ["eyeglasses", "sunglasses"].includes(category.name.toLowerCase())) && <>
                             {!categories.some(child => child.parentId === category.id && child.slug === "new-arrivals") && <Link className="mobile-shop-menu-child" href={`/${category.slug}/new-arrivals`} onClick={() => setMenu(false)}>New arrivals</Link>}
                             {!categories.some(child => child.parentId === category.id && child.slug === "under-5000") && <Link className="mobile-shop-menu-child" href={`/${category.slug}/under-5000`} onClick={() => setMenu(false)}>Under 5000</Link>}
@@ -95,7 +98,10 @@ export default function Navbar() {
                             <div className="mega-column">
                                 <b>{main.name}</b>
                                 <Link href={`/${main.slug}/all`}>All {main.name.toLowerCase()}</Link>
-                                {children.map(child => <Link href={`/${main.slug}/${child.slug}`} key={child.id}>{child.name}</Link>)}
+                                {children.map(child => <div className="mega-subcategory" key={child.id}>
+                                    <Link href={`/${main.slug}/${child.slug}`}>{child.name}</Link>
+                                    {categories.filter(nested => nested.parentId === child.id).map(nested => <Link className="mega-nested-category" href={`/${main.slug}/${nested.slug}`} key={nested.id}>{nested.name}</Link>)}
+                                </div>)}
                                 {(["eyeglasses", "sunglasses"].includes(main.slug.toLowerCase()) || ["eyeglasses", "sunglasses"].includes(main.name.toLowerCase())) && <>
                                     {!children.some(child => child.slug === "new-arrivals") && <Link href={`/${main.slug}/new-arrivals`}>New arrivals</Link>}
                                     {!children.some(child => child.slug === "under-5000") && <Link href={`/${main.slug}/under-5000`}>Under 5000</Link>}
