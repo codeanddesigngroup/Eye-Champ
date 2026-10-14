@@ -14,7 +14,7 @@ export default function CategoriesPage() {
   const [menuOpen, setMenuOpen] = useState(false), [query, setQuery] = useState(""), [status, setStatus] = useState("All statuses"), [typeFilter, setTypeFilter] = useState("All types"), [selected, setSelected] = useState<string[]>([]), [modalOpen, setModalOpen] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]), [expanded, setExpanded] = useState<string[]>([]), [name, setName] = useState(""), [parentId, setParentId] = useState(""), [newStatus, setNewStatus] = useState("Active"), [newType, setNewType] = useState("Manual"), [, setLoading] = useState(true);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false), [deleting, setDeleting] = useState(false);
-  
+
   useEffect(() => {
     fetch("/api/admin/categories", { cache: "no-store" }).then(async response => {
       const result = await response.json() as { categories?: Category[]; error?: string };
@@ -23,11 +23,14 @@ export default function CategoriesPage() {
       setCategories(loaded); setExpanded(loaded.filter(category => category.parentId === null).map(category => category.id));
     }).catch(() => showAuthToast({ message: "Could not load categories.", type: "error" })).finally(() => setLoading(false));
   }, []);
-  
+
   const shown = useMemo(() => {
     const matches = (category: Category) => (status === "All statuses" || category.status === status) && (typeFilter === "All types" || category.type === typeFilter) && (`${category.name} ${category.slug}`.toLowerCase().includes(query.toLowerCase()));
     if (query || status !== "All statuses" || typeFilter !== "All types") return categories.filter(matches);
-    return categories.filter(category => category.parentId === null).flatMap(parent => [parent, ...(expanded.includes(parent.id) ? categories.filter(category => category.parentId === parent.id) : [])]);
+    const descendants = (parent: Category): Category[] => expanded.includes(parent.id)
+      ? categories.filter(category => category.parentId === parent.id).flatMap(child => [child, ...descendants(child)])
+      : [];
+    return categories.filter(category => category.parentId === null).flatMap(parent => [parent, ...descendants(parent)]);
   }, [categories, expanded, query, status, typeFilter]);
   const toggle = (id: string) => setSelected(value => value.includes(id) ? value.filter(item => item !== id) : [...value, id]);
   const toggleParent = (id: string) => setExpanded(value => value.includes(id) ? value.filter(item => item !== id) : [...value, id]);
@@ -38,7 +41,10 @@ export default function CategoriesPage() {
       const result = await response.json() as { category?: Category; error?: string };
       if (!response.ok || !result.category) throw new Error(result.error || "Could not create category.");
       setCategories(value => [...value, result.category!]);
-      if (parentId) setExpanded(value => value.includes(parentId) ? value : [...value, parentId]);
+      if (parentId) {
+        const parent = categories.find(category => category.id === parentId);
+        setExpanded(value => [...new Set([...value, parentId, ...(parent?.parentId ? [parent.parentId] : [])])]);
+      }
       setName(""); setParentId(""); setNewStatus("Active"); setNewType("Manual"); setModalOpen(false);
       showAuthToast({ message: "Category created successfully.", type: "success" });
     } catch (error) { showAuthToast({ message: error instanceof Error ? error.message : "Could not create category.", type: "error" }); }
@@ -50,7 +56,7 @@ export default function CategoriesPage() {
     setCategories(value => value.map(category => selected.includes(category.slug) ? { ...category, status: nextStatus, updated: "Just now" } : category)); setSelected([]);
     showAuthToast({ message: `Categories set to ${nextStatus.toLowerCase()}.`, type: "success" });
   }
-  
+
   async function bulkDelete() {
     const ids = categories.filter(category => selected.includes(category.slug)).map(category => category.id);
     setDeleting(true);
@@ -71,18 +77,73 @@ export default function CategoriesPage() {
         <div className="categories-head"><div><p>Catalog</p><h1>Categories</h1><span>Organize products into browsable groups for your storefront.</span></div><button onClick={() => setModalOpen(true)}><Plus size={17} /> Create category</button></div>
         <section className="categories-summary"><article><span><Layers3 size={17} /></span><div><small>Total categories</small><strong>{categories.length}</strong><p>{categories.filter(item => item.status === "Active").length} active, {categories.filter(item => item.status === "Draft").length} drafts</p></div></article><article><span className="green"><Sparkles size={17} /></span><div><small>Smart categories</small><strong>{categories.filter(item => item.type === "Smart").length}</strong><p>Automatically organized</p></div></article><article><span className="blue"><ArrowUpRight size={17} /></span><div><small>Most popular</small><strong>{categories.reduce((best, item) => item.products > best.products ? item : best, categories[0] ?? { name: "None", products: 0 }).name}</strong><p>{Math.max(0, ...categories.map(item => item.products))} active products</p></div></article></section>
         <section className="categories-panel">
-          <div className="categories-tabs"><div><button className={status === "All statuses" ? "active" : ""} onClick={() => setStatus("All statuses")}>All <span>{categories.length}</span></button><button className={status === "Active" ? "active" : ""} onClick={() => setStatus("Active")}>Active <span>{categories.filter(item => item.status === "Active").length}</span></button><button className={status === "Draft" ? "active" : ""} onClick={() => setStatus("Draft")}>Draft <span>{categories.filter(item => item.status === "Draft").length}</span></button></div><button>Sort: Newest <ArrowUpDown size={12}/></button></div>
+          <div className="categories-tabs"><div><button className={status === "All statuses" ? "active" : ""} onClick={() => setStatus("All statuses")}>All <span>{categories.length}</span></button><button className={status === "Active" ? "active" : ""} onClick={() => setStatus("Active")}>Active <span>{categories.filter(item => item.status === "Active").length}</span></button><button className={status === "Draft" ? "active" : ""} onClick={() => setStatus("Draft")}>Draft <span>{categories.filter(item => item.status === "Draft").length}</span></button></div><button>Sort: Newest <ArrowUpDown size={12} /></button></div>
           <div className="categories-tools"><label><Search size={16} /><input value={query} onChange={event => setQuery(event.target.value)} placeholder="Search categories" /></label><select value={status} onChange={event => setStatus(event.target.value)}><option>All statuses</option><option>Active</option><option>Draft</option></select><select value={typeFilter} onChange={event => setTypeFilter(event.target.value)}><option>All types</option><option>Manual</option><option>Smart</option></select></div>
           {selected.length > 0 && <div className="categories-bulk"><strong>{selected.length} categories selected</strong><button onClick={() => bulkStatus("Active")}>Set active</button><button onClick={() => bulkStatus("Draft")}>Set draft</button><button onClick={() => setDeleteConfirmOpen(true)}>Delete</button><button onClick={() => setSelected([])}>Clear</button></div>}
-          <div className="categories-table"><table><thead><tr><th><input type="checkbox" checked={shown.length > 0 && selected.length === shown.length} onChange={event => setSelected(event.target.checked ? shown.map(item => item.slug) : [])} /></th><th>Category</th><th>Products</th><th>Type</th><th>Status</th><th>Last updated</th><th /></tr></thead><tbody>{shown.map(category => { const childCount = categories.filter(item => item.parentId === category.id).length; return <tr className={category.parentId ? "subcategory-row" : ""} key={category.slug}><td><input type="checkbox" checked={selected.includes(category.slug)} onChange={() => toggle(category.slug)} /></td><td><div className="category-cell">{category.parentId ? <span className="category-branch">&#9492;</span> : childCount > 0 ? <button className="category-expand" onClick={() => toggleParent(category.id)} aria-label={`${expanded.includes(category.id) ? "Collapse" : "Expand"} ${category.name}`}>{expanded.includes(category.id) ? <ChevronDown size={15} /> : <ChevronRight size={15} />}</button> : <span className="category-expand-spacer" />}<div><strong>{category.name}</strong>{category.parentId && <em>Subcategory</em>}<small>/{category.slug}</small><p>{category.description}</p></div></div></td><td><strong>{category.products}</strong> products{childCount > 0 && <small className="child-count">{childCount} subcategories</small>}</td><td><span className={`category-type ${category.type.toLowerCase()}`}>{category.type === "Smart" && <Sparkles size={11} />} {category.type}</span></td><td><span className={`category-status ${category.status.toLowerCase()}`}><i />{category.status}</span></td><td>{category.updated}</td><td></td></tr> })}</tbody></table></div>
+          <CategoryTable shown={shown} categories={categories} selected={selected} expanded={expanded} onSelect={toggle} onExpand={toggleParent} onSelectAll={setSelected} onAddChild={id => { setParentId(id); setModalOpen(true); }} />
           {shown.length === 0 && <div className="categories-empty"><Layers3 size={32} /><h2>No categories found</h2><p>Try changing your search or filters.</p><button onClick={() => { setQuery(""); setStatus("All statuses"); setTypeFilter("All types") }}>Clear filters</button></div>}
-          <div className="categories-pagination"><span>Showing {shown.length} of {categories.length} categories</span><div><button disabled aria-label="Previous page"><ArrowLeft size={13}/></button><button className="active">1</button><button disabled aria-label="Next page"><ArrowRight size={13}/></button></div></div>
+          <div className="categories-pagination"><span>Showing {shown.length} of {categories.length} categories</span><div><button disabled aria-label="Previous page"><ArrowLeft size={13} /></button><button className="active">1</button><button disabled aria-label="Next page"><ArrowRight size={13} /></button></div></div>
         </section>
       </div>
     </section>
-    {modalOpen && <div className="category-modal-backdrop" onClick={() => setModalOpen(false)}><section className="category-modal" onClick={event => event.stopPropagation()}><header><div><h2>Create category</h2><p>Create a main category or place it beneath an existing one.</p></div><button onClick={() => setModalOpen(false)} aria-label="Close"><X size={19} /></button></header><form onSubmit={event => { event.preventDefault(); createCategory() }}><label>Category name<input required value={name} onChange={event => setName(event.target.value)} placeholder="e.g. Polarized sunglasses" /></label><label>Parent category<select value={parentId} onChange={event => setParentId(event.target.value)}><option value="">None - create main category</option>{categories.filter(category => category.parentId === null).map(category => <option value={category.id} key={category.id}>{category.name}</option>)}</select><small>{parentId ? "This category will appear nested beneath its parent." : "Main categories appear at the top level."}</small></label><label>Description<textarea placeholder="Describe this category..." /></label><div className="category-form-row"><label>Category type<select value={newType} onChange={event => setNewType(event.target.value)}><option>Manual</option><option>Smart</option></select></label><label>Status<select value={newStatus} onChange={event => setNewStatus(event.target.value)}><option>Active</option><option>Draft</option></select></label></div><footer><button type="button" onClick={() => setModalOpen(false)}>Cancel</button><button className="save">Create category</button></footer></form></section></div>}
+    {modalOpen && <CreateCategoryModal categories={categories} name={name} parentId={parentId} status={newStatus} type={newType} onNameChange={setName} onParentChange={setParentId} onStatusChange={setNewStatus} onTypeChange={setNewType} onClose={() => setModalOpen(false)} onCreate={createCategory} />}
     <DeleteConfirmDialog open={deleteConfirmOpen} count={selected.length} singular="category" plural="categories" deleting={deleting} onCancel={() => setDeleteConfirmOpen(false)} onConfirm={bulkDelete} />
   </main>
 }
 
+function CategoryTable({ shown, categories, selected, expanded, onSelect, onExpand, onSelectAll, onAddChild }: {
+  shown: Category[]; categories: Category[]; selected: string[]; expanded: string[];
+  onSelect: (slug: string) => void; onExpand: (id: string) => void;
+  onSelectAll: (slugs: string[]) => void; onAddChild: (id: string) => void;
+}) {
+  return <div className="categories-table"><table>
+    <thead><tr><th><input type="checkbox" checked={shown.length > 0 && shown.every(item => selected.includes(item.slug))} onChange={event => onSelectAll(event.target.checked ? shown.map(item => item.slug) : [])} /></th><th>Category</th><th>Products</th><th>Type</th><th>Status</th><th>Last updated</th><th /></tr></thead>
+    <tbody>{shown.map(category => {
+      const childCount = categories.filter(item => item.parentId === category.id).length;
+      const parent = categories.find(item => item.id === category.parentId);
+      const depth = parent ? parent.parentId ? 2 : 1 : 0;
+      return <tr className={category.parentId ? "subcategory-row" : ""} key={category.id}>
+        <td><input type="checkbox" checked={selected.includes(category.slug)} onChange={() => onSelect(category.slug)} /></td>
+        <td><div className="category-cell" style={{ paddingLeft: depth * 14 }}>
+          {childCount > 0 ? <button type="button" className="category-expand" onClick={() => onExpand(category.id)} aria-label={`${expanded.includes(category.id) ? "Collapse" : "Expand"} ${category.name}`}>{expanded.includes(category.id) ? <ChevronDown size={15} /> : <ChevronRight size={15} />}</button> : category.parentId ? <span className="category-branch">&#9492;</span> : <span className="category-expand-spacer" />}
+          <div><strong>{category.name}</strong>{category.parentId && <em>{depth === 2 ? "Nested category" : "Subcategory"}</em>}<small>/{category.slug}</small><p>{category.description}</p></div>
+        </div></td>
+        <td><strong>{category.products}</strong> products{childCount > 0 && <small className="child-count">{childCount} {childCount === 1 ? "subcategory" : "subcategories"}</small>}</td>
+        <td><span className={`category-type ${category.type.toLowerCase()}`}>{category.type === "Smart" && <Sparkles size={11} />} {category.type}</span></td>
+        <td><span className={`category-status ${category.status.toLowerCase()}`}><i />{category.status}</span></td>
+        <td>{category.updated}</td>
+        <td>{depth < 2 && <button type="button" className="category-add-child" onClick={() => onAddChild(category.id)} aria-label={`Add category under ${category.name}`} title={`Add category under ${category.name}`}><Plus size={16} /></button>}</td>
+      </tr>;
+    })}</tbody>
+  </table></div>;
+}
+
+function CreateCategoryModal({ categories, name, parentId, status, type, onNameChange, onParentChange, onStatusChange, onTypeChange, onClose, onCreate }: {
+  categories: Category[]; name: string; parentId: string; status: string; type: string;
+  onNameChange: (value: string) => void; onParentChange: (value: string) => void;
+  onStatusChange: (value: string) => void; onTypeChange: (value: string) => void;
+  onClose: () => void; onCreate: () => void;
+}) {
+  const mainCategories = categories.filter(category => category.parentId === null);
+  const subcategories = categories.filter(category => mainCategories.some(parent => parent.id === category.parentId));
+  return <div className="category-modal-backdrop" onClick={onClose}>
+    <section className="category-modal" onClick={event => event.stopPropagation()}>
+      <header><div><h2>Create category</h2><p>Create a main category or place it beneath an existing one.</p></div><button type="button" onClick={onClose} aria-label="Close"><X size={19} /></button></header>
+      <form onSubmit={event => { event.preventDefault(); onCreate(); }}>
+        <label>Category name<input required value={name} onChange={event => onNameChange(event.target.value)} placeholder="e.g. Polarized sunglasses" /></label>
+        <label>Parent category<select value={parentId} onChange={event => onParentChange(event.target.value)}>
+          <option value="">None - create main category</option>
+          <optgroup label="Main categories">{mainCategories.map(category => <option value={category.id} key={category.id}>{category.name}</option>)}</optgroup>
+          <optgroup label="Subcategories">{subcategories.map(category => {
+            const parent = mainCategories.find(item => item.id === category.parentId);
+            return <option value={category.id} key={category.id}>{parent?.name} / {category.name}</option>;
+          })}</optgroup>
+        </select><small>{parentId ? "This category will appear nested beneath its parent." : "Main categories appear at the top level."}</small></label>
+        <label>Description<textarea placeholder="Describe this category..." /></label>
+        <div className="category-form-row"><label>Category type<select value={type} onChange={event => onTypeChange(event.target.value)}><option>Manual</option><option>Smart</option></select></label><label>Status<select value={status} onChange={event => onStatusChange(event.target.value)}><option>Active</option><option>Draft</option></select></label></div>
+        <footer><button type="button" onClick={onClose}>Cancel</button><button className="save">Create category</button></footer>
+      </form>
+    </section>
+  </div>;
+}
 
