@@ -36,6 +36,7 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
   const [categoryOptions, setCategoryOptions] = useState<CategoryOption[]>([]);
   const [selectedMainCategories, setSelectedMainCategories] = useState<string[]>([]);
   const [selectedSubCategories, setSelectedSubCategories] = useState<string[]>([]);
+  const [selectedNestedCategories, setSelectedNestedCategories] = useState<string[]>([]);
   const [collectionOptions, setCollectionOptions] = useState<string[]>([]);
   const [brandOptions, setBrandOptions] = useState<string[]>([]);
   const [editProduct, setEditProduct] = useState<Record<string, unknown> | null>(null);
@@ -49,7 +50,7 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
       setEditProduct(product);
       setTitle(String(product.title ?? "")); setDescription(String(product.description ?? "")); setPrice(String(product.price ?? "")); setStatus(String(product.status ?? "Draft"));
       setLensCompatibility((product.lens_compatibility as string[]) ?? []);
-      setSelectedMainCategories((product.categories as string[]) ?? []); setSelectedSubCategories((product.subcategories as string[]) ?? []);
+      setSelectedMainCategories((product.categories as string[]) ?? []); setSelectedSubCategories((product.subcategories as string[]) ?? []); setSelectedNestedCategories((product.subcategories as string[]) ?? []);
       const loaded = ((product.variants as Array<{name:string;values:string[];mediaByValue?:Record<string,Media[]>}>) ?? []).map((variant, index) => ({ id: index + 1, name: variant.name, values: variant.values, input: "", mediaByValue: variant.mediaByValue }));
       setVariants(loaded); setVariantMedia(Object.fromEntries(loaded.flatMap(variant => variant.values.map(value => [`${variant.id}:${value}`, variant.mediaByValue?.[value] ?? []]))));
     }).catch(error => showAuthToast({ message: error instanceof Error ? error.message : "Could not load product.", type: "error" }));
@@ -102,7 +103,7 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
       measurements: { lensWidth: data.get("lens-width"), bridge: data.get("bridge"), templeLength: data.get("temple-length"), lensHeight: data.get("lens-height") },
       lensCompatibility: data.getAll("lensCompatibility").map(String), variants: variants.map(({ id, name, values }) => ({ name, values, mediaByValue: Object.fromEntries(values.map((value) => [value, variantMedia[`${id}:${value}`] ?? []])) })),
       status, genders: data.getAll("gender").map(String), categories: data.getAll("category").map(String),
-      subcategories: data.getAll("subCategory").map(String), collections: data.getAll("collections").map(String), brands: data.getAll("brands").map(String),
+      subcategories: [...data.getAll("subCategory"), ...data.getAll("nestedCategory")].map(String), collections: data.getAll("collections").map(String), brands: data.getAll("brands").map(String),
       tags: String(data.get("tags") || "").split(",").map((tag) => tag.trim()).filter(Boolean),
       media: Object.values(variantMedia).flat().slice(0, 1).map(item => ({ name: item.name, url: item.url, primary: true })),
     };
@@ -590,7 +591,7 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
                   name="category"
                   values={categoryOptions.filter((category) => category.parentId === null).map((category) => category.name)}
                   selectedValues={selectedMainCategories}
-                  onSelectedValuesChange={(values) => { setSelectedMainCategories(values); setSelectedSubCategories([]); }}
+                  onSelectedValuesChange={(values) => { setSelectedMainCategories(values); setSelectedSubCategories([]); setSelectedNestedCategories([]); }}
                   required
                 />
 
@@ -602,8 +603,23 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
                     return category.parentId !== null && selectedParentIds.includes(category.parentId);
                   }).map((category) => category.name)}
                   selectedValues={selectedSubCategories}
-                  onSelectedValuesChange={setSelectedSubCategories}
+                  onSelectedValuesChange={(values) => {
+                    setSelectedSubCategories(values);
+                    const selectedIds = categoryOptions.filter((category) => values.includes(category.name)).map((category) => category.id);
+                    setSelectedNestedCategories((current) => current.filter((name) => categoryOptions.some((category) => category.name === name && selectedIds.includes(category.parentId ?? ""))));
+                  }}
                   required
+                />
+
+                <MultiCheck
+                  label="Nested category"
+                  name="nestedCategory"
+                  values={categoryOptions.filter((category) => {
+                    const selectedParentIds = categoryOptions.filter((parent) => selectedSubCategories.includes(parent.name) && parent.parentId !== null).map((parent) => parent.id);
+                    return category.parentId !== null && selectedParentIds.includes(category.parentId);
+                  }).map((category) => category.name)}
+                  selectedValues={selectedNestedCategories}
+                  onSelectedValuesChange={setSelectedNestedCategories}
                 />
 
                 <MultiCheck
