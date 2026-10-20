@@ -40,16 +40,6 @@ export default function Footer() {
   const [openGroups, setOpenGroups] = useState<string[]>([]);
   const toggleGroup = (heading: string) => setOpenGroups(current => current.includes(heading) ? current.filter(item => item !== heading) : [...current, heading]);
   return <footer id="help" className={styles.footer}>
-    <section className={styles.socialBanner} aria-label="Social media links">
-      <FontAwesomeIcon className={styles.socialMark} icon={faSquareFontAwesomeStroke} aria-hidden="true" />
-      <strong>Socialize with us</strong>
-      <nav>
-        <a href="#top" id="facebook" aria-label="Facebook"><FontAwesomeIcon icon={faFacebookF} /></a>
-        <a href="#top" aria-label="Twitter"><FontAwesomeIcon icon={faTwitter} /></a>
-        <a href="#top" aria-label="Instagram"><FontAwesomeIcon icon={faInstagram} /></a>
-        <a href="#top" aria-label="YouTube"><FontAwesomeIcon icon={faYoutube} /></a>
-      </nav>
-    </section>
     <section className={styles.assurances} aria-label="Shopping assurances">
       <div><LockKeyhole aria-hidden="true" /><strong>SECURE CHECKOUT</strong></div><Link href="/shipping-and-delivery-policy"><Truck aria-hidden="true" /><strong>RESPONSIBLE SHIPPING</strong></Link>
     </section>

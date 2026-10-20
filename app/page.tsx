@@ -123,7 +123,7 @@ export default function Home() {
 
     <div className="page shell">
       <section className="trend card">
-        <div key={`${trendBanners[trendIndex]}-${mobileTrendBanners[mobileTrendIndex]}`} className="trend-bg" style={{ "--trend-desktop-image": `url(${trendBanners[trendIndex]})`, "--trend-mobile-image": `url(${mobileTrendBanners[mobileTrendIndex]})` } as CSSProperties} /><div className="trend-content"><h2>THE TREND SHOP</h2><p>Curated styles, fresh colors, and must-see edits.</p><Link className="btn" href="/shop-all">SHOP NOW</Link></div><span className="trend-badge"><Tag aria-hidden="true" />Frames</span>
+        <div key={`${trendBanners[trendIndex]}-${mobileTrendBanners[mobileTrendIndex]}`} className="trend-bg" style={{ "--trend-desktop-image": `url(${trendBanners[trendIndex]})`, "--trend-mobile-image": `url(${mobileTrendBanners[mobileTrendIndex]})` } as CSSProperties} /><div className="trend-content"><h2>THE TREND SHOP</h2><p>Curated styles, fresh colors, and must-see edits.</p><Link className="btn" href="/all-glasses/new-arrivals">SHOP NOW</Link></div><span className="trend-badge"><Tag aria-hidden="true" />Frames</span>
       </section>
     </div>
     

@@ -152,12 +152,29 @@ export default function ProductPage({ databaseProduct }: { databaseProduct?: Dat
                         {/* <b className="size-pill">Large</b> */}
                         {(!databaseProduct || frameColors.length > 0) && <><p><b>Frame color:</b> {selectedFrameColor || "Tortoiseshell"}</p><div className="swatches" aria-label="Frame colors">{(databaseProduct ? frameColors : ["tortoise", "black", "blue"]).map((c, i) => <button key={c} onClick={() => setColor(i)} style={{ background: productColor(c) }} className={color === i ? "selected" : ""} aria-label={`Select frame color ${c}`} title={c} />)}</div></>}</div>
                     {outOfStock ? <button className="select-lenses" type="button" disabled>Out of stock</button> : <><BuyNowButton productId={databaseProduct?.id} name={databaseProduct?.title} frameColor={selectedFrameColor || undefined} image={databaseImage(0)} framePrice={salePrice} /><SelectLensesButton product={databaseProduct ? { productId: databaseProduct.id, name: databaseProduct.title, frameColor: selectedFrameColor, image: databaseImage(0) || "", framePrice: salePrice, lensColors } : undefined} /></>}
-                    <div className="pay-card">Pay over time with PayPal, Affirm or Afterpay. &nbsp;<u><Link href={`/accepted-payment-methods`}>Learn More</Link></u><br />Use your insurance or FSA/HSA benefits. &nbsp;<u><Link href={`/accepted-payment-methods`}>Learn more</Link></u></div>
-                    <div className="includes"><h3>ZENNI WOW PRICE INCLUDES:</h3><p>✓ High-quality frame<br />✓ Basic prescription lenses*<br />✓ Anti-scratch coating<br />✓ UV protection</p><i>*multifocal or readers lenses start at additional cost</i></div>
+                    <div className="includes"><h3>EYE CHAMP WOW PRICE INCLUDES:</h3><p>✓ High-quality frame<br />✓ Basic prescription lenses*<br />✓ Anti-scratch coating<br />✓ UV protection</p><i>*multifocal or readers lenses start at additional cost</i></div>
                     <div className="bought">
                         <h2>Customers also bought</h2>
-                        <div><ProductImage view="case" />
-                            <section><b>Deluxe Eyewear Case</b><p>Protect your eyewear wherever life takes you with this reliable case. <u>read more</u></p><button>Add to cart Rs299.00</button></section></div></div>
+                        <div>
+                            {(recommendLoading || recommendError || recommended.length === 0) && <SwiperSlide><p className="recommend-status">{recommendLoading ? "Loading similar products..." : recommendError ? "Could not load similar products." : "No other products available yet."}</p></SwiperSlide>}
+                            {recommended.map(p => {
+                                const href = `/${p.categorySlug || "shop-all"}/${p.subcategorySlug || "all"}/${p.slug}`;
+                                const price = Number(p.price) * (1 - Number(p.discountPercent || 0) / 100);
+                                const image = p.media?.find(item => item.primary)?.url || p.media?.[0]?.url;
+                                const colors = p.variants?.find(variant => variant.name.trim().toLowerCase() === "frame color")?.values ?? [];
+                                return <article className="product-card" key={p.id}>
+                                    <div className="card-photo">
+                                        <Link href={href} aria-label={`View ${p.title}`}>{image ? <img src={image} alt={p.title} /> : <span>No image available</span>}</Link>
+                                        <button type="button" className="recommend-heart" aria-label={savedRecommendations.includes(p.id) ? "Remove from favorites" : "Add to favorites"} onClick={() => toggleFavorite({ ...p, price })}><Heart fill={savedRecommendations.includes(p.id) ? "currentColor" : "none"} /></button>
+                                    </div>
+                                    <div className="card-meta"><b>{formatMoney(currency, price)}</b></div>
+                                    <p><Link href={href}>{p.title}</Link></p>
+                                    {p.shape && <small>{p.shape}</small>}
+                                    {colors.length > 0 && <div className="mini-swatches" aria-label="Available frame colors">{colors.slice(0, 4).map(value => <i key={value} title={value} style={{ background: productColor(value) }} />)}</div>}
+                                </article>;
+                            })}
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -168,7 +185,7 @@ export default function ProductPage({ databaseProduct }: { databaseProduct?: Dat
                 {tab === "Features" && <div className="feature-content wrap">
                     <div className="frame-design"><h3>Frame design</h3><dl><dt>Shape</dt><dd><u>{databaseProduct?.shape ?? "Square"}</u></dd><dt>Feature</dt><dd><u>{databaseProduct?.specialFeature ?? "Spring Hinges, Universal Bridge Fit"}</u></dd><dt>Rim</dt><dd><u>{databaseProduct?.rim ?? "Full Rim"}</u></dd><dt>Material</dt><dd><u>{databaseProduct?.material ?? "Acetate"}</u></dd><dt>Weight</dt><dd>{databaseProduct?.weight ? `${databaseProduct.weight} grams` : "(23 grams / 0.8 ounces)"}</dd></dl></div>
                     <div className="lens-list"><h3>Lens compatibility</h3>{displayedLensCompatibility.length ? displayedLensCompatibility.map(item => <p key={item}><span>✓</span><b>{item}</b></p>) : <p>No lens compatibility specified.</p>}</div>
-                    <div className="special-list"><h3>What makes it special</h3><div><span>✓</span><p><b>Zenni Promise</b><br />Experience high quality frames at our most affordable prices.</p></div><div><span>✓</span><p><b>Made for all faces</b><br />Designed to accommodate many face shapes and sizes.</p></div><div><span>✓</span><p><b>Luxury Crafted</b><br />Handcrafted acetate delivers vibrant, fade-resistant colors with hypoallergenic durability.</p></div></div>
+                    <div className="special-list"><h3>What makes it special</h3><div><span>✓</span><p><b>Eye Champ Promise</b><br />Experience high quality frames at our most affordable prices.</p></div><div><span>✓</span><p><b>Made for all faces</b><br />Designed to accommodate many face shapes and sizes.</p></div><div><span>✓</span><p><b>Luxury Crafted</b><br />Handcrafted acetate delivers vibrant, fade-resistant colors with hypoallergenic durability.</p></div></div>
                 </div>}
                 {tab === "Description" && <div className="detail-content wrap"><div>{databaseProduct ? <div dangerouslySetInnerHTML={{ __html: databaseProduct.description || "<p>No description provided.</p>" }} /> : <><b>Design:</b><p>Discover timeless sophistication with these full rim square glasses, meticulously crafted from premium acetate to showcase a sleek design and impeccable craftsmanship.</p><b>Fit:</b><p>These glasses feature spring hinges and a universal bridge fit, ensuring superior comfort and a secure fit for everyday wear.</p><b>Recommendation:</b><p>These glasses offer a sophisticated and classic style, perfect for both men and women. With their square frame shape, they are ideal for individuals with heart and oval face shapes.</p></>}</div><ProductImage view="angle" src={databaseImage(2)} database={Boolean(databaseProduct)} /></div>}
             </section>
@@ -211,14 +228,14 @@ export default function ProductPage({ databaseProduct }: { databaseProduct?: Dat
                     <Swiper className="customer-photos" onSwiper={swiper => { photoSlider.current = swiper }} slidesPerView={1.5} spaceBetween={14} breakpoints={{ 480: { slidesPerView: 2.4, spaceBetween: 16 }, 768: { slidesPerView: 3.5, spaceBetween: 18 }, 1100: { slidesPerView: 5.2, spaceBetween: 22 } }}>
                         {reviewPhotos.map(review => <SwiperSlide key={review.id}><img className="customer-review-photo" src={review.photoUrl!} alt={`Review photo by ${review.name}`} /></SwiperSlide>)}
                     </Swiper></>}
-                <div className="rating-box"><div><b>Overall Rating</b><div className="big-rating">{averageRating ? averageRating.toFixed(1) : "—"} <span><Rating value={Math.round(averageRating)} /><small>{reviews.length} {reviews.length === 1 ? "review" : "reviews"}</small></span></div><p>customers</p>{databaseProduct && <button type="button" onClick={() => setReviewFormOpen(open => !open)}>Write a review</button>}</div><div><b>Rating Snapshot</b>{ratingCounts.map(({ stars, count }) => <div className="bar" key={stars}><u>{stars} stars</u><i><em style={{ width: `${reviews.length ? count / reviews.length * 100 : 0}%` }} /></i><u>{count}</u></div>)}</div><div><b>Average Ratings</b><p>Fit</p><div className="scale"><i style={{ left: averageScale(["Tight", "True to Size", "Loose"], "fit") }} /></div><div className="scale-labels"><span>Tight</span><span>True to Size</span><span>Loose</span></div><p>Quality</p><div className="scale"><i style={{ left: averageScale(["Low", "Average", "High"], "quality") }} /></div><div className="scale-labels"><span>Low</span><span>Average</span><span>High</span></div></div></div>
+                <div className="rating-box"><div><b>Overall Rating</b><div className="big-rating">{averageRating ? averageRating.toFixed(1) : "—"} <span><Rating value={Math.round(averageRating)} /><small>{reviews.length} {reviews.length === 1 ? "review" : "reviews"}</small></span></div><p>customers</p>{databaseProduct && <button type="button" onClick={() => setReviewFormOpen(open => !open)}>Write a review</button>}</div><div><b>Rating Snapshot</b>{ratingCounts.map(({ stars, count }) => <div className="bar" key={stars}><u>{stars} stars</u><i><em style={{ width: `${reviews.length ? count / reviews.length * 100 : 0}%` }} /></i><u>{count}</u></div>)}</div></div>
                 {reviewFormOpen && <form className="review-form" onSubmit={submitReview}>
                     <h3>Review this product</h3><p>Sign in with the email used for your order. Only purchasers can post a review.</p>
                     <label>Rating <select name="rating" required defaultValue=""><option value="" disabled>Select rating</option>{[5, 4, 3, 2, 1].map(value => <option key={value} value={value}>{value} stars</option>)}</select></label>
                     <label>Title <input name="title" minLength={3} maxLength={160} required /></label>
                     <label>Your review <textarea name="body" minLength={10} maxLength={3000} required /></label>
                     <label>Fit <select name="fit"><option value="">Not rated</option>{["Tight", "True to Size", "Loose"].map(value => <option key={value}>{value}</option>)}</select></label>
-                    <label>Quality <select name="quality"><option value="">Not rated</option>{["Low", "Average", "High"].map(value => <option key={value}>{value}</option>)}</select></label>
+                    <label>Quality <select name="quality"><option value="">Not rated</option>{["Low", "High"].map(value => <option key={value}>{value}</option>)}</select></label>
                     <label>Photo URL (optional) <input name="photoUrl" type="url" placeholder="https://example.com/photo.jpg" /></label>
                     {reviewMessage && <p role="alert">{reviewMessage} {reviewMessage.includes("Sign in") && <Link href="/login">Sign in</Link>}</p>}
                     <button type="submit" disabled={reviewSubmitting}>{reviewSubmitting ? "Submitting..." : "Submit review"}</button>
