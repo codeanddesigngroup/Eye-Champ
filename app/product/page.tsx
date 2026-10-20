@@ -155,25 +155,23 @@ export default function ProductPage({ databaseProduct }: { databaseProduct?: Dat
                     <div className="includes"><h3>EYE CHAMP WOW PRICE INCLUDES:</h3><p>✓ High-quality frame<br />✓ Basic prescription lenses*<br />✓ Anti-scratch coating<br />✓ UV protection</p><i>*multifocal or readers lenses start at additional cost</i></div>
                     <div className="bought">
                         <h2>Customers also bought</h2>
-                        <div>
-                            {(recommendLoading || recommendError || recommended.length === 0) && <SwiperSlide><p className="recommend-status">{recommendLoading ? "Loading similar products..." : recommendError ? "Could not load similar products." : "No other products available yet."}</p></SwiperSlide>}
-                            {recommended.map(p => {
-                                const href = `/${p.categorySlug || "shop-all"}/${p.subcategorySlug || "all"}/${p.slug}`;
-                                const price = Number(p.price) * (1 - Number(p.discountPercent || 0) / 100);
-                                const image = p.media?.find(item => item.primary)?.url || p.media?.[0]?.url;
-                                const colors = p.variants?.find(variant => variant.name.trim().toLowerCase() === "frame color")?.values ?? [];
-                                return <article className="product-card" key={p.id}>
-                                    <div className="card-photo">
-                                        <Link href={href} aria-label={`View ${p.title}`}>{image ? <img src={image} alt={p.title} /> : <span>No image available</span>}</Link>
-                                        <button type="button" className="recommend-heart" aria-label={savedRecommendations.includes(p.id) ? "Remove from favorites" : "Add to favorites"} onClick={() => toggleFavorite({ ...p, price })}><Heart fill={savedRecommendations.includes(p.id) ? "currentColor" : "none"} /></button>
-                                    </div>
-                                    <div className="card-meta"><b>{formatMoney(currency, price)}</b></div>
-                                    <p><Link href={href}>{p.title}</Link></p>
-                                    {p.shape && <small>{p.shape}</small>}
-                                    {colors.length > 0 && <div className="mini-swatches" aria-label="Available frame colors">{colors.slice(0, 4).map(value => <i key={value} title={value} style={{ background: productColor(value) }} />)}</div>}
-                                </article>;
-                            })}
-                        </div>
+                        {(recommendLoading || recommendError || recommended.length === 0) && <SwiperSlide><p className="recommend-status">{recommendLoading ? "Loading similar products..." : recommendError ? "Could not load similar products." : "No other products available yet."}</p></SwiperSlide>}
+                        {recommended.map(p => {
+                            const href = `/${p.categorySlug || "shop-all"}/${p.subcategorySlug || "all"}/${p.slug}`;
+                            const price = Number(p.price) * (1 - Number(p.discountPercent || 0) / 100);
+                            const image = p.media?.find(item => item.primary)?.url || p.media?.[0]?.url;
+                            const colors = p.variants?.find(variant => variant.name.trim().toLowerCase() === "frame color")?.values ?? [];
+                            return <article className="product-card" key={p.id}>
+                                <div className="card-photo">
+                                    <Link href={href} aria-label={`View ${p.title}`}>{image ? <img src={image} alt={p.title} /> : <span>No image available</span>}</Link>
+                                    <button type="button" className="recommend-heart" aria-label={savedRecommendations.includes(p.id) ? "Remove from favorites" : "Add to favorites"} onClick={() => toggleFavorite({ ...p, price })}><Heart fill={savedRecommendations.includes(p.id) ? "currentColor" : "none"} /></button>
+                                </div>
+                                <div className="card-meta"><b>{formatMoney(currency, price)}</b></div>
+                                <p><Link href={href}>{p.title}</Link></p>
+                                {p.shape && <small>{p.shape}</small>}
+                                {colors.length > 0 && <div className="mini-swatches" aria-label="Available frame colors">{colors.slice(0, 4).map(value => <i key={value} title={value} style={{ background: productColor(value) }} />)}</div>}
+                            </article>;
+                        })}
                     </div>
                 </div>
             </section>
