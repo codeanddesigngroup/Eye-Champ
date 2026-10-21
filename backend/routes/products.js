@@ -81,8 +81,9 @@ productsRouter.patch("/:id", async (request, response, next) => {
     if (!Number.isFinite(discountPercent) || discountPercent < 0 || discountPercent > 100) return response.status(400).json({ error: "Price off must be between 0 and 100 percent." });
     const frameImageUrl = String(body.frameImageUrl ?? "").trim() || null;
     if (frameImageUrl && !uploadedImagePath(frameImageUrl)) return response.status(400).json({ error: "Invalid frame image." });
-    const existing = await pool.query("SELECT media, variants, frame_image_url, slug FROM products WHERE id=$1", [request.params.id]);
+    const existing = await pool.query("SELECT media, variants, frame_image_url, slug, status FROM products WHERE id=$1", [request.params.id]);
     if (!existing.rows[0]) return response.status(404).json({ error: "Product not found." });
+    if (existing.rows[0].status === "Draft" && body.status !== "Draft" && !frameImageUrl) return response.status(400).json({ error: "A frame image is required before publishing the product." });
     const previousImagePaths = new Set();
     collectUploadedImages(existing.rows[0].media, previousImagePaths);
     collectUploadedImages(existing.rows[0].variants, previousImagePaths);
@@ -149,6 +150,7 @@ productsRouter.post("/", async (request, response, next) => {
     const media = Array.isArray(body.media) ? body.media : [];
     const frameImageUrl = String(body.frameImageUrl ?? "").trim() || null;
     if (frameImageUrl && !uploadedImagePath(frameImageUrl)) return response.status(400).json({ error: "Invalid frame image." });
+    if (body.status !== "Draft" && !frameImageUrl) return response.status(400).json({ error: "A frame image is required before publishing the product." });
     const { rows } = await pool.query(`
       INSERT INTO products (
         title,slug,description,price,compare_price,cost,taxable,sku,barcode,track_quantity,quantity,

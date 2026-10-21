@@ -134,6 +134,11 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
     if (uploadingFrame) return showAuthToast({ message: "Wait for the frame image to finish uploading.", type: "error" });
     const data = new FormData(form);
     if ((statusOverride ?? status) !== "Draft") {
+    if ((!editId || editProduct?.status === "Draft") && !frameImage?.url?.trim()) {
+      showAuthToast({ message: "Upload a frame image before saving the product.", type: "error" });
+      document.querySelector(".np-frame-image-row")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
     const missingGroup = [["gender", "Gender"], ["category", "Category"], ["subCategory", "Sub category"]].find(([name]) => data.getAll(name).length === 0);
     if (missingGroup) {
       showAuthToast({ message: `Select at least one ${missingGroup[1].toLowerCase()}.`, type: "error" });
@@ -574,7 +579,7 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
                 )}
               </section>
               <section className="np-card">
-                <CardTitle number="06" title="Lens-step frame image" subtitle="Optional image shown beside the second Select Lenses step. If empty, the product image is used." />
+                <CardTitle number="06" title={<>Frame image{(!editId || editProduct?.status === "Draft") && <em className="np-required"> *</em>}</>} subtitle="Shown beside the second Select Lenses step." />
                 <div className="np-frame-image-row">
                   {frameImage && <div className="np-frame-image-preview"><Image src={frameImage.url} alt="Lens-step frame preview" width={150} height={84} unoptimized /><button type="button" onClick={() => setFrameImage(null)} aria-label="Remove lens-step frame image"><X size={14} /></button></div>}
                   <label className="np-color-upload"><input type="file" accept="image/png,image/jpeg,image/webp,image/avif" disabled={uploadingFrame} onChange={(event) => { void uploadFrameImage(event.target.files?.[0]); event.target.value = ""; }} /><ImagePlus size={14} />{uploadingFrame ? "Uploading..." : frameImage ? "Replace image" : "Upload frame image"}</label>
@@ -705,7 +710,7 @@ function CardTitle({
   aside,
 }: {
   number: string;
-  title: string;
+  title: ReactNode;
   subtitle: string;
   aside?: ReactNode;
 }) {
