@@ -64,7 +64,7 @@ storefrontProductsRouter.get("/detail/:slug", async (request, response, next) =>
     const { rows } = await pool.query(`SELECT id::text, title, slug, description, price::float, discount_percent::float AS "discountPercent", quantity,
       shape, material, rim, fit, weight::float, special_feature AS "specialFeature", measurements,
       lens_compatibility AS "lensCompatibility", genders, categories, subcategories, collections,
-      brands, media, variants FROM products WHERE slug=$1 AND status='Active'`, [request.params.slug]);
+      brands, media, variants, frame_image_url AS "frameImageUrl" FROM products WHERE slug=$1 AND status='Active'`, [request.params.slug]);
     if (!rows[0]) return response.status(404).json({ error: "Product not found." });
     response.json({ product: rows[0] });
   } catch (error) { next(error); }

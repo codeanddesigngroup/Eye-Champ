@@ -33,6 +33,8 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
   const [lensInput, setLensInput] = useState("");
   const [variants, setVariants] = useState<VariantOption[]>([]);
   const [variantMedia, setVariantMedia] = useState<Record<string, Media[]>>({});
+  const [frameImage, setFrameImage] = useState<Media | null>(null);
+  const [uploadingFrame, setUploadingFrame] = useState(false);
   const [categoryOptions, setCategoryOptions] = useState<CategoryOption[]>([]);
   const [selectedMainCategories, setSelectedMainCategories] = useState<string[]>([]);
   const [selectedSubCategories, setSelectedSubCategories] = useState<string[]>([]);
@@ -50,6 +52,8 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
       setEditProduct(product);
       setTitle(String(product.title ?? "")); setDescription(String(product.description ?? "")); setPrice(String(product.price ?? "")); setStatus(String(product.status ?? "Draft"));
       setLensCompatibility((product.lens_compatibility as string[]) ?? []);
+      const frameImageUrl = String(product.frame_image_url ?? "");
+      setFrameImage(frameImageUrl ? { name: frameImageUrl.split("/").pop() || "Frame image", url: frameImageUrl } : null);
       setSelectedMainCategories((product.categories as string[]) ?? []); setSelectedSubCategories((product.subcategories as string[]) ?? []); setSelectedNestedCategories((product.subcategories as string[]) ?? []);
       const loaded = ((product.variants as Array<{name:string;values:string[];mediaByValue?:Record<string,Media[]>}>) ?? []).map((variant, index) => ({ id: index + 1, name: variant.name, values: variant.values, input: "", mediaByValue: variant.mediaByValue }));
       setVariants(loaded); setVariantMedia(Object.fromEntries(loaded.flatMap(variant => variant.values.map(value => [`${variant.id}:${value}`, variant.mediaByValue?.[value] ?? []]))));
@@ -106,6 +110,7 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
       subcategories: [...data.getAll("subCategory"), ...data.getAll("nestedCategory")].map(String), collections: data.getAll("collections").map(String), brands: data.getAll("brands").map(String),
       tags: String(data.get("tags") || "").split(",").map((tag) => tag.trim()).filter(Boolean),
       media: Object.values(variantMedia).flat().slice(0, 1).map(item => ({ name: item.name, url: item.url, primary: true })),
+      frameImageUrl: frameImage?.url ?? null,
     };
   };
   const draft = useProductDraft(!editId, readPayload);
@@ -126,6 +131,7 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
   const save = async (statusOverride?: "Draft") => {
     const form = document.getElementById("new-product-form") as HTMLFormElement | null;
     if (!form || saving) return;
+    if (uploadingFrame) return showAuthToast({ message: "Wait for the frame image to finish uploading.", type: "error" });
     const data = new FormData(form);
     if ((statusOverride ?? status) !== "Draft") {
     const missingGroup = [["gender", "Gender"], ["category", "Category"], ["subCategory", "Sub category"]].find(([name]) => data.getAll(name).length === 0);
@@ -216,6 +222,21 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
       setVariantMedia((existing) => ({ ...existing, [key]: [...(existing[key] ?? []), ...result.media!].slice(0, 4) }));
       showAuthToast({ message: `Images uploaded for ${value}.`, type: "success" });
     } catch (error) { showAuthToast({ message: error instanceof Error ? error.message : "Could not upload color images.", type: "error" }); }
+  };
+  const uploadFrameImage = async (file: File | undefined) => {
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) return showAuthToast({ message: "Frame image must be 2 MB or smaller.", type: "error" });
+    const uploadData = new FormData();
+    uploadData.append("images", file);
+    setUploadingFrame(true);
+    try {
+      const response = await fetch("/api/admin/uploads/products", { method: "POST", body: uploadData });
+      const result = await response.json() as { media?: Media[]; error?: string };
+      if (!response.ok || !result.media?.[0]) throw new Error(result.error || "Could not upload frame image.");
+      setFrameImage(result.media[0]);
+    } catch (error) {
+      showAuthToast({ message: error instanceof Error ? error.message : "Could not upload frame image.", type: "error" });
+    } finally { setUploadingFrame(false); }
   };
   const addVariant = () =>
     setVariants((current) => [
@@ -551,6 +572,14 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
                     </button>
                   </div>
                 )}
+              </section>
+              <section className="np-card">
+                <CardTitle number="06" title="Lens-step frame image" subtitle="Optional image shown beside the second Select Lenses step. If empty, the product image is used." />
+                <div className="np-frame-image-row">
+                  {frameImage && <div className="np-frame-image-preview"><Image src={frameImage.url} alt="Lens-step frame preview" width={150} height={84} unoptimized /><button type="button" onClick={() => setFrameImage(null)} aria-label="Remove lens-step frame image"><X size={14} /></button></div>}
+                  <label className="np-color-upload"><input type="file" accept="image/png,image/jpeg,image/webp,image/avif" disabled={uploadingFrame} onChange={(event) => { void uploadFrameImage(event.target.files?.[0]); event.target.value = ""; }} /><ImagePlus size={14} />{uploadingFrame ? "Uploading..." : frameImage ? "Replace image" : "Upload frame image"}</label>
+                  <small>PNG, JPG, WEBP or AVIF. Maximum 2 MB.</small>
+                </div>
               </section>
             </div>
 

@@ -701,6 +701,26 @@
     z-index: 2;
 }
 
+.frame-lens-tint {
+    position: absolute;
+    z-index: 3;
+    top: 0;
+    left: 2.5%;
+    width: 95%;
+    height: 100%;
+    opacity: .76;
+    mix-blend-mode: multiply;
+    pointer-events: none;
+}
+
+canvas.frame-lens-tint {
+    top: 50%;
+    height: auto;
+    transform: translateY(-50%);
+    opacity: 1;
+    mix-blend-mode: normal;
+}
+
 .live-lens-tint {
     position: absolute;
     z-index: 3;
@@ -1176,6 +1196,15 @@ svg.live-lens-tint .lens-shine.right {
     background: linear-gradient(135deg, #e9f6ff 12%, #8a9eab 58%, #414d57);
 }
 
+.lens-type-swatch.power-sunglasses {
+    background: linear-gradient(135deg, #535d65, #1f272c);
+}
+
+.lens-type-swatch.premium-power-sunglasses {
+    background: linear-gradient(135deg, #798994, #111c24);
+    box-shadow: inset 0 0 8px #ffffff55, 3px -3px 0 -1px #c49b53;
+}
+
 .lens-type-card>span:last-child>b {
     display: flex;
     align-items: center;
@@ -1261,6 +1290,14 @@ svg.live-lens-tint .lens-shine.right {
     gap: 10px;
 }
 
+.tint-selected,
+.tint-unavailable {
+    display: block;
+    margin-top: 10px;
+    color: #626b72;
+    font-size: 13px;
+}
+
 .tint-swatches button {
     width: 22px;
     height: 22px;
@@ -1292,6 +1329,21 @@ svg.live-lens-tint .lens-shine.right {
     border: 1px solid #a5846d;
     background: #fff;
     cursor: pointer;
+}
+
+.custom-tint button {
+    padding: 6px 10px;
+    border: 1px solid #c9cfd1;
+    border-radius: 6px;
+    background: #fff;
+    color: #3f4b61;
+    font: inherit;
+    cursor: pointer;
+}
+
+.custom-tint button.selected {
+    border-color: #c51e2a;
+    color: #c51e2a;
 }
 
 .lens-config-confirm {

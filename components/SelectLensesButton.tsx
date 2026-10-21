@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export type LensProduct = { productId?:string; name:string; frameColor:string; image:string; framePrice:number; lensColors?:string[]; returnUrl?:string };
+export type LensProduct = { productId?:string; name:string; frameColor:string; image:string; frameImageUrl?:string|null; framePrice:number; lensColors?:string[]; categories?:string[]; returnUrl?:string };
 export default function SelectLensesButton({product,outOfStock=false}:{product?:LensProduct;outOfStock?:boolean}) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
