@@ -122,6 +122,10 @@ export default function ProductPage({ databaseProduct }: { databaseProduct?: Dat
         finally { setReviewSubmitting(false); }
     }
     const toggleLiked = () => { if (!databaseProduct) return setLiked(value => !value); const slug = (value: string) => value.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); setLiked(toggleFavorite({ ...databaseProduct, price: salePrice, categorySlug: slug(databaseProduct.categories[0] || "shop-all"), subcategorySlug: slug(databaseProduct.subcategories[0] || "all") })) };
+    const boughtProduct = recommended[0];
+    const boughtPrice = boughtProduct ? Number(boughtProduct.price) * (1 - Number(boughtProduct.discountPercent || 0) / 100) : 0;
+    const boughtHref = boughtProduct ? `/${boughtProduct.categorySlug || "shop-all"}/${boughtProduct.subcategorySlug || "all"}/${boughtProduct.slug}` : "#";
+    const boughtImage = boughtProduct?.media?.find(item => item.primary)?.url || boughtProduct?.media?.[0]?.url;
     return (
         <main className="pdp productDetails">
             <section className="product-hero wrap">
@@ -155,28 +159,15 @@ export default function ProductPage({ databaseProduct }: { databaseProduct?: Dat
                     <div className="includes"><h3>EYE CHAMP WOW PRICE INCLUDES:</h3><p>✓ High-quality frame<br />✓ Basic prescription lenses*<br />✓ Anti-scratch coating<br />✓ UV protection</p><i>*multifocal or readers lenses start at additional cost</i></div>
                     <div className="bought">
                         <h2>Customers also bought</h2>
-
-                        <section className="recommend">
-                            <Swiper className="product-row" watchOverflow onSwiper={swiper => { productSlider.current = swiper; setRecommendCanNavigate(!swiper.isLocked) }} onResize={swiper => setRecommendCanNavigate(!swiper.isLocked)} onBreakpoint={swiper => setRecommendCanNavigate(!swiper.isLocked)} onSlidesLengthChange={swiper => setRecommendCanNavigate(!swiper.isLocked)} spaceBetween={38} slidesPerView={1.2} breakpoints={{ 600: { slidesPerView: 1.4, spaceBetween: 20 }, 900: { slidesPerView: 1.4, spaceBetween: 28 }, 1200: { slidesPerView: 1, spaceBetween: 38 } }}>
-                                {(recommendLoading || recommendError || recommended.length === 0) && <SwiperSlide><p className="recommend-status">{recommendLoading ? "Loading similar products..." : recommendError ? "Could not load similar products." : "No other products available yet."}</p></SwiperSlide>}
-                                {recommended.map(p => {
-                                    const href = `/${p.categorySlug || "shop-all"}/${p.subcategorySlug || "all"}/${p.slug}`;
-                                    const price = Number(p.price) * (1 - Number(p.discountPercent || 0) / 100);
-                                    const image = p.media?.find(item => item.primary)?.url || p.media?.[0]?.url;
-                                    const colors = p.variants?.find(variant => variant.name.trim().toLowerCase() === "frame color")?.values ?? [];
-                                    return <SwiperSlide key={p.id}><article className="product-card">
-                                        <div className="card-photo">
-                                            <Link href={href} aria-label={`View ${p.title}`}>{image ? <img src={image} alt={p.title} /> : <span>No image available</span>}</Link>
-                                            <button type="button" className="recommend-heart" aria-label={savedRecommendations.includes(p.id) ? "Remove from favorites" : "Add to favorites"} onClick={() => toggleFavorite({ ...p, price })}><Heart fill={savedRecommendations.includes(p.id) ? "currentColor" : "none"} /></button>
-                                        </div>
-                                        <div className="card-meta"><b>{formatMoney(currency, price)}</b></div>
-                                        <p><Link href={href}>{p.title}</Link></p>
-                                        {p.shape && <small>{p.shape}</small>}
-                                        {colors.length > 0 && <div className="mini-swatches" aria-label="Available frame colors">{colors.slice(0, 4).map(value => <i key={value} title={value} style={{ background: productColor(value) }} />)}</div>}
-                                    </article></SwiperSlide>;
-                                })}
-                            </Swiper>
-                        </section>
+                        {recommendLoading ? <p className="bought-status">Loading similar product...</p> : boughtProduct ? <div className="bought-product">
+                            <Link className="bought-image" href={boughtHref}>{boughtImage ? <img src={boughtImage} alt={boughtProduct.title} /> : <span>No image</span>}</Link>
+                            <div className="bought-info">
+                                <Link href={boughtHref}><strong>{boughtProduct.title}</strong></Link>
+                                {boughtProduct.shape && <small>{boughtProduct.shape}</small>}
+                                <b>{formatMoney(currency, boughtPrice)}</b>
+                                <div><Link className="bought-view" href={boughtHref}>View product</Link><button type="button" aria-label={savedRecommendations.includes(boughtProduct.id) ? `Remove ${boughtProduct.title} from favorites` : `Add ${boughtProduct.title} to favorites`} onClick={() => toggleFavorite({ ...boughtProduct, price: boughtPrice })}><Heart fill={savedRecommendations.includes(boughtProduct.id) ? "currentColor" : "none"} /></button></div>
+                            </div>
+                        </div> : <p className="bought-status">No similar product available.</p>}
                     </div>
                 </div>
             </section>

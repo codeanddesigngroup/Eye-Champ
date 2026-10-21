@@ -539,6 +539,109 @@
 }
 
 /* Dedicated prescription selection page */
+.usage-purpose-list {
+    display: grid;
+    gap: 10px;
+}
+
+.usage-purpose-step .usage-form h2 {
+    margin-bottom: 12px;
+}
+
+.usage-purpose-step .usage-audio {
+    margin-bottom: 16px;
+}
+
+.usage-purpose-card {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 114px;
+    gap: 26px;
+    padding: 18px 20px;
+    border: 1px solid #e4e4e4;
+    border-radius: 12px;
+    background: #f6f6f6;
+    color: #292d30;
+    text-align: left;
+    box-shadow: 0 1px 4px #00000008;
+    cursor: pointer;
+}
+
+.usage-purpose-card:hover,
+.usage-purpose-card:focus-visible {
+    border-color: #7e898e;
+    background: #f0f3f4;
+}
+
+.usage-purpose-card:disabled {
+    opacity: .6;
+    cursor: wait;
+}
+
+.usage-purpose-icon {
+    display: grid;
+    flex: 0 0 64px;
+    place-items: center;
+    height: 64px;
+}
+
+.usage-purpose-icon > svg {
+    width: 62px;
+    height: 62px;
+    stroke-width: 1.2;
+}
+
+.usage-purpose-lens {
+    display: block;
+    width: 58px;
+    height: 58px;
+    border: 1px solid #aab4ba;
+    border-bottom-color: #252e33;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #fff 8%, #e9edef 65%, #c8ced0 100%);
+}
+
+.usage-purpose-copy {
+    display: grid;
+    gap: 10px;
+}
+
+.usage-purpose-copy strong {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 18px;
+}
+
+.usage-purpose-copy strong svg {
+    color: #808080;
+}
+
+.usage-purpose-copy small {
+    color: #747474;
+    font-size: 15px;
+}
+
+@media (max-width: 600px) {
+    .usage-purpose-card {
+        min-height: 104px;
+        gap: 14px;
+        padding: 14px;
+    }
+    .usage-purpose-icon {
+        flex-basis: 52px;
+    }
+    .usage-purpose-lens {
+        width: 48px;
+        height: 48px;
+    }
+    .usage-purpose-icon > svg {
+        width: 50px;
+        height: 50px;
+    }
+}
+
 .usage-page {
     min-height: 100vh;
     color: #111;
@@ -1057,28 +1160,33 @@ svg.live-lens-tint .lens-shine.right {
     box-shadow: inset 0 0 8px rgba(255, 255, 255, .55);
 }
 
-.lens-type-swatch.medium {
-    background: linear-gradient(135deg, #9ca8af, #44515b);
+.lens-type-swatch.ordinary-anti-reflection {
+    background: linear-gradient(135deg, #fff, #e4ecef);
 }
 
-.lens-type-swatch.gradient {
-    background: linear-gradient(#20292d, #667177 48%, #e7eaeb);
+.lens-type-swatch.emi-silk {
+    background: linear-gradient(135deg, #fafcff, #d8e4eb);
 }
 
-.lens-type-swatch.polarized {
-    background: linear-gradient(135deg, #839099, #202a30);
-    box-shadow: inset -8px -8px 12px rgba(255, 255, 255, .2), 8px -4px 0 -5px #f29900;
+.lens-type-swatch.blue-cut {
+    background: linear-gradient(135deg, #e9f6ff, #b4d9f5);
+}
+
+.lens-type-swatch.transition-blue-cut {
+    background: linear-gradient(135deg, #e9f6ff 12%, #8a9eab 58%, #414d57);
 }
 
 .lens-type-card>span:last-child>b {
     display: flex;
     align-items: center;
-    gap: 22px;
+    flex-wrap: wrap;
+    gap: 6px 14px;
     font-size: 17px;
 }
 
 .lens-type-card strong {
     font-size: 16px;
+    white-space: nowrap;
 }
 
 .lens-type-card b svg {
@@ -1796,20 +1904,65 @@ svg.live-lens-tint .lens-shine.right {
     margin-bottom: 1vw;
 }
 
-.bought>div {
+.bought>.bought-product {
     display: grid;
     grid-template-columns: 48% 1fr;
-    align-items: center
+    align-items: center;
+    gap: 12px
 }
 
-.bought .sprite {
-    height: 145px
+.bought-image {
+    height: 145px;
+    display: grid;
+    place-items: center;
+    border-radius: 10px;
+    background: #f5f7f7;
+    overflow: hidden
+}
+
+.bought-image img {
+    width: 94%;
+    height: 94%;
+    object-fit: contain
+}
+
+.bought-image span,
+.bought-status {
+    color: #738084;
+    font-size: 12px
+}
+
+.bought-info {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 7px
+}
+
+.bought-info strong {
+    display: -webkit-box;
+    overflow: hidden;
+    font-size: 14px;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2
+}
+
+.bought-info small {
+    color: #657276
+}
+
+.bought-info>div {
+    display: flex;
+    align-items: center;
+    gap: 8px
 }
 
 .bought p {
     color: #394044
 }
 
+.bought .bought-view,
 .bought button {
     padding: 4px 10px;
     border: 1px solid;
@@ -1817,6 +1970,17 @@ svg.live-lens-tint .lens-shine.right {
     background: white;
     font-weight: 700;
     margin-top: 1vw;
+}
+
+.bought button {
+    display: grid;
+    place-items: center;
+    cursor: pointer
+}
+
+.bought button svg {
+    width: 16px;
+    height: 16px
 }
 
 .details {
@@ -2392,7 +2556,7 @@ svg.live-lens-tint .lens-shine.right {
         padding-inline: 14px
     }
 
-    .bought>div {
+    .bought>.bought-product {
         grid-template-columns: 42% 1fr
     }
 }
