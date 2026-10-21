@@ -83,7 +83,7 @@ export default function PrescriptionSelectionPage() {
   const showOptional=(value:string)=>!value||value==="n/a"?"--":value;
   const isSunglasses = product.categories?.some(category => category.trim().toLowerCase() === "sunglasses") ?? false;
   const secondStep = isSunglasses ? "lenses" : "prescription";
-  const previewImage = step === secondStep && product.frameImageUrl ? product.frameImageUrl : product.image;
+  const previewImage = (step === secondStep || (isSunglasses && step === "review")) && product.frameImageUrl ? product.frameImageUrl : product.image;
   const availableLensOptions = isSunglasses ? sunglassesLensOptions : lensOptions;
   const selectedLensOption = availableLensOptions.find(option => option.id === selectedLens);
   const tintColors = [...new Map((product.lensColors ?? []).map(color => color.trim()).filter(Boolean).map(color => [color.toLowerCase(), color])).values()];
@@ -113,7 +113,7 @@ export default function PrescriptionSelectionPage() {
     <div className="usage-layout">
       <section className="usage-product">
         <Link href={product.returnUrl||"/product"} className="usage-back">Back to Product Page</Link>
-        <div className="usage-product-image"><div className="lens-preview-stage"><Image src={previewImage} alt={`${product.name} ${product.frameColor}`} width={1000} height={460} priority unoptimized />{isSunglasses && step === "lenses" && selectedTint && <LensTintOverlay src={previewImage} color={tintCssColor(selectedTint)} />}</div></div>
+        <div className="usage-product-image"><div className="lens-preview-stage"><Image src={previewImage} alt={`${product.name} ${product.frameColor}`} width={1000} height={460} priority unoptimized />{isSunglasses && (step === "lenses" || step === "review") && selectedTint && <LensTintOverlay src={previewImage} color={tintCssColor(selectedTint)} />}</div></div>
         <h1>{product.name}</h1>
         <p>{product.frameColor}</p>
         <strong>Rs {Number(product.framePrice).toLocaleString()}</strong>
@@ -186,11 +186,13 @@ export default function PrescriptionSelectionPage() {
           <small className="lens-review-type">{isSunglasses ? "Sunglasses" : product.categories?.[0] ?? "Eyeglasses"}</small>
           <div className="lens-review-product"><span>{product.name} | {product.frameColor}</span><b>Rs {Number(product.framePrice).toLocaleString()}</b></div>
           <h3>{usage === "non-prescription" ? "No prescription needed" : "Your prescription"}</h3>
-          {usage !== "non-prescription" && <div className="prescription-summary" role="table" aria-label="Prescription summary">
-            <div className="summary-row summary-head" role="row"><span /><b>SPH</b><b>CYL</b><b>Axis</b><b>ADD</b><b>PD</b></div>
-            <div className="summary-row" role="row"><b>R</b><span>{showPower(prescription.right.sph)}</span><span>{showPower(prescription.right.cyl)}</span><span>{showOptional(prescription.right.axis)}</span><span>{showOptional(prescription.right.add)}</span><strong>{prescription.twoPd?prescription.pdRight:prescription.pd}</strong></div>
-            <div className="summary-row" role="row"><b>L</b><span>{showPower(prescription.left.sph)}</span><span>{showPower(prescription.left.cyl)}</span><span>{showOptional(prescription.left.axis)}</span><span>{showOptional(prescription.left.add)}</span><strong>{prescription.twoPd?prescription.pdLeft:prescription.pd}</strong></div>
-          </div>}
+          {usage !== "non-prescription" && <table className="prescription-summary" aria-label="Prescription summary">
+            <thead><tr><th scope="col" /><th scope="col">SPH</th><th scope="col">CYL</th><th scope="col">Axis</th><th scope="col">ADD</th><th scope="col">PD</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">R</th><td>{showPower(prescription.right.sph)}</td><td>{showPower(prescription.right.cyl)}</td><td>{showOptional(prescription.right.axis)}</td><td>{showOptional(prescription.right.add)}</td><td className="summary-pd" rowSpan={prescription.twoPd ? 1 : 2}>{prescription.twoPd ? prescription.pdRight : prescription.pd}</td></tr>
+              <tr><th scope="row">L</th><td>{showPower(prescription.left.sph)}</td><td>{showPower(prescription.left.cyl)}</td><td>{showOptional(prescription.left.axis)}</td><td>{showOptional(prescription.left.add)}</td>{prescription.twoPd && <td className="summary-pd">{prescription.pdLeft}</td>}</tr>
+            </tbody>
+          </table>}
           <h3>Lens details</h3>
           <dl className="lens-review-details">
             <dt>{selectedLensOption?.name}</dt><dd>Rs {(selectedLensOption?.price ?? 0).toLocaleString()}</dd>

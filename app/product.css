@@ -1395,36 +1395,35 @@ svg.live-lens-tint .lens-shine.right {
 }
 
 .prescription-summary {
+    width: 100%;
     margin-bottom: 0;
-    border-top: 1px solid #dce1e7;
-    border-left: 1px solid #dce1e7;
+    border-collapse: collapse;
+    table-layout: fixed;
 }
 
-.summary-row {
-    display: grid;
-    grid-template-columns: .62fr repeat(5, 1fr);
-    min-height: 37px;
-}
-
-.summary-row>* {
-    display: grid;
-    place-items: center;
-    margin: 0;
-    border-right: 1px solid #dce1e7;
-    border-bottom: 1px solid #dce1e7;
+.prescription-summary th,
+.prescription-summary td {
+    height: 37px;
+    padding: 4px;
+    border: 1px solid #dce1e7;
+    text-align: center;
     font-size: 13px;
 }
 
-.summary-row.summary-head {
-    min-height: 33px;
-    color: #687283;
-    font-size: 11px;
+.prescription-summary th:first-child {
+    width: 11%;
 }
 
-.summary-row>strong {
-    grid-row: span 1;
+.prescription-summary thead th {
+    height: 33px;
+    color: #687283;
+    font-size: 13px;
+}
+
+.prescription-summary .summary-pd {
     background: #edf0ff;
     color: #4933e6;
+    font-weight: 700;
 }
 
 /* .lens-review>h3:nth-of-type(2) {
