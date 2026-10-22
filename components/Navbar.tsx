@@ -12,7 +12,7 @@ export default function Navbar() {
     const [customerLoggedIn, setCustomerLoggedIn] = useState(false);
     const [categories, setCategories] = useState<Array<{ id: string; name: string; slug: string; parentId: string | null }>>([]);
     const [expandedCategoryIds, setExpandedCategoryIds] = useState<string[]>([]);
-    
+
     useEffect(() => {
         const updateCartCount = () => {
             const cart = JSON.parse(localStorage.getItem("eye-champ-cart") ?? "[]") as Array<{ quantity?: number }>;
