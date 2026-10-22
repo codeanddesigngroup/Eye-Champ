@@ -80,7 +80,7 @@ input {
 }
 
 .site-header {
-    height: 6.667vw;
+    /* height: 6.667vw; */
     display: grid;
     grid-template-columns: 11.111vw 1fr 17.014vw;
     gap: 1.944vw;
@@ -88,7 +88,8 @@ input {
 }
 
 .logo img {
-    width: 80%;
+    width: 70%;
+    padding: 10px;
 }
 
 .mobile_logo{

@@ -45,6 +45,10 @@ export default function PrescriptionSelectionPage() {
   const [transitionLoading, setTransitionLoading] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [product,setProduct]=useState<LensProduct>({name:"Celine CL40248U",frameColor:"Black",image:"/images/product/1.avif",framePrice:15000,returnUrl:"/product"});
+  const isSunglasses = product.categories?.some(category => category.trim().toLowerCase() === "sunglasses") ?? false;
+  const audioSrc = isSunglasses
+    ? step === "prescription" ? "/audio/sunglasses/audio-step-1-mp3.mp3" : "/audio/sunglasses/audio-step-2-mp3.mp3"
+    : step === "usage" ? "/audio/eyeglasses/audio-step-1-mp3.mp3" : step === "prescription" ? "/audio/eyeglasses/audio-step-2-mp3.mp3" : "/audio/eyeglasses/audio-step-3-mp3.mp3";
 
   useEffect(()=>{queueMicrotask(()=>{try{const saved=sessionStorage.getItem("eye-champ-lens-product");if(saved){const loaded=JSON.parse(saved) as LensProduct;setProduct(loaded);if(loaded.categories?.some(category=>category.trim().toLowerCase()==="sunglasses")){setStep("prescription");setOpenPanel("upload")}}}catch{}})},[]);
 
@@ -57,7 +61,7 @@ export default function PrescriptionSelectionPage() {
     setPlaying(false);
     setElapsed(0);
     setAudioDuration(0);
-  }, [step]);
+  }, [audioSrc]);
 
   const formatTime = (seconds: number) => {
     if (!Number.isFinite(seconds)) return "0:00";
@@ -81,7 +85,6 @@ export default function PrescriptionSelectionPage() {
   const updateEye=(eye:"right"|"left",field:keyof EyePrescription,value:string)=>{setPrescription(current=>({...current,[eye]:{...current[eye],[field]:value}}));setPrescriptionEntered(true);setValidationError(false)};
   const showPower=(value:string)=>value==="0.00"?"+0.00":value;
   const showOptional=(value:string)=>!value||value==="n/a"?"--":value;
-  const isSunglasses = product.categories?.some(category => category.trim().toLowerCase() === "sunglasses") ?? false;
   const secondStep = isSunglasses ? "lenses" : "prescription";
   const previewImage = (step === secondStep || (isSunglasses && step === "review")) && product.frameImageUrl ? product.frameImageUrl : product.image;
   const availableLensOptions = isSunglasses ? sunglassesLensOptions : lensOptions;
@@ -123,7 +126,7 @@ export default function PrescriptionSelectionPage() {
         <h2>Usage</h2>
         {step !== "usage" && !(isSunglasses && step === "prescription") && <button type="button" className="usage-step-back" disabled={transitionLoading} onClick={() => changeStep(step === "review" ? "lenses" : step === "lenses" ? "prescription" : "usage")}><ChevronLeft /> Back</button>}
         {step !== "review" && <div className="usage-audio" aria-label="Prescription guidance audio player">
-          <audio ref={audioRef} src={step === "usage" ? "/audio/audio-step-1-mp3.mp3" : "/audio/audio-step-2-mp3.mp3"} preload="metadata" onLoadedMetadata={event => setAudioDuration(event.currentTarget.duration)} onTimeUpdate={event => setElapsed(event.currentTarget.currentTime)} onEnded={() => setPlaying(false)} />
+          <audio ref={audioRef} src={audioSrc} preload="metadata" onLoadedMetadata={event => setAudioDuration(event.currentTarget.duration)} onTimeUpdate={event => setElapsed(event.currentTarget.currentTime)} onEnded={() => setPlaying(false)} />
           <button type="button" aria-label={playing ? "Pause guidance" : "Play guidance"} onClick={toggleAudio}>{playing ? <Pause /> : <Play />}</button>
           <span>{formatTime(elapsed)}</span>
           <input type="range" min="0" max={audioDuration || 0} step="0.1" value={elapsed} aria-label="Audio progress" onChange={event => { const nextTime = Number(event.target.value); setElapsed(nextTime); if (audioRef.current) audioRef.current.currentTime = nextTime; }} />

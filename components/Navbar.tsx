@@ -53,7 +53,7 @@ export default function Navbar() {
             <header className="site-header shell">
                 <Link className="logo" href="/" aria-label="Eye Champ home">
                     <img className="desktop_logo" src="/images/logo.png" alt="" />
-                    <img className="mobile_logo" src="/images/mobile_logo.png" alt="" />
+                    <img className="mobile_logo" src="/images/logo.png" alt="" />
                 </Link>
                 <form className="search" action="/shop-all" method="get" role="search">
                     <input name="search" type="search" aria-label="Search frames" placeholder="Search our recommended frames" required />
