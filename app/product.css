@@ -544,6 +544,254 @@
     gap: 10px;
 }
 
+.usage-purpose-item {
+    position: relative;
+}
+
+.usage-distance-info {
+    position: absolute;
+    z-index: 5;
+    top: 27px;
+    left: 191px;
+}
+
+.usage-multifocal-info {
+    left: 214px;
+}
+
+.usage-multifocal-info .usage-distance-tooltip {
+    left: -213px;
+}
+
+.usage-multifocal-info .usage-distance-tooltip::before {
+    left: 219px;
+}
+
+.usage-progressive-info {
+    left: 220px;
+}
+
+.usage-progressive-info .usage-distance-tooltip {
+    left: -196px;
+}
+
+.usage-progressive-info .usage-distance-tooltip::before {
+    left: 202px;
+}
+
+.usage-bifocal-info {
+    left: 172px;
+}
+
+.usage-bifocal-info .usage-distance-tooltip {
+    top: auto;
+    bottom: 36px;
+    left: -160px;
+}
+
+.usage-bifocal-info .usage-distance-tooltip::before {
+    top: auto;
+    bottom: -8px;
+    left: 166px;
+    transform: rotate(225deg);
+}
+
+.usage-reading-info {
+    left: 188px;
+}
+
+.usage-reading-info .usage-distance-tooltip {
+    top: auto;
+    bottom: 36px;
+    left: -182px;
+}
+
+.usage-reading-info .usage-distance-tooltip::before {
+    top: auto;
+    bottom: -8px;
+    left: 188px;
+    transform: rotate(225deg);
+}
+
+.usage-non-prescription-info {
+    left: 383px;
+}
+
+.usage-non-prescription-info .usage-distance-tooltip {
+    top: auto;
+    bottom: 36px;
+    left: -200px;
+}
+
+.usage-non-prescription-info .usage-distance-tooltip::before {
+    top: auto;
+    bottom: -8px;
+    left: 206px;
+    transform: rotate(225deg);
+}
+
+.usage-distance-info > button {
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #808080;
+    cursor: help;
+}
+
+.usage-distance-info:hover > button,
+.usage-distance-info:focus-within > button {
+    color: #c62032;
+}
+
+.usage-distance-tooltip {
+    position: absolute;
+    top: 28px;
+    left: -190px;
+    width: min(400px, calc(100vw - 48px));
+    padding: 18px 24px 22px;
+    border: 1px solid #d9dee5;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 10px 32px #00000024;
+    color: #4b5a70;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-5px);
+    transition: opacity .15s ease, transform .15s ease;
+}
+
+.usage-distance-info:hover .usage-distance-tooltip,
+.usage-distance-info:focus-within .usage-distance-tooltip {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.usage-distance-tooltip::before {
+    position: absolute;
+    top: -8px;
+    left: 196px;
+    width: 14px;
+    height: 14px;
+    border-top: 1px solid #d9dee5;
+    border-left: 1px solid #d9dee5;
+    background: #fff;
+    content: "";
+    transform: rotate(45deg);
+}
+
+.usage-distance-tooltip strong {
+    display: block;
+    margin: 14px 0 10px;
+    font-size: 20px;
+    line-height: 1.25;
+}
+
+.usage-distance-tooltip p {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.55;
+}
+
+.usage-distance-visual {
+    display: block;
+    width: 228px;
+    height: 160px;
+    margin: auto;
+    border-radius: 10px;
+    object-fit: cover;
+}
+
+.usage-multifocal-options {
+    display: grid;
+    gap: 10px;
+}
+
+@media (max-width: 600px) {
+    .usage-distance-info {
+        top: 27px;
+        left: 160px;
+    }
+
+    .usage-multifocal-info {
+        left: 184px;
+    }
+
+    .usage-multifocal-info .usage-distance-tooltip {
+        left: -178px;
+    }
+
+    .usage-multifocal-info .usage-distance-tooltip::before {
+        left: 184px;
+    }
+
+    .usage-progressive-info {
+        left: 195px;
+    }
+
+    .usage-progressive-info .usage-distance-tooltip {
+        left: -178px;
+    }
+
+    .usage-progressive-info .usage-distance-tooltip::before {
+        left: 184px;
+    }
+
+    .usage-bifocal-info {
+        left: 145px;
+    }
+
+    .usage-bifocal-info .usage-distance-tooltip {
+        left: -136px;
+    }
+
+    .usage-bifocal-info .usage-distance-tooltip::before {
+        left: 142px;
+    }
+
+    .usage-reading-info {
+        left: 156px;
+    }
+
+    .usage-reading-info .usage-distance-tooltip {
+        left: -150px;
+    }
+
+    .usage-reading-info .usage-distance-tooltip::before {
+        left: 156px;
+    }
+
+    .usage-non-prescription-info {
+        left: auto;
+        right: 18px;
+    }
+
+    .usage-non-prescription-info .usage-distance-tooltip {
+        left: auto;
+        right: -12px;
+    }
+
+    .usage-non-prescription-info .usage-distance-tooltip::before {
+        left: auto;
+        right: 16px;
+    }
+
+    .usage-distance-tooltip {
+        left: -154px;
+    }
+
+    .usage-distance-tooltip::before {
+        left: 160px;
+    }
+
+    .usage-multifocal-options {
+        padding-left: 12px;
+    }
+}
+
 .usage-purpose-step .usage-form h2 {
     margin-bottom: 12px;
 }
@@ -1254,6 +1502,7 @@ svg.live-lens-tint .lens-shine.right {
 
 .lens-customization-shell.expanded .lens-customization {
     padding: 6px 5px 14px;
+    overflow: visible;
 }
 
 .lens-customization fieldset {
@@ -1284,6 +1533,48 @@ svg.live-lens-tint .lens-shine.right {
     height: 14px;
     margin: 0;
     accent-color: #ce1d2b;
+}
+
+.lens-customization .tint-strength {
+    margin-bottom: 14px;
+}
+
+.lens-customization .tint-strength-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 22px;
+}
+
+.tint-strength-options label {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+}
+
+.tint-strength-options label.selected {
+    color: #c51e2a;
+    font-weight: 800;
+}
+
+.lens-customization .tint-strength-options input[type="radio"] {
+    width: 16px;
+    height: 16px;
+    appearance: none;
+    border: 1.5px solid #818b91;
+    border-radius: 50%;
+    background: #fff;
+    cursor: pointer;
+}
+
+.lens-customization .tint-strength-options input[type="radio"]:checked {
+    border-color: #c51e2a;
+    background: radial-gradient(circle, #c51e2a 0 4px, #fff 4.5px);
+}
+
+.lens-customization .tint-strength-options input[type="radio"]:focus-visible {
+    outline: 2px solid #c51e2a;
+    outline-offset: 2px;
 }
 
 .lens-customization .tint-swatches {
@@ -1317,12 +1608,18 @@ svg.live-lens-tint .lens-shine.right {
     align-items: center;
     gap: 8px;
     padding-top: 13px;
-    border-top: 1px solid #e5e5e5;
     color: #536078;
     font-weight: 700;
 }
 
-.custom-tint input {
+.custom-tint-control {
+    position: relative;
+}
+
+.custom-tint-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
     width: 50px;
     height: 31px;
     padding: 2px;
@@ -1331,19 +1628,97 @@ svg.live-lens-tint .lens-shine.right {
     cursor: pointer;
 }
 
-.custom-tint button {
-    padding: 6px 10px;
-    border: 1px solid #c9cfd1;
-    border-radius: 6px;
-    background: #fff;
-    color: #3f4b61;
-    font: inherit;
+.custom-tint-trigger span {
+    width: 27px;
+    height: 23px;
+    border: 1px solid #ddd;
+}
+
+.custom-tint-picker {
+    position: absolute;
+    z-index: 30;
+    top: 100%;
+    left: 0;
+    display: grid;
+    grid-template-columns: 138px 27px;
+    grid-template-rows: 138px 27px auto;
+    gap: 6px;
+    width: 195px;
+    padding: 10px;
+    border: 1px solid #e2b798;
+    background: #f8f8f8;
+    box-shadow: 0 10px 25px #0002;
+}
+
+.custom-tint-palette {
+    position: relative;
+    width: 138px;
+    height: 138px;
+    border: 1px solid #777;
+    background-image: linear-gradient(to top, #000, transparent), linear-gradient(to right, #fff, transparent);
+    cursor: crosshair;
+    touch-action: none;
+}
+
+.custom-tint-palette > span {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border: 1px solid #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 2px #000;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+}
+
+.custom-tint-hue {
+    width: 138px;
+    height: 27px;
+    margin: 55px -55px;
+    transform: rotate(90deg);
+    appearance: none;
+    background: linear-gradient(to right, red, yellow, lime, cyan, blue, magenta, red);
     cursor: pointer;
 }
 
-.custom-tint button.selected {
-    border-color: #c51e2a;
-    color: #c51e2a;
+.custom-tint-hue::-webkit-slider-thumb {
+    width: 12px;
+    height: 12px;
+    appearance: none;
+    border: 2px solid #fff;
+    box-shadow: 0 0 2px #000;
+    background: #333;
+}
+
+.custom-tint-preview {
+    border: 1px solid #777;
+}
+
+.custom-tint-hex {
+    min-width: 0;
+    padding: 3px;
+    border: 1px solid #aaa;
+    font-size: 12px;
+}
+
+.custom-tint-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 5px;
+    grid-column: 1 / -1;
+}
+
+.custom-tint-actions button {
+    padding: 4px 8px;
+    border: 1px solid #c9cfd1;
+    border-radius: 3px;
+    background: #fff;
+    cursor: pointer;
+}
+
+.custom-tint-actions button:disabled {
+    opacity: .5;
+    cursor: not-allowed;
 }
 
 .lens-config-confirm {
@@ -1904,7 +2279,7 @@ svg.live-lens-tint .lens-shine.right {
 
 .select-lenses {
     width: 100%;
-    margin-top: 24px;
+    margin-top: 10px;
     padding: 14px;
     border: 0;
     border-radius: 28px;

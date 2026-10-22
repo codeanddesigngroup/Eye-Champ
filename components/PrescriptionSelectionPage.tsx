@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { BookOpen, Camera, Check, ChevronLeft, ClipboardPenLine, FileText, Info, Pause, Play, Upload, Volume2, X } from "lucide-react";
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import LensTintOverlay from "./LensTintOverlay";
 
 type Panel = "prescription" | "upload" | "manual";
@@ -22,6 +22,38 @@ const sunglassesLensOptions = [
   { id: "premium-power-sunglasses", name: "Premium Power Sunglasses Lens", price: 2250, text: "High-quality prescription sunglasses lenses with enhanced clarity, better UV protection, and a premium finish. Ideal for comfortable vision in bright sunlight while matching your personal style." },
 ] as const;
 const tintCssColor = (value:string) => ({ black:"#000000", brown:"#594400", green:"#105e18", blue:"#7395cf", yellow:"#fff06a", red:"#cd5050", gray:"#808080", grey:"#808080", pink:"#db86a4", purple:"#76529a", orange:"#dd7b35", clear:"#eef4f4", gold:"#b79a53", silver:"#aeb7ba" } as Record<string,string>)[value.toLowerCase()] ?? value;
+const hsvToHex = (h:number, s:number, v:number) => {
+  const channel = (n:number) => { const k = (n + h / 60) % 6; return Math.round((v - v * s * Math.max(Math.min(k, 4 - k, 1), 0)) * 255).toString(16).padStart(2, "0"); };
+  return `#${channel(5)}${channel(3)}${channel(1)}`;
+};
+const hexToHsv = (hex:string) => {
+  const [r,g,b] = [1,3,5].map(index => parseInt(hex.slice(index,index+2),16) / 255);
+  const max = Math.max(r,g,b), min = Math.min(r,g,b), diff = max - min;
+  let h = 0;
+  if (diff) h = max === r ? ((g-b)/diff)%6 : max === g ? (b-r)/diff+2 : (r-g)/diff+4;
+  return { h: (h*60+360)%360, s: max ? diff/max : 0, v:max };
+};
+
+function CustomTintPicker({ initialColor, onChoose }: { initialColor:string; onChoose:(color:string)=>void }) {
+  const [open,setOpen] = useState(false);
+  const [hex,setHex] = useState(initialColor);
+  const [hsv,setHsv] = useState(() => hexToHsv(initialColor));
+  const update = (next:{h:number;s:number;v:number}) => { setHsv(next); setHex(hsvToHex(next.h,next.s,next.v)); };
+  const updateSquare = (event:ReactPointerEvent<HTMLDivElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    update({ ...hsv, s:Math.max(0,Math.min(1,(event.clientX-rect.left)/rect.width)), v:1-Math.max(0,Math.min(1,(event.clientY-rect.top)/rect.height)) });
+  };
+  return <div className="custom-tint-control">
+    <button type="button" className="custom-tint-trigger" aria-label="Open custom tint color picker" aria-expanded={open} onClick={() => { if (!open) { const color = /^#[0-9a-f]{6}$/i.test(initialColor) ? initialColor : "#000000"; setHex(color); setHsv(hexToHsv(color)); } setOpen(current=>!current); }}><span style={{backgroundColor:hex}} />▾</button>
+    {open && <div className="custom-tint-picker" role="dialog" aria-label="Customize lens tint color">
+      <div className="custom-tint-palette" style={{backgroundColor:`hsl(${hsv.h} 100% 50%)`}} onPointerDown={event=>{event.currentTarget.setPointerCapture(event.pointerId);updateSquare(event)}} onPointerMove={event=>{if(event.buttons)updateSquare(event)}} aria-label="Color saturation and brightness"><span style={{left:`${hsv.s*100}%`,top:`${(1-hsv.v)*100}%`}} /></div>
+      <input className="custom-tint-hue" type="range" min="0" max="359" value={Math.round(hsv.h)} aria-label="Color hue" onChange={event=>update({...hsv,h:Number(event.target.value)})} />
+      <span className="custom-tint-preview" style={{backgroundColor:/^#[0-9a-f]{6}$/i.test(hex)?hex:"#000000"}} />
+      <input className="custom-tint-hex" type="text" aria-label="Custom tint hex color" value={hex} maxLength={7} onChange={event=>{const next=event.target.value;setHex(next);if(/^#[0-9a-f]{6}$/i.test(next))setHsv(hexToHsv(next));}} />
+      <div className="custom-tint-actions"><button type="button" onClick={()=>setOpen(false)}>Cancel</button><button type="button" disabled={!/^#[0-9a-f]{6}$/i.test(hex)} onClick={()=>{onChoose(hex);setOpen(false)}}>Choose</button></div>
+    </div>}
+  </div>;
+}
 
 export default function PrescriptionSelectionPage() {
   const router = useRouter();
@@ -37,9 +69,10 @@ export default function PrescriptionSelectionPage() {
   const [audioDuration, setAudioDuration] = useState(0);
   const [step, setStep] = useState<"usage" | "prescription" | "lenses" | "review">("usage");
   const [usage, setUsage] = useState<string | null>(null);
+  const [multifocalOpen, setMultifocalOpen] = useState(false);
   const [selectedLens, setSelectedLens] = useState<string | null>(null);
   const [selectedTint, setSelectedTint] = useState<string | null>(null);
-  const [customTint, setCustomTint] = useState("#808080");
+  const [tintStrength, setTintStrength] = useState(0.8);
   const [customTintSelected, setCustomTintSelected] = useState(false);
   const [lensConfigured, setLensConfigured] = useState(false);
   const [transitionLoading, setTransitionLoading] = useState(false);
@@ -103,7 +136,7 @@ export default function PrescriptionSelectionPage() {
   const addToCart = () => {
     if (!selectedLensOption || (isSunglasses && !selectedTint) || transitionLoading) return;
     const cart = JSON.parse(localStorage.getItem("eye-champ-cart") ?? "[]") as Array<Record<string, unknown>>;
-    cart.push({ id: `${product.productId??Date.now()}:${product.frameColor}:${selectedLens}:${Date.now()}`, productId:product.productId, name:product.name, frameColor:product.frameColor, image:product.image, framePrice:product.framePrice, lens: selectedLensOption.name, lensPrice: selectedLensOption.price, ...(isSunglasses && selectedTint ? { tintColor: selectedTint, colorName: tintLabel } : {}), quantity: 1, usage, prescription: usage === "non-prescription" ? null : prescription });
+    cart.push({ id: `${product.productId??Date.now()}:${product.frameColor}:${selectedLens}:${Date.now()}`, productId:product.productId, name:product.name, frameColor:product.frameColor, image:product.image, framePrice:product.framePrice, lens: selectedLensOption.name, lensPrice: selectedLensOption.price, ...(isSunglasses && selectedTint ? { tintColor: selectedTint, colorName: tintLabel, tintStrength: Math.round(tintStrength * 100) } : {}), quantity: 1, usage, prescription: usage === "non-prescription" ? null : prescription });
     localStorage.setItem("eye-champ-cart", JSON.stringify(cart));
     window.dispatchEvent(new Event("eye-champ-cart-updated"));
     setLensConfigured(true);
@@ -116,7 +149,7 @@ export default function PrescriptionSelectionPage() {
     <div className="usage-layout">
       <section className="usage-product">
         <Link href={product.returnUrl||"/product"} className="usage-back">Back to Product Page</Link>
-        <div className="usage-product-image"><div className="lens-preview-stage"><Image src={previewImage} alt={`${product.name} ${product.frameColor}`} width={1000} height={460} priority unoptimized />{isSunglasses && (step === "lenses" || step === "review") && selectedTint && <LensTintOverlay src={previewImage} color={tintCssColor(selectedTint)} />}</div></div>
+        <div className="usage-product-image"><div className="lens-preview-stage"><Image src={previewImage} alt={`${product.name} ${product.frameColor}`} width={1000} height={460} priority unoptimized />{isSunglasses && (step === "lenses" || step === "review") && selectedTint && <LensTintOverlay src={previewImage} color={tintCssColor(selectedTint)} strength={tintStrength} />}</div></div>
         <h1>{product.name}</h1>
         <p>{product.frameColor}</p>
         <strong>Rs {Number(product.framePrice).toLocaleString()}</strong>
@@ -139,10 +172,73 @@ export default function PrescriptionSelectionPage() {
             { id: "multifocal", title: "Multifocal", description: "Lenses for seeing things both close and far away" },
             { id: "reading", title: "Reading", description: "General use lenses for seeing things up close" },
             { id: "non-prescription", title: "Non Prescription / No Eyesight", description: "Lenses without any prescription" },
-          ].map((option) => <button key={option.id} type="button" className="usage-purpose-card" disabled={transitionLoading} onClick={() => { setUsage(option.id); changeStep("prescription"); }}>
-            <span className="usage-purpose-icon" aria-hidden="true">{option.id === "reading" ? <BookOpen /> : <span className="usage-purpose-lens" />}</span>
-            <span className="usage-purpose-copy"><strong>{option.title} <Info size={18} aria-hidden="true" /></strong><small>{option.description}</small></span>
-          </button>)}
+          ].map((option) => <Fragment key={option.id}>
+            <div className="usage-purpose-item">
+              <button type="button" className="usage-purpose-card" aria-expanded={option.id === "multifocal" ? multifocalOpen : undefined} disabled={transitionLoading} onClick={() => { if (option.id === "multifocal") { setMultifocalOpen(current => !current); return; } setUsage(option.id); changeStep("prescription"); }}>
+                <span className="usage-purpose-icon" aria-hidden="true">{option.id === "reading" ? <BookOpen /> : <span className="usage-purpose-lens" />}</span>
+                <span className="usage-purpose-copy"><strong>{option.title}</strong><small>{option.description}</small></span>
+              </button>
+              {option.id === "distance" && <div className="usage-distance-info">
+                <button type="button" aria-label="About distance lenses" aria-describedby="distance-lens-tooltip"><Info size={18} /></button>
+                <div id="distance-lens-tooltip" className="usage-distance-tooltip" role="tooltip">
+                  <Image className="usage-distance-visual" src="/images/distance_desk-1.webp" alt="Distance vision example showing objects farther away out of focus" width={228} height={160} />
+                  <strong>Single Vision Distance<br />Lenses</strong>
+                  <p>Distance lenses are needed when things up close appear clear, while things further away look blurry.</p>
+                </div>
+              </div>}
+              {option.id === "multifocal" && <div className="usage-distance-info usage-multifocal-info">
+                <button type="button" aria-label="About multifocal lenses" aria-describedby="multifocal-lens-tooltip"><Info size={18} /></button>
+                <div id="multifocal-lens-tooltip" className="usage-distance-tooltip" role="tooltip">
+                  <Image className="usage-distance-visual" src="/images/multifocal_desk-2.webp" alt="Multifocal lens example showing both near and far vision" width={228} height={160} />
+                  <strong>Multifocal Lenses</strong>
+                  <p>Multifocal lenses are designed to help your eyes focus on objects both near and far away.</p>
+                </div>
+              </div>}
+              {option.id === "reading" && <div className="usage-distance-info usage-reading-info">
+                <button type="button" aria-label="About reading lenses" aria-describedby="reading-lens-tooltip"><Info size={18} /></button>
+                <div id="reading-lens-tooltip" className="usage-distance-tooltip" role="tooltip">
+                  <Image className="usage-distance-visual" src="/images/reading_desk-1-1.webp" alt="Reading lens example showing a book in focus" width={228} height={160} />
+                  <strong>Single Vision Reading<br />Lenses</strong>
+                  <p>Reader and intermediate lenses are designed for those who have trouble focusing while reading.</p>
+                </div>
+              </div>}
+              {option.id === "non-prescription" && <div className="usage-distance-info usage-non-prescription-info">
+                <button type="button" aria-label="About non-prescription lenses" aria-describedby="non-prescription-lens-tooltip"><Info size={18} /></button>
+                <div id="non-prescription-lens-tooltip" className="usage-distance-tooltip" role="tooltip">
+                  <Image className="usage-distance-visual" src="/images/non-prescription_desk.webp" alt="Person wearing non-prescription glasses" width={228} height={160} />
+                  <strong>Non-Prescription Lenses</strong>
+                  <p>Looking to get glasses as accessories without a prescription? Non-prescription lenses are for you.</p>
+                </div>
+              </div>}
+            </div>
+            {option.id === "multifocal" && multifocalOpen && <div className="usage-multifocal-options" aria-label="Choose a multifocal lens type">
+              {[
+                { id: "progressive", title: "Progressive", description: "No-line lenses with a smooth transition between distances including near, intermediate, and far vision correction." },
+                { id: "bifocal", title: "Bifocal", description: "Lenses divided into two portions, one for reading and one for seeing from a distance. Each is separated by a visible line." },
+              ].map(choice => <div className="usage-purpose-item" key={choice.id}>
+                <button type="button" className="usage-purpose-card" disabled={transitionLoading} onClick={() => { setUsage(choice.id); changeStep("prescription"); }}>
+                  <span className="usage-purpose-icon" aria-hidden="true">{choice.id === "bifocal" ? <BookOpen /> : <span className="usage-purpose-lens" />}</span>
+                  <span className="usage-purpose-copy"><strong>{choice.title}</strong><small>{choice.description}</small></span>
+                </button>
+                {choice.id === "progressive" && <div className="usage-distance-info usage-progressive-info">
+                  <button type="button" aria-label="About progressive lenses" aria-describedby="progressive-lens-tooltip"><Info size={18} /></button>
+                  <div id="progressive-lens-tooltip" className="usage-distance-tooltip" role="tooltip">
+                    <Image className="usage-distance-visual" src="/images/progressive_desk-1.webp" alt="Diagram of distance, intermediate, and near zones in a progressive lens" width={228} height={160} />
+                    <strong>Progressive Lenses</strong>
+                    <p>For correcting vision at all distances, so you don’t need to switch between reading and other glasses.</p>
+                  </div>
+                </div>}
+                {choice.id === "bifocal" && <div className="usage-distance-info usage-bifocal-info">
+                  <button type="button" aria-label="About bifocal lenses" aria-describedby="bifocal-lens-tooltip"><Info size={18} /></button>
+                  <div id="bifocal-lens-tooltip" className="usage-distance-tooltip" role="tooltip">
+                    <Image className="usage-distance-visual" src="/images/bifocal_desk-1.webp" alt="Diagram showing the separate distance and near zones of a bifocal lens" width={228} height={160} />
+                    <strong>Bifocal Lenses</strong>
+                    <p>These offer a distinct separation between the distance and reading parts of your lenses.</p>
+                  </div>
+                </div>}
+              </div>)}
+            </div>}
+          </Fragment>)}
         </div> : step === "prescription" ? <><div className="usage-accordions">
           <article className={openPanel === "prescription" ? "open" : ""}>
             <button className="usage-accordion-head" type="button" onClick={() => togglePanel("prescription")}><ClipboardPenLine /><b>Prescription</b><span>{openPanel === "prescription" ? "−" : "+"}</span></button>
@@ -181,7 +277,7 @@ export default function PrescriptionSelectionPage() {
               <span><b>{option.name} <strong>Rs {option.price.toLocaleString()}</strong> <Info /></b><small>{option.text}</small></span>
             </button>
             <div className={`lens-customization-shell ${selectedLens === option.id ? "expanded" : ""}`} aria-hidden={selectedLens !== option.id} inert={selectedLens !== option.id ? true : undefined}><div className="lens-customization">
-              {isSunglasses && <fieldset><legend>Tint Color</legend>{tintColors.length > 0 && <div className="tint-swatches">{tintColors.map(color => <button type="button" title={color} aria-label={`Select tint color ${color}`} aria-pressed={selectedTint === color && !customTintSelected} className={selectedTint === color && !customTintSelected ? "selected" : ""} style={{ backgroundColor: tintCssColor(color) }} key={color} onClick={() => { setSelectedTint(color); setCustomTintSelected(false); setLensConfigured(false); }} />)}</div>}<div className="custom-tint"><label htmlFor={`${option.id}-custom-lens-tint`}>Custom color</label><input id={`${option.id}-custom-lens-tint`} type="color" value={customTint} onChange={event => { setCustomTint(event.target.value); setSelectedTint(event.target.value); setCustomTintSelected(true); setLensConfigured(false); }} /><button type="button" className={customTintSelected ? "selected" : ""} onClick={() => { setSelectedTint(customTint); setCustomTintSelected(true); setLensConfigured(false); }}>Use custom color</button></div>{tintLabel && <small className="tint-selected">Selected: {tintLabel}</small>}</fieldset>}
+              {isSunglasses && <><fieldset className="tint-strength"><legend>Tint Strength:</legend><div className="tint-strength-options">{[{label:"Dark (80%)",value:0.8},{label:"Medium (50%)",value:0.5},{label:"Light (20%)",value:0.2}].map(strength=><label key={strength.value} className={tintStrength===strength.value?"selected":""}><input type="radio" name={`${option.id}-tintStrength`} checked={tintStrength===strength.value} onChange={()=>{setTintStrength(strength.value);setLensConfigured(false)}} />{strength.label}</label>)}</div></fieldset><fieldset><legend>Tint Color</legend>{tintColors.length > 0 && <div className="tint-swatches">{tintColors.map(color => <button type="button" title={color} aria-label={`Select tint color ${color}`} aria-pressed={selectedTint === color && !customTintSelected} className={selectedTint === color && !customTintSelected ? "selected" : ""} style={{ backgroundColor: tintCssColor(color) }} key={color} onClick={() => { setSelectedTint(color); setCustomTintSelected(false); setLensConfigured(false); }} />)}</div>}<div className="custom-tint"><span>Customize Color:</span><CustomTintPicker initialColor={customTintSelected && selectedTint ? selectedTint : "#000000"} onChoose={color=>{setSelectedTint(color);setCustomTintSelected(true);setLensConfigured(false)}} /></div>{tintLabel && <small className="tint-selected">Selected: {tintLabel}</small>}</fieldset></>}
               <button type="button" className="lens-config-confirm" disabled={transitionLoading || (isSunglasses && !selectedTint)} onClick={() => { setLensConfigured(false); changeStep("review"); }}>Confirm</button>
             </div></div>
           </Fragment>)}
@@ -200,6 +296,7 @@ export default function PrescriptionSelectionPage() {
           <dl className="lens-review-details">
             <dt>{selectedLensOption?.name}</dt><dd>Rs {(selectedLensOption?.price ?? 0).toLocaleString()}</dd>
             {isSunglasses && tintLabel && <><dt>Tint Color</dt><dd>{tintLabel}</dd></>}
+            {isSunglasses && tintLabel && <><dt>Tint Strength</dt><dd>{Math.round(tintStrength * 100)}%</dd></>}
             <dt>Subtotal</dt><dd>Rs {(product.framePrice + (selectedLensOption?.price ?? 0)).toLocaleString()}</dd>
           </dl>
           <div className="lens-review-note"><b>Note:</b><span>We will take 50% advance payment for this order as your lenses are custom made. Place your order our representative will contact you for further details.</span></div>
