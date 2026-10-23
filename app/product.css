@@ -1268,6 +1268,10 @@ svg.live-lens-tint .lens-shine.right {
     padding-inline: 8px;
 }
 
+.mobile-prescription-add {
+    display: none;
+}
+
 .usage-dropzone {
     display: flex;
     flex-direction: column;
@@ -1498,6 +1502,27 @@ svg.live-lens-tint .lens-shine.right {
     overflow: hidden;
     padding: 0;
     transition: padding .35s ease;
+}
+
+.mobile-tint-preview {
+    display: none;
+}
+
+.mobile-expanded-product-details {
+    display: grid;
+    justify-items: center;
+    gap: 7px;
+    text-align: center;
+}
+
+.mobile-expanded-product-details h3 {
+    margin: 0;
+    font-size: 24px;
+    line-height: 1.1;
+}
+
+.mobile-expanded-product-details strong {
+    font-size: 15px;
 }
 
 .lens-customization-shell.expanded .lens-customization {
@@ -1982,6 +2007,398 @@ svg.live-lens-tint .lens-shine.right {
 }
 
 @media(max-width:480px) {
+    .eyeglasses-usage-step .usage-product {
+        padding: 16px 18px 8px;
+    }
+
+    .eyeglasses-usage-step .usage-product-image,
+    .eyeglasses-usage-step .usage-product > h1,
+    .eyeglasses-usage-step .usage-product > p,
+    .eyeglasses-usage-step .usage-product > strong {
+        display: none;
+    }
+
+    .eyeglasses-usage-step .usage-back {
+        margin: 0;
+        font-size: 15px;
+    }
+
+    .eyeglasses-usage-step .usage-form {
+        padding: 22px 16px 90px;
+    }
+
+    .eyeglasses-lenses-step .usage-product {
+        display: flex;
+        padding: 16px 18px 8px;
+    }
+
+    .eyeglasses-lenses-step .usage-back {
+        margin: 0;
+        font-size: 15px;
+    }
+
+    .eyeglasses-lenses-step .usage-product-image {
+        display: none;
+    }
+
+    .eyeglasses-lenses-step .usage-product-image img {
+        width: 100%;
+        max-height: 185px;
+    }
+
+    .eyeglasses-lenses-step .usage-product h1 {
+        display: none;
+    }
+
+    .eyeglasses-lenses-step .usage-product > p {
+        display: none;
+    }
+
+    .eyeglasses-lenses-step .usage-product > strong {
+        display: none;
+    }
+
+    .eyeglasses-lenses-step .usage-form {
+        padding: 22px 16px 90px;
+    }
+
+    .eyeglasses-lenses-step .usage-form h2 {
+        margin-bottom: 26px;
+        font-size: 32px;
+        font-weight: 500;
+    }
+
+    .eyeglasses-lenses-step .usage-step-back {
+        margin: 0 0 46px;
+        font-size: 16px;
+    }
+
+    .eyeglasses-lenses-step .usage-audio {
+        width: 100%;
+        height: 48px;
+        margin-bottom: 12px;
+        border-width: 3px;
+        border-radius: 17px;
+    }
+
+    .eyeglasses-lenses-step .lens-type-card {
+        grid-template-columns: 82px 1fr;
+        gap: 16px;
+        min-height: 165px;
+        padding: 20px 12px;
+        border-radius: 13px;
+    }
+
+    .eyeglasses-lenses-step .lens-type-card > span:last-child > b {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 5px 12px;
+        font-size: 16px;
+        line-height: 1.45;
+    }
+
+    .eyeglasses-lenses-step .lens-type-card small {
+        font-size: 15px;
+        line-height: 1.45;
+    }
+
+    .eyeglasses-lenses-step .mobile-tint-preview {
+        display: grid;
+        place-items: center;
+        min-height: 260px;
+        margin: 12px 0 18px;
+    }
+
+    .eyeglasses-lenses-step .mobile-tint-preview .lens-preview-stage {
+        width: 100%;
+    }
+
+    .eyeglasses-lenses-step .mobile-tint-preview img {
+        width: 100%;
+        max-height: 270px;
+        object-fit: contain;
+    }
+
+    .eyeglasses-lenses-step .lens-customization-shell.expanded .lens-customization {
+        padding-top: 0;
+    }
+
+    .prescription-step .usage-product {
+        display: none;
+    }
+
+    .prescription-step .usage-form {
+        padding: 18px 16px 90px;
+    }
+
+    .prescription-step .usage-form > h2 {
+        display: none;
+    }
+
+    .prescription-step .usage-step-back {
+        display: flex;
+        margin: 0 0 16px;
+        font-size: 17px;
+    }
+
+    .prescription-step .usage-audio {
+        width: 100%;
+        height: 44px;
+        margin-bottom: 14px;
+        padding-inline: 10px;
+        border-width: 3px;
+        border-radius: 18px;
+    }
+
+    .prescription-step .usage-audio span {
+        margin-inline: 7px;
+    }
+
+    .prescription-step .usage-accordions {
+        gap: 16px;
+    }
+
+    .prescription-step .usage-accordions article:first-child {
+        overflow: visible;
+        border-radius: 0;
+        background: transparent;
+    }
+
+    .prescription-step .usage-accordions article:first-child .usage-accordion-head {
+        border: 2px solid #c91e2a;
+        border-radius: 12px;
+        background: #f7f7f7;
+    }
+
+    .prescription-step .usage-accordion-head {
+        min-height: 64px;
+        padding: 12px 26px;
+        font-size: 17px;
+    }
+
+    .prescription-step .usage-accordions article:not(:first-child) .usage-accordion-head {
+        min-height: 84px;
+    }
+
+    .prescription-step .prescription-entry {
+        overflow: visible;
+        padding: 18px 0 24px;
+        background: #fff;
+    }
+
+    .prescription-step .prescription-head,
+    .prescription-step .prescription-row {
+        grid-template-columns: 44px 64px 64px minmax(86px, 1fr);
+        gap: 4px;
+        min-width: 0;
+    }
+
+    .prescription-step .prescription-head {
+        margin-bottom: 8px;
+        font-size: 10px;
+    }
+
+    .prescription-step .prescription-head b:nth-child(5),
+    .prescription-step .prescription-row > select:last-child {
+        display: none;
+    }
+
+    .prescription-step .prescription-head b:nth-child(2),
+    .prescription-step .prescription-head b:nth-child(3),
+    .prescription-step .prescription-head b:nth-child(4) {
+        font-size: 0;
+    }
+
+    .prescription-step .prescription-head b:nth-child(2)::before { content: "SPH"; font-size: 10px; }
+    .prescription-step .prescription-head b:nth-child(3)::before { content: "CYL"; font-size: 10px; }
+    .prescription-step .prescription-head b:nth-child(4)::before { content: "Axis"; font-size: 10px; }
+
+    .prescription-step .prescription-row {
+        margin-bottom: 10px;
+    }
+
+    .prescription-step .prescription-row > b,
+    .prescription-step .prescription-pd > b,
+    .mobile-prescription-add label > b {
+        display: block;
+        align-self: center;
+        width: 44px;
+        color: #111;
+        text-align: left;
+        font-size: 11px;
+        font-weight: 700;
+        line-height: 1.05;
+        white-space: normal;
+    }
+
+    .prescription-step .prescription-row > b small,
+    .prescription-step .prescription-pd > b small,
+    .mobile-prescription-add label > b small {
+        display: block;
+        margin-top: 2px;
+        color: #111;
+        font-size: 9px;
+        font-weight: 400;
+        line-height: 1.05;
+        overflow-wrap: normal;
+        white-space: normal;
+    }
+
+    .prescription-step .prescription-row select,
+    .prescription-step .prescription-row input,
+    .prescription-step .prescription-pd select,
+    .mobile-prescription-add select {
+        height: 46px;
+        padding: 0 7px;
+        font-size: 12px;
+    }
+
+    .prescription-step .prescription-pd {
+        grid-template-columns: 44px 64px 1fr;
+        gap: 4px;
+        min-width: 0;
+    }
+
+    .prescription-step .prescription-pd label {
+        justify-self: start;
+        margin-left: 4px;
+        font-size: 11px;
+    }
+
+    .prescription-step .prescription-pd label input {
+        width: 14px;
+        height: 14px;
+        margin: 0;
+    }
+
+    .mobile-prescription-add {
+        display: grid;
+        grid-template-columns: 44px 64px;
+        gap: 8px 4px;
+        margin-top: 10px;
+    }
+
+    .mobile-add-title {
+        grid-column: 2;
+        font-size: 10px;
+    }
+
+    .mobile-prescription-add label {
+        display: contents;
+    }
+
+    .prescription-step .usage-accordions article:not(:first-child) .usage-accordion-head b {
+        max-width: 150px;
+        font-size: 17px;
+        line-height: 1.2;
+    }
+
+    .prescription-step .usage-accordions article:not(:first-child) {
+        border-radius: 12px;
+        background: #f3f3f3;
+    }
+
+    .sunglasses-lenses-step .usage-layout {
+        display: grid;
+        grid-template-columns: 1fr;
+        padding: 0 16px 85px;
+    }
+
+    .sunglasses-lenses-step .usage-product,
+    .sunglasses-lenses-step .usage-form {
+        display: contents;
+    }
+
+    .sunglasses-lenses-step .usage-back {
+        order: 1;
+        justify-self: center;
+        margin: 18px 0 10px;
+        font-size: 19px;
+    }
+
+    .sunglasses-lenses-step .usage-form h2 {
+        order: 2;
+        margin: 0 0 18px;
+        font-size: 36px;
+    }
+
+    .sunglasses-lenses-step .usage-step-back {
+        order: 3;
+        margin: 0 0 18px;
+        font-size: 20px;
+    }
+
+    .sunglasses-lenses-step .usage-audio {
+        order: 4;
+        width: 100%;
+        height: 48px;
+        margin-bottom: 14px;
+        border-width: 3px;
+        border-radius: 22px;
+    }
+
+    .sunglasses-lenses-step .lens-type-list {
+        order: 5;
+    }
+
+    .sunglasses-lenses-step .usage-product > .usage-product-image,
+    .sunglasses-lenses-step .usage-product > h1,
+    .sunglasses-lenses-step .usage-product > p,
+    .sunglasses-lenses-step .usage-product > strong {
+        display: none;
+    }
+
+    .sunglasses-lenses-step .lens-type-card {
+        grid-template-columns: 62px 1fr;
+        min-height: 130px;
+        padding: 18px 14px;
+        border-radius: 14px;
+    }
+
+    .sunglasses-lenses-step .lens-type-card > span:last-child > b {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px 14px;
+        font-size: 17px;
+    }
+
+    .sunglasses-lenses-step .lens-type-card small {
+        font-size: 15px;
+        line-height: 1.45;
+    }
+
+    .sunglasses-lenses-step .mobile-tint-preview {
+        display: grid;
+        place-items: center;
+        min-height: 460px;
+        margin: 18px -5px 22px;
+    }
+
+    .sunglasses-lenses-step .mobile-tint-preview .lens-preview-stage {
+        width: 100%;
+    }
+
+    .sunglasses-lenses-step .mobile-tint-preview img {
+        width: 100%;
+        height: auto;
+        object-fit: contain;
+    }
+
+    .sunglasses-lenses-step .lens-customization-shell.expanded .lens-customization {
+        padding-top: 0;
+    }
+
+    .sunglasses-lenses-step .tint-strength-options {
+        display: grid;
+        grid-template-columns: repeat(2, max-content);
+        gap: 14px 28px;
+    }
+
+    .sunglasses-lenses-step .tint-strength-options label {
+        font-size: 16px;
+    }
+
     .usage-product-image {
         height: 205px;
     }

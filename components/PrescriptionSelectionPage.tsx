@@ -541,7 +541,7 @@ export default function PrescriptionSelectionPage() {
 
   return (
     <main
-      className={`usage-page${step === "usage" ? " usage-purpose-step" : ""}`}
+      className={`usage-page${step === "usage" ? " usage-purpose-step" : ""}${step === "usage" && !isSunglasses ? " eyeglasses-usage-step" : ""}${step === "prescription" ? " prescription-step" : ""}${step === "lenses" && !isSunglasses ? " eyeglasses-lenses-step" : ""}${isSunglasses && step === "lenses" ? " sunglasses-lenses-step" : ""}`}
     >
       <div className="usage-topline" />
 
@@ -1179,6 +1179,18 @@ export default function PrescriptionSelectionPage() {
                           Two PD numbers
                         </label>
                       </div>
+
+                      <div className="mobile-prescription-add">
+                        <b className="mobile-add-title">ADD</b>
+                        {[{ code: "OD", label: "Right eye", key: "right" as const }, { code: "OS", label: "Left eye", key: "left" as const }].map((eye) => (
+                          <label key={eye.key}>
+                            <b>{eye.code}<small>({eye.label})</small></b>
+                            <select aria-label={`${eye.label} ADD`} value={prescription[eye.key].add} onChange={(event) => updateEye(eye.key, "add", event.target.value)}>
+                              <option>n/a</option><option>+0.75</option><option>+1.00</option><option>+1.25</option><option>+1.50</option><option>+2.00</option>
+                            </select>
+                          </label>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </article>
@@ -1334,6 +1346,16 @@ export default function PrescriptionSelectionPage() {
                     inert={selectedLens !== option.id ? true : undefined}
                   >
                     <div className="lens-customization">
+                      <div className="mobile-tint-preview">
+                        <div className="lens-preview-stage">
+                          <Image src={previewImage} alt={`${product.name} ${product.frameColor}`} width={1000} height={460} unoptimized />
+                          {isSunglasses && selectedTint && <LensTintOverlay src={previewImage} color={tintCssColor(selectedTint)} strength={tintStrength} />}
+                        </div>
+                        <div className="mobile-expanded-product-details">
+                          <h3>{product.name}</h3>
+                          <strong>Rs {Number(product.framePrice).toLocaleString()}</strong>
+                        </div>
+                      </div>
                       {isSunglasses && (
                         <>
                           <fieldset className="tint-strength">
