@@ -333,9 +333,6 @@ export default function PrescriptionSelectionPage() {
   const [tintStrength, setTintStrength] = useState(0.8);
   const [customTintSelected, setCustomTintSelected] = useState(false);
 
-  // Tracks whether the customer has selected a tint.
-  const [tintChanged, setTintChanged] = useState(false);
-
   const [lensConfigured, setLensConfigured] = useState(false);
   const [transitionLoading, setTransitionLoading] = useState(false);
 
@@ -451,12 +448,8 @@ export default function PrescriptionSelectionPage() {
 
   const secondStep = isSunglasses ? "lenses" : "prescription";
 
-  // Default to the product image. Switch to the frame image only after
-  // a preset tint or custom tint has been selected.
-  const previewImage =
-    tintChanged && product.frameImageUrl
-      ? product.frameImageUrl
-      : product.image;
+  const tintFrameImage = product.frameImageUrl || product.image;
+  const showTintFrame = Boolean(isSunglasses && selectedTint && product.frameImageUrl);
 
   const availableLensOptions = isSunglasses
     ? sunglassesLensOptions
@@ -554,7 +547,8 @@ export default function PrescriptionSelectionPage() {
           <div className="usage-product-image">
             <div className="lens-preview-stage">
               <Image
-                src={previewImage}
+                className={`lens-preview-image${showTintFrame ? "" : " active"}`}
+                src={product.image}
                 alt={`${product.name} ${product.frameColor}`}
                 width={1000}
                 height={460}
@@ -562,11 +556,15 @@ export default function PrescriptionSelectionPage() {
                 unoptimized
               />
 
+              {isSunglasses && product.frameImageUrl && (
+                <Image className={`lens-preview-image${showTintFrame ? " active" : ""}`} src={product.frameImageUrl} alt={`${product.name} frame`} width={1000} height={460} priority unoptimized />
+              )}
+
               {isSunglasses &&
                 (step === "lenses" || step === "review") &&
                 selectedTint && (
                   <LensTintOverlay
-                    src={previewImage}
+                    src={tintFrameImage}
                     color={tintCssColor(selectedTint)}
                     strength={tintStrength}
                   />
@@ -1348,8 +1346,9 @@ export default function PrescriptionSelectionPage() {
                     <div className="lens-customization">
                       <div className="mobile-tint-preview">
                         <div className="lens-preview-stage">
-                          <Image src={previewImage} alt={`${product.name} ${product.frameColor}`} width={1000} height={460} unoptimized />
-                          {isSunglasses && selectedTint && <LensTintOverlay src={previewImage} color={tintCssColor(selectedTint)} strength={tintStrength} />}
+                          <Image className={`lens-preview-image${showTintFrame ? "" : " active"}`} src={product.image} alt={`${product.name} ${product.frameColor}`} width={1000} height={460} unoptimized />
+                          {isSunglasses && product.frameImageUrl && <Image className={`lens-preview-image${showTintFrame ? " active" : ""}`} src={product.frameImageUrl} alt={`${product.name} frame`} width={1000} height={460} unoptimized />}
+                          {isSunglasses && selectedTint && <LensTintOverlay src={tintFrameImage} color={tintCssColor(selectedTint)} strength={tintStrength} />}
                         </div>
                         <div className="mobile-expanded-product-details">
                           <h3>{product.name}</h3>
@@ -1421,10 +1420,6 @@ export default function PrescriptionSelectionPage() {
                                       setSelectedTint(color);
                                       setCustomTintSelected(false);
 
-                                      // Switch from the default product
-                                      // image to the frame image.
-                                      setTintChanged(true);
-
                                       setLensConfigured(false);
                                     }}
                                   />
@@ -1444,9 +1439,6 @@ export default function PrescriptionSelectionPage() {
                                 onChoose={(color) => {
                                   setSelectedTint(color);
                                   setCustomTintSelected(true);
-
-                                  // Also switch images for custom colors.
-                                  setTintChanged(true);
 
                                   setLensConfigured(false);
                                 }}

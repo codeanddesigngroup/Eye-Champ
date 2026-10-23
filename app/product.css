@@ -630,7 +630,7 @@
     transform: rotate(225deg);
 }
 
-.usage-distance-info > button {
+.usage-distance-info>button {
     display: grid;
     place-items: center;
     width: 24px;
@@ -642,8 +642,8 @@
     cursor: help;
 }
 
-.usage-distance-info:hover > button,
-.usage-distance-info:focus-within > button {
+.usage-distance-info:hover>button,
+.usage-distance-info:focus-within>button {
     color: #c62032;
 }
 
@@ -834,7 +834,7 @@
     height: 64px;
 }
 
-.usage-purpose-icon > svg {
+.usage-purpose-icon>svg {
     width: 62px;
     height: 62px;
     stroke-width: 1.2;
@@ -877,14 +877,17 @@
         gap: 14px;
         padding: 14px;
     }
+
     .usage-purpose-icon {
         flex-basis: 52px;
     }
+
     .usage-purpose-lens {
         width: 48px;
         height: 48px;
     }
-    .usage-purpose-icon > svg {
+
+    .usage-purpose-icon>svg {
         width: 50px;
         height: 50px;
     }
@@ -947,6 +950,16 @@
 .lens-preview-stage>img {
     position: relative;
     z-index: 2;
+    grid-area: 1 / 1;
+}
+
+.lens-preview-stage > .lens-preview-image {
+    opacity: 0;
+    transition: opacity .22s ease;
+}
+
+.lens-preview-stage > .lens-preview-image.active {
+    opacity: 1;
 }
 
 .frame-lens-tint {
@@ -1685,7 +1698,7 @@ svg.live-lens-tint .lens-shine.right {
     touch-action: none;
 }
 
-.custom-tint-palette > span {
+.custom-tint-palette>span {
     position: absolute;
     width: 8px;
     height: 8px;
@@ -2012,9 +2025,9 @@ svg.live-lens-tint .lens-shine.right {
     }
 
     .eyeglasses-usage-step .usage-product-image,
-    .eyeglasses-usage-step .usage-product > h1,
-    .eyeglasses-usage-step .usage-product > p,
-    .eyeglasses-usage-step .usage-product > strong {
+    .eyeglasses-usage-step .usage-product>h1,
+    .eyeglasses-usage-step .usage-product>p,
+    .eyeglasses-usage-step .usage-product>strong {
         display: none;
     }
 
@@ -2050,11 +2063,11 @@ svg.live-lens-tint .lens-shine.right {
         display: none;
     }
 
-    .eyeglasses-lenses-step .usage-product > p {
+    .eyeglasses-lenses-step .usage-product>p {
         display: none;
     }
 
-    .eyeglasses-lenses-step .usage-product > strong {
+    .eyeglasses-lenses-step .usage-product>strong {
         display: none;
     }
 
@@ -2089,7 +2102,7 @@ svg.live-lens-tint .lens-shine.right {
         border-radius: 13px;
     }
 
-    .eyeglasses-lenses-step .lens-type-card > span:last-child > b {
+    .eyeglasses-lenses-step .lens-type-card>span:last-child>b {
         display: flex;
         flex-wrap: wrap;
         align-items: center;
@@ -2132,7 +2145,7 @@ svg.live-lens-tint .lens-shine.right {
         padding: 18px 16px 90px;
     }
 
-    .prescription-step .usage-form > h2 {
+    .prescription-step .usage-form>h2 {
         display: none;
     }
 
@@ -2200,7 +2213,7 @@ svg.live-lens-tint .lens-shine.right {
     }
 
     .prescription-step .prescription-head b:nth-child(5),
-    .prescription-step .prescription-row > select:last-child {
+    .prescription-step .prescription-row>select:last-child {
         display: none;
     }
 
@@ -2210,17 +2223,28 @@ svg.live-lens-tint .lens-shine.right {
         font-size: 0;
     }
 
-    .prescription-step .prescription-head b:nth-child(2)::before { content: "SPH"; font-size: 10px; }
-    .prescription-step .prescription-head b:nth-child(3)::before { content: "CYL"; font-size: 10px; }
-    .prescription-step .prescription-head b:nth-child(4)::before { content: "Axis"; font-size: 10px; }
+    .prescription-step .prescription-head b:nth-child(2)::before {
+        content: "SPH";
+        font-size: 10px;
+    }
+
+    .prescription-step .prescription-head b:nth-child(3)::before {
+        content: "CYL";
+        font-size: 10px;
+    }
+
+    .prescription-step .prescription-head b:nth-child(4)::before {
+        content: "Axis";
+        font-size: 10px;
+    }
 
     .prescription-step .prescription-row {
         margin-bottom: 10px;
     }
 
-    .prescription-step .prescription-row > b,
-    .prescription-step .prescription-pd > b,
-    .mobile-prescription-add label > b {
+    .prescription-step .prescription-row>b,
+    .prescription-step .prescription-pd>b,
+    .mobile-prescription-add label>b {
         display: block;
         align-self: center;
         width: 44px;
@@ -2232,9 +2256,9 @@ svg.live-lens-tint .lens-shine.right {
         white-space: normal;
     }
 
-    .prescription-step .prescription-row > b small,
-    .prescription-step .prescription-pd > b small,
-    .mobile-prescription-add label > b small {
+    .prescription-step .prescription-row>b small,
+    .prescription-step .prescription-pd>b small,
+    .mobile-prescription-add label>b small {
         display: block;
         margin-top: 2px;
         color: #111;
@@ -2342,10 +2366,10 @@ svg.live-lens-tint .lens-shine.right {
         order: 5;
     }
 
-    .sunglasses-lenses-step .usage-product > .usage-product-image,
-    .sunglasses-lenses-step .usage-product > h1,
-    .sunglasses-lenses-step .usage-product > p,
-    .sunglasses-lenses-step .usage-product > strong {
+    .sunglasses-lenses-step .usage-product>.usage-product-image,
+    .sunglasses-lenses-step .usage-product>h1,
+    .sunglasses-lenses-step .usage-product>p,
+    .sunglasses-lenses-step .usage-product>strong {
         display: none;
     }
 
@@ -2356,7 +2380,7 @@ svg.live-lens-tint .lens-shine.right {
         border-radius: 14px;
     }
 
-    .sunglasses-lenses-step .lens-type-card > span:last-child > b {
+    .sunglasses-lenses-step .lens-type-card>span:last-child>b {
         display: flex;
         flex-wrap: wrap;
         gap: 5px 14px;
@@ -2867,9 +2891,44 @@ svg.live-lens-tint .lens-shine.right {
     height: 330px
 }
 
-.product-no-image{display:grid!important;place-items:center;background:#f4f6f6;color:#87969a;font-size:13px;font-weight:700}
-.gallery-empty{height:100%;min-height:430px;display:grid;place-items:center;background:#f4f6f6;color:#87969a;font-size:13px;font-weight:700}
-.gallery-single-image{width:88%;height:400px;margin:2vw auto 0;display:flex;align-items:center;justify-content:center;overflow:hidden}.gallery-single-image .product-asset{width:100%;height:100%}.gallery-single-image img{object-fit:contain}
+.product-no-image {
+    display: grid !important;
+    place-items: center;
+    background: #f4f6f6;
+    color: #87969a;
+    font-size: 13px;
+    font-weight: 700
+}
+
+.gallery-empty {
+    height: 100%;
+    min-height: 430px;
+    display: grid;
+    place-items: center;
+    background: #f4f6f6;
+    color: #87969a;
+    font-size: 13px;
+    font-weight: 700
+}
+
+.gallery-single-image {
+    width: 88%;
+    height: 400px;
+    margin: 2vw auto 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden
+}
+
+.gallery-single-image .product-asset {
+    width: 100%;
+    height: 100%
+}
+
+.gallery-single-image img {
+    object-fit: contain
+}
 
 .recommend {
     width: min(1392px, 100% - 64px);
@@ -2926,14 +2985,14 @@ svg.live-lens-tint .lens-shine.right {
     display: flex;
 }
 
-.recommend .card-photo > a {
+.recommend .card-photo>a {
     width: 100%;
     height: 100%;
     display: grid;
     place-items: center;
 }
 
-.recommend .card-photo > a img {
+.recommend .card-photo>a img {
     width: 92%;
     max-height: 85%;
     object-fit: contain;
@@ -3065,12 +3124,45 @@ svg.live-lens-tint .lens-shine.right {
     border-radius: 12px;
 }
 
-.review-form h3, .review-form p { margin: 0; }
-.review-form label { display: grid; gap: 6px; font-weight: 600; }
-.review-form input, .review-form select, .review-form textarea { width: 100%; padding: 10px; border: 1px solid #b8c5c5; border-radius: 6px; font: inherit; }
-.review-form textarea { min-height: 100px; resize: vertical; }
-.review-form button { width: max-content; padding: 10px 18px; border: 0; border-radius: 24px; background: #111; color: white; cursor: pointer; }
-.review-form button:disabled { opacity: .6; }
+.review-form h3,
+.review-form p {
+    margin: 0;
+}
+
+.review-form label {
+    display: grid;
+    gap: 6px;
+    font-weight: 600;
+}
+
+.review-form input,
+.review-form select,
+.review-form textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #b8c5c5;
+    border-radius: 6px;
+    font: inherit;
+}
+
+.review-form textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.review-form button {
+    width: max-content;
+    padding: 10px 18px;
+    border: 0;
+    border-radius: 24px;
+    background: #111;
+    color: white;
+    cursor: pointer;
+}
+
+.review-form button:disabled {
+    opacity: .6;
+}
 
 .person {
     height: 250px;

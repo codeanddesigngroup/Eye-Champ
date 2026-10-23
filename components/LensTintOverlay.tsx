@@ -6,10 +6,11 @@ type Region = { pixels: number[]; area: number; centerX: number };
 
 export default function LensTintOverlay({ src, color, strength = 0.8 }: { src: string; color: string; strength?: number }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [fallback, setFallback] = useState(true);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
+    setReady(false);
     const image = new window.Image();
     image.crossOrigin = "anonymous";
     image.onload = () => {
@@ -61,7 +62,7 @@ export default function LensTintOverlay({ src, color, strength = 0.8 }: { src: s
 
         const left = regions.filter(region => region.centerX < width / 2).sort((a, b) => b.area - a.area)[0];
         const right = regions.filter(region => region.centerX >= width / 2).sort((a, b) => b.area - a.area)[0];
-        if (!left || !right) { setFallback(true); return; }
+        if (!left || !right) return;
 
         const colorCanvas = document.createElement("canvas");
         colorCanvas.width = colorCanvas.height = 1;
@@ -86,21 +87,13 @@ export default function LensTintOverlay({ src, color, strength = 0.8 }: { src: s
           }
         }
         context.putImageData(overlay, 0, 0);
-        if (!cancelled) setFallback(false);
-      } catch {
-        if (!cancelled) setFallback(true);
-      }
+        if (!cancelled) setReady(true);
+      } catch {}
     };
-    image.onerror = () => { if (!cancelled) setFallback(true); };
+    image.onerror = () => {};
     image.src = src;
     return () => { cancelled = true; image.onload = null; image.onerror = null; };
   }, [src, color, strength]);
 
-  return <>
-    <canvas ref={canvasRef} className="frame-lens-tint" style={{ display: fallback ? "none" : undefined }} aria-hidden="true" />
-    {fallback && <svg className="frame-lens-tint" viewBox="0 0 100 100" preserveAspectRatio="none" opacity={strength} aria-hidden="true">
-      <path d="M14.2 17 C18.5 8.5 37.5 7.5 43.8 15.5 C46 18.5 46.5 23 46.2 29 L44.8 65 C44.3 79 38.4 88 27.8 88.7 C18.5 89.2 13.4 83.5 12.2 72 L10.7 31 C10.4 24 11.5 20 14.2 17 Z" fill={color} />
-      <path d="M85.8 17 C81.5 8.5 62.5 7.5 56.2 15.5 C54 18.5 53.5 23 53.8 29 L55.2 65 C55.7 79 61.6 88 72.2 88.7 C81.5 89.2 86.6 83.5 87.8 72 L89 31 C89.3 24 88.5 20 85.8 17 Z" fill={color} />
-    </svg>}
-  </>;
+  return <canvas ref={canvasRef} className="frame-lens-tint" style={{ visibility: ready ? "visible" : "hidden" }} aria-hidden="true" />;
 }
