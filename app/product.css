@@ -953,12 +953,12 @@
     grid-area: 1 / 1;
 }
 
-.lens-preview-stage > .lens-preview-image {
+.lens-preview-stage>.lens-preview-image {
     opacity: 0;
     transition: opacity .22s ease;
 }
 
-.lens-preview-stage > .lens-preview-image.active {
+.lens-preview-stage>.lens-preview-image.active {
     opacity: 1;
 }
 

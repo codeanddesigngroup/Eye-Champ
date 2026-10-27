@@ -90,6 +90,7 @@ export async function initializeDatabase() {
       subcategories JSONB NOT NULL DEFAULT '[]'::jsonb, collections JSONB NOT NULL DEFAULT '[]'::jsonb,
       brands JSONB NOT NULL DEFAULT '[]'::jsonb, tags JSONB NOT NULL DEFAULT '[]'::jsonb,
       media JSONB NOT NULL DEFAULT '[]'::jsonb,
+      feature_image_url TEXT,
       frame_image_url TEXT,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
@@ -140,6 +141,7 @@ export async function initializeDatabase() {
     ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_method VARCHAR(40) NOT NULL DEFAULT 'Cash on Delivery';
     ALTER TABLE products ADD COLUMN IF NOT EXISTS discount_percent NUMERIC(5,2) NOT NULL DEFAULT 0 CHECK (discount_percent >= 0 AND discount_percent <= 100);
     ALTER TABLE products ADD COLUMN IF NOT EXISTS frame_image_url TEXT;
+    ALTER TABLE products ADD COLUMN IF NOT EXISTS feature_image_url TEXT;
     ALTER TABLE products ADD COLUMN IF NOT EXISTS draft_key UUID;
     ALTER TABLE products ADD COLUMN IF NOT EXISTS draft_revision BIGINT NOT NULL DEFAULT 0;
     CREATE UNIQUE INDEX IF NOT EXISTS products_draft_key_idx ON products(draft_key);

@@ -44,6 +44,8 @@ test("incomplete drafts, retries, stale requests, and publishing", async () => {
       genders: ["Unisex"], categories: ["Glasses"], subcategories: ["Frames"],
       shape: "Round", material: "Metal", rim: "Full rim",
       media: [{ url: "/test.jpg" }],
+      frameImageUrl: "/uploads/products/test-frame.webp",
+      featureImageUrl: "/uploads/products/test-feature.webp",
     }, first.product.id);
     assert.equal(published.status, 200);
     assert.equal(published.product.status, "Active");

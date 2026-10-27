@@ -77,6 +77,7 @@ CREATE TABLE IF NOT EXISTS products (
   subcategories JSONB NOT NULL DEFAULT '[]'::jsonb, collections JSONB NOT NULL DEFAULT '[]'::jsonb,
   brands JSONB NOT NULL DEFAULT '[]'::jsonb, tags JSONB NOT NULL DEFAULT '[]'::jsonb,
   media JSONB NOT NULL DEFAULT '[]'::jsonb,
+  feature_image_url TEXT,
   frame_image_url TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

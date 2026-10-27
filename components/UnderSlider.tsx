@@ -12,6 +12,7 @@ import "swiper/css";
 type Product = {
   id: string; title: string; slug: string; price: number; discountPercent: number; rating?: number; reviewCount?: number;
   shape: string | null; categorySlug: string | null; subcategorySlug: string | null;
+  featureImageUrl?: string | null;
   media: { url: string; primary?: boolean }[];
   variants: { name: string; values: string[]; mediaByValue?: Record<string, { url: string }[]> }[];
 };
@@ -80,7 +81,7 @@ export default function UnderSlider() {
         {products.map(product => {
           const frameColors = product.variants?.find(variant => /frame.*color/i.test(variant.name));
           const selectedColor = selectedColors[product.id] ?? frameColors?.values[0];
-          const image = (selectedColor && frameColors?.mediaByValue?.[selectedColor]?.[0]?.url) || product.media?.find(item => item.primary)?.url || product.media?.[0]?.url;
+          const image = product.featureImageUrl || (selectedColor && frameColors?.mediaByValue?.[selectedColor]?.[0]?.url) || product.media?.find(item => item.primary)?.url || product.media?.[0]?.url;
           const price = Number(product.price) * (1 - Number(product.discountPercent || 0) / 100);
           const href = `/${product.categorySlug || "shop-all"}/${product.subcategorySlug || "all"}/${product.slug}`;
           return <SwiperSlide key={product.id}><article className="seller-card" role="link" tabIndex={0}

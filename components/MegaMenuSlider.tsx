@@ -9,6 +9,7 @@ import "swiper/css";
 
 type Product = {
   id: string; title: string; slug: string; categorySlug: string | null; subcategorySlug: string | null;
+  featureImageUrl?: string | null;
   media: Array<{ url: string; primary?: boolean }>;
   variants: Array<{ name: string; values: string[]; mediaByValue?: Record<string, Array<{ url: string }>> }>;
 };
@@ -70,7 +71,7 @@ export default function MegaMenuSlider({ fullWidth = false, categorySlug }: Mega
       {products.map(product => {
         const frameColors = product.variants?.find(variant => /frame.*color/i.test(variant.name));
         const firstColor = frameColors?.values[0];
-        const image = (firstColor && frameColors?.mediaByValue?.[firstColor]?.[0]?.url) || product.media?.find(item => item.primary)?.url || product.media?.[0]?.url;
+        const image = product.featureImageUrl || (firstColor && frameColors?.mediaByValue?.[firstColor]?.[0]?.url) || product.media?.find(item => item.primary)?.url || product.media?.[0]?.url;
         const main = product.categorySlug || categorySlug || "shop-all";
         const sub = product.subcategorySlug || "all";
         return <SwiperSlide key={product.id}><Link className="mega-product" href={`/${main}/${sub}/${product.slug}`}>

@@ -20,7 +20,7 @@ const productAssets: Record<string, { src: string; width: number; height: number
     folded: { src: "/images/product/3.avif", width: 84, height: 37 },
     case: { src: "/images/product/eyewear-case.avif", width: 84, height: 30 },
 };
-type RecommendedProduct = { id: string; title: string; slug: string; price: number; discountPercent: number; shape: string | null; material: string | null; categories: string[]; subcategories: string[]; brands: string[]; categorySlug: string | null; subcategorySlug: string | null; media: Array<{ url: string; primary?: boolean }>; variants: Array<{ name: string; values: string[] }> };
+type RecommendedProduct = { id: string; title: string; slug: string; price: number; discountPercent: number; shape: string | null; material: string | null; categories: string[]; subcategories: string[]; brands: string[]; categorySlug: string | null; subcategorySlug: string | null; featureImageUrl?: string | null; media: Array<{ url: string; primary?: boolean }>; variants: Array<{ name: string; values: string[] }> };
 type ProductReview = { id: string; name: string; rating: number; title: string; body: string; fit: string | null; quality: string | null; photoUrl: string | null; createdAt: string };
 export type DatabaseProduct = { id: string; title: string; slug: string; description: string; price: number; discountPercent: number; quantity: number; shape: string | null; material: string | null; rim: string | null; fit: string | null; weight: number | null; specialFeature: string | null; measurements: Record<string, string>; lensCompatibility: string[]; genders: string[]; categories: string[]; subcategories: string[]; collections: string[]; brands: string[]; frameImageUrl?: string | null; media: Array<{ name?: string; url: string; primary?: boolean }>; variants: Array<{ name: string; values: string[]; mediaByValue?: Record<string, Array<{ name?: string; url: string }>> }> };
 function ProductImage({ view, className = "", src, database = false }: { view: string, className?: string, src?: string, database?: boolean }) {
@@ -125,7 +125,7 @@ export default function ProductPage({ databaseProduct }: { databaseProduct?: Dat
     const boughtProduct = recommended[0];
     const boughtPrice = boughtProduct ? Number(boughtProduct.price) * (1 - Number(boughtProduct.discountPercent || 0) / 100) : 0;
     const boughtHref = boughtProduct ? `/${boughtProduct.categorySlug || "shop-all"}/${boughtProduct.subcategorySlug || "all"}/${boughtProduct.slug}` : "#";
-    const boughtImage = boughtProduct?.media?.find(item => item.primary)?.url || boughtProduct?.media?.[0]?.url;
+    const boughtImage = boughtProduct?.featureImageUrl || boughtProduct?.media?.find(item => item.primary)?.url || boughtProduct?.media?.[0]?.url;
     return (
         <main className="pdp productDetails">
             <section className="product-hero wrap">
@@ -197,7 +197,7 @@ export default function ProductPage({ databaseProduct }: { databaseProduct?: Dat
                     {recommended.map(p => {
                         const href = `/${p.categorySlug || "shop-all"}/${p.subcategorySlug || "all"}/${p.slug}`;
                         const price = Number(p.price) * (1 - Number(p.discountPercent || 0) / 100);
-                        const image = p.media?.find(item => item.primary)?.url || p.media?.[0]?.url;
+                        const image = p.featureImageUrl || p.media?.find(item => item.primary)?.url || p.media?.[0]?.url;
                         const colors = p.variants?.find(variant => variant.name.trim().toLowerCase() === "frame color")?.values ?? [];
                         return <SwiperSlide key={p.id}><article className="product-card">
                             <div className="card-photo">

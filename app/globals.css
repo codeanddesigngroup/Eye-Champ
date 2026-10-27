@@ -692,7 +692,6 @@ input {
     margin-right: 4vw
 }
 
-
 #women div {
     position: absolute;
     inset: 3.125vw;
@@ -859,15 +858,15 @@ input {
 .section-title p {
     margin: 0;
     color: #666;
-    font-size: 0.903vw
+    font-size: 0.903vw;
 }
 
 .section-title.light {
-    color: #fff
+    color: #fff;
 }
 
 .section-title.light p {
-    color: #fff
+    color: #fff;
 }
 
 
@@ -2127,11 +2126,9 @@ footer {
         height: 16px;
     }
 
-
     .page {
         margin-top: 10vw;
     }
-
 
     .slider-arrow {
         bottom: -5vw;

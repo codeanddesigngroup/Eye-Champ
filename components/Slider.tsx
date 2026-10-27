@@ -9,7 +9,7 @@ import Link from "next/link";
 import { favoritesUpdatedEvent, getFavorites, toggleFavorite } from "@/lib/favorites";
 import "swiper/css";
 
-type Product = { id: string; title: string; slug: string; price: number; discountPercent: number; rating?: number; reviewCount?: number; shape: string | null; media: { url: string; primary?: boolean }[]; variants: { name: string; values: string[]; mediaByValue?: Record<string, { url: string }[]> }[]; categorySlug: string | null; subcategorySlug: string | null };
+type Product = { id: string; title: string; slug: string; price: number; discountPercent: number; rating?: number; reviewCount?: number; shape: string | null; featureImageUrl?: string | null; media: { url: string; primary?: boolean }[]; variants: { name: string; values: string[]; mediaByValue?: Record<string, { url: string }[]> }[]; categorySlug: string | null; subcategorySlug: string | null };
 
 function swatchColor(value: string) {
   const normalized = value.toLowerCase().trim();
@@ -115,7 +115,7 @@ export default function Slider() {
           {products.map((product) => {
             const colors = product.variants?.find(variant => /frame.*color/i.test(variant.name));
             const selectedColor = selectedColors[product.id] ?? colors?.values[0];
-            const image = (selectedColor && colors?.mediaByValue?.[selectedColor]?.[0]?.url) || product.media?.find(item => item.primary)?.url || product.media?.[0]?.url;
+            const image = product.featureImageUrl || (selectedColor && colors?.mediaByValue?.[selectedColor]?.[0]?.url) || product.media?.find(item => item.primary)?.url || product.media?.[0]?.url;
             const href = `/${product.categorySlug ?? category.toLowerCase()}/${product.subcategorySlug ?? "all"}/${product.slug}`;
             const price = `${currency} ${(Number(product.price) * (1 - Number(product.discountPercent || 0) / 100)).toFixed(2)}`;
             return <SwiperSlide key={product.id}>

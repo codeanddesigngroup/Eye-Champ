@@ -10,7 +10,7 @@ import "./shop-all.css";
 
 type Media = { name?: string; url: string; primary?: boolean };
 type Variant = { name: string; values: string[]; mediaByValue?: Record<string, Media[]> };
-type Product = { id: string; title: string; slug: string; price: number; discountPercent: number; quantity: number; rating?: number; reviewCount?: number; shape: string | null; material: string | null; rim: string | null; genders: string[]; categories: string[]; collections: string[]; subcategories: string[]; brands: string[]; media: Media[]; variants: Variant[]; createdAt: string; categorySlug: string | null; subcategorySlug: string | null };
+type Product = { id: string; title: string; slug: string; price: number; discountPercent: number; quantity: number; rating?: number; reviewCount?: number; shape: string | null; material: string | null; rim: string | null; genders: string[]; categories: string[]; collections: string[]; subcategories: string[]; brands: string[]; featureImageUrl?: string | null; media: Media[]; variants: Variant[]; createdAt: string; categorySlug: string | null; subcategorySlug: string | null };
 
 function frameColor(value: string) {
   const normalized = value.toLowerCase().trim();
@@ -36,7 +36,7 @@ function Card({ product, categorySlug, subcategorySlug, currency }: { product: P
   const colors = frameColors?.values ?? [];
   const [selectedColor, setSelectedColor] = useState(colors[0] ?? "");
   const colorMedia = selectedColor ? frameColors?.mediaByValue?.[selectedColor] : undefined;
-  const image = colorMedia?.[0]?.url || product.media?.find(item => item.primary)?.url || product.media?.[0]?.url;
+  const image = product.featureImageUrl || colorMedia?.[0]?.url || product.media?.find(item => item.primary)?.url || product.media?.[0]?.url;
   const collection = product.collections?.[0];
   const rating = Number(product.rating ?? 0);
   const reviewCount = Number(product.reviewCount ?? 0);

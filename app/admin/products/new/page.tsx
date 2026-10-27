@@ -33,6 +33,8 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
   const [lensInput, setLensInput] = useState("");
   const [variants, setVariants] = useState<VariantOption[]>([]);
   const [variantMedia, setVariantMedia] = useState<Record<string, Media[]>>({});
+  const [featureImage, setFeatureImage] = useState<Media | null>(null);
+  const [uploadingFeature, setUploadingFeature] = useState(false);
   const [frameImage, setFrameImage] = useState<Media | null>(null);
   const [uploadingFrame, setUploadingFrame] = useState(false);
   const [categoryOptions, setCategoryOptions] = useState<CategoryOption[]>([]);
@@ -52,6 +54,8 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
       setEditProduct(product);
       setTitle(String(product.title ?? "")); setDescription(String(product.description ?? "")); setPrice(String(product.price ?? "")); setStatus(String(product.status ?? "Draft"));
       setLensCompatibility((product.lens_compatibility as string[]) ?? []);
+      const featureImageUrl = String(product.feature_image_url ?? "");
+      setFeatureImage(featureImageUrl ? { name: featureImageUrl.split("/").pop() || "Product feature image", url: featureImageUrl } : null);
       const frameImageUrl = String(product.frame_image_url ?? "");
       setFrameImage(frameImageUrl ? { name: frameImageUrl.split("/").pop() || "Frame image", url: frameImageUrl } : null);
       setSelectedMainCategories((product.categories as string[]) ?? []); setSelectedSubCategories((product.subcategories as string[]) ?? []); setSelectedNestedCategories((product.subcategories as string[]) ?? []);
@@ -110,6 +114,7 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
       subcategories: [...data.getAll("subCategory"), ...data.getAll("nestedCategory")].map(String), collections: data.getAll("collections").map(String), brands: data.getAll("brands").map(String),
       tags: String(data.get("tags") || "").split(",").map((tag) => tag.trim()).filter(Boolean),
       media: Object.values(variantMedia).flat().slice(0, 1).map(item => ({ name: item.name, url: item.url, primary: true })),
+      featureImageUrl: featureImage?.url ?? null,
       frameImageUrl: frameImage?.url ?? null,
     };
   };
@@ -131,9 +136,14 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
   const save = async (statusOverride?: "Draft") => {
     const form = document.getElementById("new-product-form") as HTMLFormElement | null;
     if (!form || saving) return;
-    if (uploadingFrame) return showAuthToast({ message: "Wait for the frame image to finish uploading.", type: "error" });
+    if (uploadingFeature || uploadingFrame) return showAuthToast({ message: "Wait for the image upload to finish.", type: "error" });
     const data = new FormData(form);
     if ((statusOverride ?? status) !== "Draft") {
+    if ((!editId || editProduct?.status === "Draft") && !featureImage?.url?.trim()) {
+      showAuthToast({ message: "Upload a product feature image before saving the product.", type: "error" });
+      document.querySelector(".np-feature-image-row")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
     if ((!editId || editProduct?.status === "Draft") && !frameImage?.url?.trim()) {
       showAuthToast({ message: "Upload a frame image before saving the product.", type: "error" });
       document.querySelector(".np-frame-image-row")?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -242,6 +252,21 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
     } catch (error) {
       showAuthToast({ message: error instanceof Error ? error.message : "Could not upload frame image.", type: "error" });
     } finally { setUploadingFrame(false); }
+  };
+  const uploadFeatureImage = async (file: File | undefined) => {
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) return showAuthToast({ message: "Product feature image must be 2 MB or smaller.", type: "error" });
+    const uploadData = new FormData();
+    uploadData.append("images", file);
+    setUploadingFeature(true);
+    try {
+      const response = await fetch("/api/admin/uploads/products", { method: "POST", body: uploadData });
+      const result = await response.json() as { media?: Media[]; error?: string };
+      if (!response.ok || !result.media?.[0]) throw new Error(result.error || "Could not upload product feature image.");
+      setFeatureImage(result.media[0]);
+    } catch (error) {
+      showAuthToast({ message: error instanceof Error ? error.message : "Could not upload product feature image.", type: "error" });
+    } finally { setUploadingFeature(false); }
   };
   const addVariant = () =>
     setVariants((current) => [
@@ -579,7 +604,15 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
                 )}
               </section>
               <section className="np-card">
-                <CardTitle number="06" title={<>Frame image{(!editId || editProduct?.status === "Draft") && <em className="np-required"> *</em>}</>} subtitle="Shown beside the second Select Lenses step." />
+                <CardTitle number="06" title={<>Product feature image{(!editId || editProduct?.status === "Draft") && <em className="np-required"> *</em>}</>} subtitle="Used on product cards and kept separate from slider images." />
+                <div className="np-frame-image-row np-feature-image-row">
+                  {featureImage && <div className="np-frame-image-preview"><Image src={featureImage.url} alt="Product feature preview" width={150} height={84} unoptimized /><button type="button" onClick={() => setFeatureImage(null)} aria-label="Remove product feature image"><X size={14} /></button></div>}
+                  <label className="np-color-upload"><input type="file" accept="image/png,image/jpeg,image/webp,image/avif" disabled={uploadingFeature} onChange={(event) => { void uploadFeatureImage(event.target.files?.[0]); event.target.value = ""; }} /><ImagePlus size={14} />{uploadingFeature ? "Uploading..." : featureImage ? "Replace image" : "Upload feature image"}</label>
+                  <small>PNG, JPG, WEBP or AVIF. Maximum 2 MB.</small>
+                </div>
+              </section>
+              <section className="np-card">
+                <CardTitle number="07" title={<>Frame image{(!editId || editProduct?.status === "Draft") && <em className="np-required"> *</em>}</>} subtitle="Shown beside the second Select Lenses step." />
                 <div className="np-frame-image-row">
                   {frameImage && <div className="np-frame-image-preview"><Image src={frameImage.url} alt="Lens-step frame preview" width={150} height={84} unoptimized /><button type="button" onClick={() => setFrameImage(null)} aria-label="Remove lens-step frame image"><X size={14} /></button></div>}
                   <label className="np-color-upload"><input type="file" accept="image/png,image/jpeg,image/webp,image/avif" disabled={uploadingFrame} onChange={(event) => { void uploadFrameImage(event.target.files?.[0]); event.target.value = ""; }} /><ImagePlus size={14} />{uploadingFrame ? "Uploading..." : frameImage ? "Replace image" : "Upload frame image"}</label>

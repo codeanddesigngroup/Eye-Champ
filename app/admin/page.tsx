@@ -122,7 +122,7 @@ export default function AdminDashboard() {
           <article className={styles.inventoryCard}>
             <div className={styles.cardHeading}><div><h3>Inventory alerts</h3><p>Products running low on stock</p></div><Link href="/admin/products">View all</Link></div>
             <div className={styles.inventoryList}>{dashboard.lowStock.length ? dashboard.lowStock.map(item => <div className={styles.inventoryItem} key={item.id}><span className={styles.productThumb}>{item.image ? <Image src={item.image} alt="" width={58} height={42} /> : <Package size={20} />}</span><div><strong>{item.name}</strong><small>{item.sku}</small></div><span className={styles.stock}>{item.stock} left</span></div>) : <p className={styles.emptyInline}>No low-stock products.</p>}</div>
-            <div className={styles.inventoryFoot}><Package size={17} /><span><strong>{dashboard.lowStock.length} products</strong> need your attention</span><Link href="/admin/products">Manage inventory</Link></div>
+            <div className={styles.inventoryFoot}><Package size={17} /><span><strong>{dashboard.lowStock.length} products</strong> need your attention</span><Link href="/admin/inventory">Manage inventory</Link></div>
           </article>
         </section>
 
