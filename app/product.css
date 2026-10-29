@@ -3569,8 +3569,8 @@ svg.live-lens-tint .lens-shine.right {
         font-size: 21px
     }
 
-    .gallery {
-        position: unset;
+    .pdp .gallery {
+        position: relative;
     }
 
     .gallery-heart {
@@ -3585,8 +3585,46 @@ svg.live-lens-tint .lens-shine.right {
         top: 300px
     }
 
-    .thumbnails {
-        display: none;
+    .pdp .gallery-arrow {
+        top: 112px;
+        z-index: 5;
+        width: 38px;
+        height: 38px;
+        display: grid;
+        place-items: center;
+        cursor: pointer;
+    }
+
+    .pdp .gallery-arrow.left {
+        left: 0;
+    }
+
+    .pdp .gallery-arrow.right {
+        right: 0;
+    }
+
+    .pdp .thumbnails {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        width: 100%;
+        margin: 18px 0 22px;
+        padding: 2px 4px 8px;
+        overflow-x: auto;
+        scrollbar-width: thin;
+        scroll-snap-type: x proximity;
+    }
+
+    .pdp .thumbnails button {
+        flex: 0 0 74px;
+        width: 74px;
+        min-width: 74px;
+        height: 62px;
+        scroll-snap-align: start;
+    }
+
+    .pdp .thumbnails .product-asset img {
+        width: 100% !important;
     }
 
     .pdp .product-asset img {
