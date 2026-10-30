@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { ChevronDown, ChevronLeft, ChevronRight, Heart, ShieldCheck, Star } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, Heart, ShieldCheck, Star, X } from "lucide-react";
 import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
 import type { Swiper as SwiperInstance } from "swiper";
@@ -20,7 +20,7 @@ const productAssets: Record<string, { src: string; width: number; height: number
     folded: { src: "/images/product/3.avif", width: 84, height: 37 },
     case: { src: "/images/product/eyewear-case.avif", width: 84, height: 30 },
 };
-type RecommendedProduct = { id: string; title: string; slug: string; price: number; discountPercent: number; shape: string | null; material: string | null; categories: string[]; subcategories: string[]; brands: string[]; categorySlug: string | null; subcategorySlug: string | null; featureImageUrl?: string | null; media: Array<{ url: string; primary?: boolean }>; variants: Array<{ name: string; values: string[] }> };
+type RecommendedProduct = { id: string; title: string; slug: string; price: number; discountPercent: number; shape: string | null; material: string | null; categories: string[]; subcategories: string[]; brands: string[]; categorySlug: string | null; subcategorySlug: string | null; featureImageUrl?: string | null; hoverImageUrl?: string | null; media: Array<{ url: string; primary?: boolean }>; variants: Array<{ name: string; values: string[] }> };
 type ProductReview = { id: string; name: string; rating: number; title: string; body: string; fit: string | null; quality: string | null; photoUrl: string | null; createdAt: string };
 export type DatabaseProduct = { id: string; title: string; slug: string; description: string; price: number; discountPercent: number; quantity: number; shape: string | null; material: string | null; rim: string | null; fit: string | null; weight: number | null; specialFeature: string | null; measurements: Record<string, string>; lensCompatibility: string[]; genders: string[]; categories: string[]; subcategories: string[]; collections: string[]; brands: string[]; featureImageUrl?: string | null; frameImageUrl?: string | null; media: Array<{ name?: string; url: string; primary?: boolean }>; variants: Array<{ name: string; values: string[]; mediaByValue?: Record<string, Array<{ name?: string; url: string }>> }> };
 function ProductImage({ view, className = "", src, database = false }: { view: string, className?: string, src?: string, database?: boolean }) {
@@ -36,7 +36,7 @@ export default function ProductPage({ databaseProduct }: { databaseProduct?: Dat
     const productSlider = useRef<SwiperInstance | null>(null);
     const photoSlider = useRef<SwiperInstance | null>(null);
     const gallerySlider = useRef<SwiperInstance | null>(null);
-    const [view, setView] = useState("front"), [galleryIndex, setGalleryIndex] = useState(0), [liked, setLiked] = useState(false), [tab, setTab] = useState("Features"), [color, setColor] = useState(0), [photosOnly, setPhotosOnly] = useState(false), [sideView, setSideView] = useState(false), [sortOpen, setSortOpen] = useState(false), [sortOrder, setSortOrder] = useState("Newest"), [reviewsOpen, setReviewsOpen] = useState(true), [currency, setCurrency] = useState("PKR");
+    const [view, setView] = useState("front"), [galleryIndex, setGalleryIndex] = useState(0), [lightboxOpen, setLightboxOpen] = useState(false), [liked, setLiked] = useState(false), [tab, setTab] = useState("Features"), [color, setColor] = useState(0), [photosOnly, setPhotosOnly] = useState(false), [sideView, setSideView] = useState(false), [sortOpen, setSortOpen] = useState(false), [sortOrder, setSortOrder] = useState("Newest"), [reviewsOpen, setReviewsOpen] = useState(true), [currency, setCurrency] = useState("PKR");
     const [recommended, setRecommended] = useState<RecommendedProduct[]>([]), [recommendLoading, setRecommendLoading] = useState(true), [recommendError, setRecommendError] = useState(false), [savedRecommendations, setSavedRecommendations] = useState<string[]>([]), [recommendCanNavigate, setRecommendCanNavigate] = useState(false);
     const [reviews, setReviews] = useState<ProductReview[]>([]), [reviewsLoading, setReviewsLoading] = useState(true), [reviewsError, setReviewsError] = useState(false), [reviewPage, setReviewPage] = useState(1), [reviewFormOpen, setReviewFormOpen] = useState(false), [reviewSubmitting, setReviewSubmitting] = useState(false), [reviewMessage, setReviewMessage] = useState("");
     const slideProducts = (direction: number) => direction < 0 ? productSlider.current?.slidePrev() : productSlider.current?.slideNext();
@@ -62,7 +62,16 @@ export default function ProductPage({ databaseProduct }: { databaseProduct?: Dat
     const salePrice = originalPrice * (1 - discountPercent / 100);
     const hasProductImages = !databaseProduct || databaseImages.length > 0;
     const showGallerySlider = !databaseProduct || databaseImages.length > 1;
+    const lightboxImages = databaseProduct ? databaseImages.map(image => image.url) : views.map(item => productAssets[item].src);
     const outOfStock = Boolean(databaseProduct && databaseProduct.quantity <= 0);
+    useEffect(() => {
+        if (!lightboxOpen) return;
+        const previousOverflow = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
+        const closeOnEscape = (event: KeyboardEvent) => { if (event.key === "Escape") setLightboxOpen(false) };
+        window.addEventListener("keydown", closeOnEscape);
+        return () => { document.body.style.overflow = previousOverflow; window.removeEventListener("keydown", closeOnEscape) };
+    }, [lightboxOpen]);
     useEffect(() => { if (!databaseProduct) return; const refresh = () => setLiked(getFavorites().some(item => item.id === databaseProduct.id)); refresh(); window.addEventListener(favoritesUpdatedEvent, refresh); return () => window.removeEventListener(favoritesUpdatedEvent, refresh) }, [databaseProduct]);
     useEffect(() => { fetch("/api/products/settings", { cache: "no-store" }).then(async response => { const result = await response.json() as { currency?: string }; if (response.ok && result.currency) setCurrency(result.currency) }).catch(() => undefined) }, []);
     useEffect(() => {
@@ -137,12 +146,12 @@ export default function ProductPage({ databaseProduct }: { databaseProduct?: Dat
                         <Heart fill={liked ? "#0b6068" : "none"} />
                     </button>
                     {hasProductImages ? (showGallerySlider ? <><button type="button" className="gallery-arrow left" onClick={() => gallerySlider.current?.slidePrev()}><ChevronLeft /></button>
-                        <Swiper className="gallery-main" loop speed={450} onSwiper={swiper => { gallerySlider.current = swiper; setGalleryIndex(swiper.realIndex) }} onSlideChange={swiper => { setGalleryIndex(swiper.realIndex); setView(views[swiper.realIndex] ?? "front") }}>{databaseProduct ? databaseImages.map((image, index) => <SwiperSlide key={`${image.url}-${index}`}><ProductImage view={views[index] ?? "front"} src={image.url} database /></SwiperSlide>) : views.map(v => <SwiperSlide key={v}><ProductImage view={v} /></SwiperSlide>)}</Swiper>
+                        <Swiper className="gallery-main" loop speed={450} onSwiper={swiper => { gallerySlider.current = swiper; setGalleryIndex(swiper.realIndex) }} onSlideChange={swiper => { setGalleryIndex(swiper.realIndex); setView(views[swiper.realIndex] ?? "front") }}>{databaseProduct ? databaseImages.map((image, index) => <SwiperSlide key={`${image.url}-${index}`}><button type="button" className="gallery-zoom-trigger" aria-label={`Enlarge image ${index + 1}`} onClick={() => { setGalleryIndex(index); setLightboxOpen(true) }}><ProductImage view={views[index] ?? "front"} src={image.url} database /></button></SwiperSlide>) : views.map((v, index) => <SwiperSlide key={v}><button type="button" className="gallery-zoom-trigger" aria-label={`Enlarge ${v} view`} onClick={() => { setGalleryIndex(index); setLightboxOpen(true) }}><ProductImage view={v} /></button></SwiperSlide>)}</Swiper>
                         <button type="button" className="gallery-arrow right" onClick={() => gallerySlider.current?.slideNext()}><ChevronRight /></button>
                         <div className="gallery-tools"><button>360°</button><button>▰</button></div>
                         <div className="thumbnails">
                             {databaseProduct ? databaseImages.map((image, index) => { const imageView = views[index] ?? "front"; return <button type="button" aria-label={`Show image ${index + 1}`} className={galleryIndex === index ? "active" : ""} key={`${image.url}-${index}`} onClick={() => gallerySlider.current?.slideToLoop(index)}><ProductImage view={imageView} src={image.url} database /></button> }) : views.slice(0, 4).map((v, index) => <button type="button" aria-label={`Show ${v} view`} className={galleryIndex === index ? "active" : ""} key={v} onClick={() => gallerySlider.current?.slideToLoop(index)}><ProductImage view={v} /></button>)}
-                        </div></> : <div className="gallery-single-image"><ProductImage view="front" src={databaseImage(0)} database /></div>) : <div className="gallery-empty">No image available</div>}
+                        </div></> : <button type="button" className="gallery-single-image gallery-zoom-trigger" aria-label="Enlarge product image" onClick={() => { setGalleryIndex(0); setLightboxOpen(true) }}><ProductImage view="front" src={databaseImage(0)} database /></button>) : <div className="gallery-empty">No image available</div>}
                 </div>
                 <div className="product-info-panel">
                     <h1>{databaseProduct?.title ?? "Tortoiseshell Square Glasses"}</h1>
@@ -174,6 +183,17 @@ export default function ProductPage({ databaseProduct }: { databaseProduct?: Dat
                     </div>
                 </div>
             </section>
+            {lightboxOpen && lightboxImages.length > 0 && <div className="product-lightbox-backdrop" role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) setLightboxOpen(false) }}>
+                <section className="product-lightbox" role="dialog" aria-modal="true" aria-label="Product image gallery">
+                    <button type="button" className="product-lightbox-close" aria-label="Close image gallery" onClick={() => setLightboxOpen(false)}><X /></button>
+                    <div className="product-lightbox-stage"><Image src={lightboxImages[galleryIndex] ?? lightboxImages[0]} alt={`${databaseProduct?.title ?? "Product"} image ${galleryIndex + 1}`} width={1600} height={1000} priority unoptimized /></div>
+                    {lightboxImages.length > 1 && <div className="product-lightbox-controls">
+                        <button type="button" aria-label="Previous image" onClick={() => setGalleryIndex(index => (index - 1 + lightboxImages.length) % lightboxImages.length)}><ChevronLeft /></button>
+                        <div className="product-lightbox-thumbnails">{lightboxImages.map((src, index) => <button type="button" key={`${src}-${index}`} className={galleryIndex === index ? "active" : ""} aria-label={`Show image ${index + 1}`} onClick={() => setGalleryIndex(index)}><Image src={src} alt="" width={100} height={70} unoptimized /></button>)}</div>
+                        <button type="button" aria-label="Next image" onClick={() => setGalleryIndex(index => (index + 1) % lightboxImages.length)}><ChevronRight /></button>
+                    </div>}
+                </section>
+            </div>}
 
             <section id="details" className="details">
                 <div className="tabs wrap">
@@ -204,7 +224,7 @@ export default function ProductPage({ databaseProduct }: { databaseProduct?: Dat
                         const colors = p.variants?.find(variant => variant.name.trim().toLowerCase() === "frame color")?.values ?? [];
                         return <SwiperSlide key={p.id}><article className="product-card">
                             <div className="card-photo">
-                                <Link href={href} aria-label={`View ${p.title}`}>{image ? <img src={image} alt={p.title} /> : <span>No image available</span>}</Link>
+                                <Link className="card-hover-image-wrap" href={href} aria-label={`View ${p.title}`}>{image ? <><img className="card-hover-primary" src={image} alt={p.title} />{p.hoverImageUrl && <img className="card-hover-secondary" src={p.hoverImageUrl} alt="" aria-hidden="true" />}</> : <span>No image available</span>}</Link>
                                 <button type="button" className="recommend-heart" aria-label={savedRecommendations.includes(p.id) ? "Remove from favorites" : "Add to favorites"} onClick={() => toggleFavorite({ ...p, price })}><Heart fill={savedRecommendations.includes(p.id) ? "currentColor" : "none"} /></button>
                             </div>
                             <div className="card-meta"><b>{formatMoney(currency, price)}</b></div>

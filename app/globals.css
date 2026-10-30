@@ -2669,6 +2669,70 @@ footer {
     object-fit: contain;
 }
 
+.card-hover-image-wrap {
+    position: relative;
+}
+
+.card-hover-image-wrap .card-hover-primary,
+.card-hover-image-wrap .card-hover-secondary {
+    transition: opacity .25s ease, transform .3s ease;
+}
+
+.card-hover-image-wrap .card-hover-secondary {
+    position: absolute !important;
+    inset: 0;
+    width: 100% !important;
+    height: 100% !important;
+    max-height: none !important;
+    margin: auto;
+    object-fit: cover;
+    border-radius: inherit;
+    opacity: 0;
+    z-index: 1;
+    transform: none !important;
+    transition: opacity .25s ease !important;
+}
+
+/* .card-hover-image-wrap .card-hover-secondary {
+    position: absolute !important;
+    inset: 0;
+    width: 92% !important;
+    height: 85% !important;
+    max-height: none !important;
+    margin: auto;
+    object-fit: contain;
+    opacity: 0;
+} */
+
+@media (hover: hover) and (pointer: fine) {
+    .seller-card:has(.card-hover-secondary):hover .card-hover-primary,
+    .seller-card:has(.card-hover-secondary):focus-within .card-hover-primary,
+    .plp-card:has(.card-hover-secondary):hover .card-hover-primary,
+    .plp-card:has(.card-hover-secondary):focus-within .card-hover-primary,
+    .product-card:has(.card-hover-secondary):hover .card-hover-primary,
+    .product-card:has(.card-hover-secondary):focus-within .card-hover-primary {
+        opacity: 0;
+    }
+
+    .seller-card:has(.card-hover-secondary):hover .card-hover-secondary,
+    .seller-card:has(.card-hover-secondary):focus-within .card-hover-secondary,
+    .plp-card:has(.card-hover-secondary):hover .card-hover-secondary,
+    .plp-card:has(.card-hover-secondary):focus-within .card-hover-secondary,
+    .product-card:has(.card-hover-secondary):hover .card-hover-secondary,
+    .product-card:has(.card-hover-secondary):focus-within .card-hover-secondary {
+        opacity: 1;
+    }
+
+}
+
+.seller-badge,
+.seller-heart,
+.plp-badge,
+.plp-stock-badge,
+.plp-heart {
+    z-index: 4;
+}
+
 .seller-badge {
     position: absolute;
     top: .903vw;

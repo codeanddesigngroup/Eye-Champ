@@ -35,6 +35,8 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
   const [variantMedia, setVariantMedia] = useState<Record<string, Media[]>>({});
   const [featureImage, setFeatureImage] = useState<Media | null>(null);
   const [uploadingFeature, setUploadingFeature] = useState(false);
+  const [hoverImage, setHoverImage] = useState<Media | null>(null);
+  const [uploadingHover, setUploadingHover] = useState(false);
   const [frameImage, setFrameImage] = useState<Media | null>(null);
   const [uploadingFrame, setUploadingFrame] = useState(false);
   const [categoryOptions, setCategoryOptions] = useState<CategoryOption[]>([]);
@@ -56,6 +58,8 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
       setLensCompatibility((product.lens_compatibility as string[]) ?? []);
       const featureImageUrl = String(product.feature_image_url ?? "");
       setFeatureImage(featureImageUrl ? { name: featureImageUrl.split("/").pop() || "Product feature image", url: featureImageUrl } : null);
+      const hoverImageUrl = String(product.hover_image_url ?? "");
+      setHoverImage(hoverImageUrl ? { name: hoverImageUrl.split("/").pop() || "Product card hover image", url: hoverImageUrl } : null);
       const frameImageUrl = String(product.frame_image_url ?? "");
       setFrameImage(frameImageUrl ? { name: frameImageUrl.split("/").pop() || "Frame image", url: frameImageUrl } : null);
       setSelectedMainCategories((product.categories as string[]) ?? []); setSelectedSubCategories((product.subcategories as string[]) ?? []); setSelectedNestedCategories((product.subcategories as string[]) ?? []);
@@ -115,6 +119,7 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
       tags: String(data.get("tags") || "").split(",").map((tag) => tag.trim()).filter(Boolean),
       media: Object.values(variantMedia).flat().slice(0, 1).map(item => ({ name: item.name, url: item.url, primary: true })),
       featureImageUrl: featureImage?.url ?? null,
+      hoverImageUrl: hoverImage?.url ?? null,
       frameImageUrl: frameImage?.url ?? null,
     };
   };
@@ -136,7 +141,7 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
   const save = async (statusOverride?: "Draft") => {
     const form = document.getElementById("new-product-form") as HTMLFormElement | null;
     if (!form || saving) return;
-    if (uploadingFeature || uploadingFrame) return showAuthToast({ message: "Wait for the image upload to finish.", type: "error" });
+    if (uploadingFeature || uploadingHover || uploadingFrame) return showAuthToast({ message: "Wait for the image upload to finish.", type: "error" });
     const data = new FormData(form);
     if ((statusOverride ?? status) !== "Draft") {
     if ((!editId || editProduct?.status === "Draft") && !featureImage?.url?.trim()) {
@@ -267,6 +272,21 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
     } catch (error) {
       showAuthToast({ message: error instanceof Error ? error.message : "Could not upload product feature image.", type: "error" });
     } finally { setUploadingFeature(false); }
+  };
+  const uploadHoverImage = async (file: File | undefined) => {
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) return showAuthToast({ message: "Product card hover image must be 2 MB or smaller.", type: "error" });
+    const uploadData = new FormData();
+    uploadData.append("images", file);
+    setUploadingHover(true);
+    try {
+      const response = await fetch("/api/admin/uploads/products", { method: "POST", body: uploadData });
+      const result = await response.json() as { media?: Media[]; error?: string };
+      if (!response.ok || !result.media?.[0]) throw new Error(result.error || "Could not upload product card hover image.");
+      setHoverImage(result.media[0]);
+    } catch (error) {
+      showAuthToast({ message: error instanceof Error ? error.message : "Could not upload product card hover image.", type: "error" });
+    } finally { setUploadingHover(false); }
   };
   const addVariant = () =>
     setVariants((current) => [
@@ -612,7 +632,15 @@ export default function NewProductPage({ editId }: { editId?: string } = {}) {
                 </div>
               </section>
               <section className="np-card">
-                <CardTitle number="07" title={<>Frame image{(!editId || editProduct?.status === "Draft") && <em className="np-required"> *</em>}</>} subtitle="Shown beside the second Select Lenses step." />
+                <CardTitle number="07" title="Product card hover image" subtitle="Shown when a customer hovers over a product card. Kept separate from the feature and slider images." />
+                <div className="np-frame-image-row">
+                  {hoverImage && <div className="np-frame-image-preview"><Image src={hoverImage.url} alt="Product card hover preview" width={150} height={84} unoptimized /><button type="button" onClick={() => setHoverImage(null)} aria-label="Remove product card hover image"><X size={14} /></button></div>}
+                  <label className="np-color-upload"><input type="file" accept="image/png,image/jpeg,image/webp,image/avif" disabled={uploadingHover} onChange={(event) => { void uploadHoverImage(event.target.files?.[0]); event.target.value = ""; }} /><ImagePlus size={14} />{uploadingHover ? "Uploading..." : hoverImage ? "Replace image" : "Upload hover image"}</label>
+                  <small>PNG, JPG, WEBP or AVIF. Maximum 2 MB.</small>
+                </div>
+              </section>
+              <section className="np-card">
+                <CardTitle number="08" title={<>Frame image{(!editId || editProduct?.status === "Draft") && <em className="np-required"> *</em>}</>} subtitle="Shown beside the second Select Lenses step." />
                 <div className="np-frame-image-row">
                   {frameImage && <div className="np-frame-image-preview"><Image src={frameImage.url} alt="Lens-step frame preview" width={150} height={84} unoptimized /><button type="button" onClick={() => setFrameImage(null)} aria-label="Remove lens-step frame image"><X size={14} /></button></div>}
                   <label className="np-color-upload"><input type="file" accept="image/png,image/jpeg,image/webp,image/avif" disabled={uploadingFrame} onChange={(event) => { void uploadFrameImage(event.target.files?.[0]); event.target.value = ""; }} /><ImagePlus size={14} />{uploadingFrame ? "Uploading..." : frameImage ? "Replace image" : "Upload frame image"}</label>

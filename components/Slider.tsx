@@ -9,7 +9,7 @@ import Link from "next/link";
 import { favoritesUpdatedEvent, getFavorites, toggleFavorite } from "@/lib/favorites";
 import "swiper/css";
 
-type Product = { id: string; title: string; slug: string; price: number; discountPercent: number; rating?: number; reviewCount?: number; shape: string | null; featureImageUrl?: string | null; media: { url: string; primary?: boolean }[]; variants: { name: string; values: string[]; mediaByValue?: Record<string, { url: string }[]> }[]; categorySlug: string | null; subcategorySlug: string | null };
+type Product = { id: string; title: string; slug: string; price: number; discountPercent: number; rating?: number; reviewCount?: number; shape: string | null; featureImageUrl?: string | null; hoverImageUrl?: string | null; media: { url: string; primary?: boolean }[]; variants: { name: string; values: string[]; mediaByValue?: Record<string, { url: string }[]> }[]; categorySlug: string | null; subcategorySlug: string | null };
 
 function swatchColor(value: string) {
   const normalized = value.toLowerCase().trim();
@@ -131,12 +131,12 @@ export default function Slider() {
                   if (event.key === "Enter" && event.target === event.currentTarget) router.push(href);
                 }}
               >
-                <div className="seller-visual">
+                <div className="seller-visual card-hover-image-wrap">
                   <span className="seller-badge">Top rated</span>
                   <button className={`seller-heart ${saved.includes(product.id) ? "saved" : ""}`} type="button" aria-label={saved.includes(product.id) ? "Remove from favorites" : "Add to favorites"} onClick={() => toggleSaved(product)}>
                     <Heart fill={saved.includes(product.id) ? "currentColor" : "none"} />
                   </button>
-                  {image ? <img src={image} alt={product.title} /> : <span>No image</span>}
+                  {image ? <><img className="card-hover-primary" src={image} alt={product.title} />{product.hoverImageUrl && <img className="card-hover-secondary" src={product.hoverImageUrl} alt="" aria-hidden="true" />}</> : <span>No image</span>}
                 </div>
                 <div className="seller-info">
                   <div className="seller-line">

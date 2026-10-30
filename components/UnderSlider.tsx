@@ -13,6 +13,7 @@ type Product = {
   id: string; title: string; slug: string; price: number; discountPercent: number; rating?: number; reviewCount?: number;
   shape: string | null; categorySlug: string | null; subcategorySlug: string | null;
   featureImageUrl?: string | null;
+  hoverImageUrl?: string | null;
   media: { url: string; primary?: boolean }[];
   variants: { name: string; values: string[]; mediaByValue?: Record<string, { url: string }[]> }[];
 };
@@ -88,12 +89,12 @@ export default function UnderSlider() {
             aria-label={`View ${product.title} for ${currency} ${price.toFixed(2)}`}
             onClick={event => { if (!(event.target as HTMLElement).closest("button, a")) router.push(href); }}
             onKeyDown={event => { if (event.key === "Enter" && event.target === event.currentTarget) router.push(href); }}>
-            <div className="seller-visual">
+            <div className="seller-visual card-hover-image-wrap">
               <span className="seller-badge">Under 5000</span>
               <button className={`seller-heart ${saved.includes(product.id) ? "saved" : ""}`} type="button"
                 aria-label={saved.includes(product.id) ? "Remove from favorites" : "Add to favorites"}
                 onClick={() => toggleFavorite({ ...product, price })}><Heart fill={saved.includes(product.id) ? "currentColor" : "none"} /></button>
-              {image ? <img src={image} alt={product.title} /> : <span>No image</span>}
+              {image ? <><img className="card-hover-primary" src={image} alt={product.title} />{product.hoverImageUrl && <img className="card-hover-secondary" src={product.hoverImageUrl} alt="" aria-hidden="true" />}</> : <span>No image</span>}
             </div>
             <div className="seller-info">
               <div className="seller-line"><strong>{currency} {price.toFixed(2)}</strong>{Number(product.reviewCount) > 0 && <span aria-label={`${Number(product.rating).toFixed(1)} out of 5 stars from ${product.reviewCount} reviews`}><Star fill="currentColor" /> {Number(product.rating).toFixed(1)} ({product.reviewCount})</span>}</div>

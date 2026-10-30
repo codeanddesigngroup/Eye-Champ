@@ -547,7 +547,7 @@ export default function PrescriptionSelectionPage() {
           <div className="usage-product-image">
             <div className="lens-preview-stage">
               <Image
-                className={`lens-preview-image${showTintFrame ? "" : " active"}`}
+                className="lens-preview-image lens-temples-base active"
                 src={product.image}
                 alt={`${product.name} ${product.frameColor}`}
                 width={1000}
@@ -1346,7 +1346,7 @@ export default function PrescriptionSelectionPage() {
                     <div className="lens-customization">
                       <div className="mobile-tint-preview">
                         <div className="lens-preview-stage">
-                          <Image className={`lens-preview-image${showTintFrame ? "" : " active"}`} src={product.image} alt={`${product.name} ${product.frameColor}`} width={1000} height={460} unoptimized />
+                          <Image className="lens-preview-image lens-temples-base active" src={product.image} alt={`${product.name} ${product.frameColor}`} width={1000} height={460} unoptimized />
                           {isSunglasses && product.frameImageUrl && <Image className={`lens-preview-image${showTintFrame ? " active" : ""}`} src={product.frameImageUrl} alt={`${product.name} frame`} width={1000} height={460} unoptimized />}
                           {isSunglasses && selectedTint && <LensTintOverlay src={tintFrameImage} color={tintCssColor(selectedTint)} strength={tintStrength} />}
                         </div>
