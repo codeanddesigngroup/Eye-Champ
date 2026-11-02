@@ -101,11 +101,11 @@ const sunglassesLensOptions = [
 const tintCssColor = (value: string) =>
   ({
     black: "#000000",
-    brown: "#594400",
-    green: "#105e18",
-    blue: "#7395cf",
-    yellow: "#fff06a",
-    red: "#cd5050",
+    brown: "#523F00",
+    green: "#19520B",
+    blue: "#6D8CC6",
+    yellow: "#FFF87F",
+    red: "#C64B4B",
     gray: "#808080",
     grey: "#808080",
     pink: "#db86a4",
@@ -474,6 +474,10 @@ export default function PrescriptionSelectionPage() {
       : selectedTint
     : null;
 
+  // A slight visual boost keeps the 20% tint from looking overly white while
+  // preserving the light-lens appearance and visible temple detail.
+  const tintPreviewStrength = tintStrength === 0.2 ? 0.28 : tintStrength;
+
   const changeStep = (
     nextStep: "usage" | "prescription" | "lenses" | "review",
   ) => {
@@ -562,11 +566,12 @@ export default function PrescriptionSelectionPage() {
 
               {isSunglasses &&
                 (step === "lenses" || step === "review") &&
-                selectedTint && (
+                selectedLens && (
                   <LensTintOverlay
                     src={tintFrameImage}
-                    color={tintCssColor(selectedTint)}
-                    strength={tintStrength}
+                    detailSrc={product.image}
+                    color={selectedTint ? tintCssColor(selectedTint) : "original"}
+                    strength={tintPreviewStrength}
                   />
                 )}
             </div>
@@ -1315,9 +1320,9 @@ export default function PrescriptionSelectionPage() {
                     aria-expanded={selectedLens === option.id}
                     className={`lens-type-card ${selectedLens === option.id ? "selected" : ""}`}
                     onClick={() => {
-                      setSelectedLens((current) =>
-                        current === option.id ? null : option.id,
-                      );
+                      const nextLens = selectedLens === option.id ? null : option.id;
+                      setSelectedLens(nextLens);
+                      if (isSunglasses && nextLens) setTintStrength(0.8);
                       setLensConfigured(false);
                     }}
                   >
@@ -1347,8 +1352,8 @@ export default function PrescriptionSelectionPage() {
                       <div className="mobile-tint-preview">
                         <div className="lens-preview-stage">
                           <Image className="lens-preview-image lens-temples-base active" src={product.image} alt={`${product.name} ${product.frameColor}`} width={1000} height={460} unoptimized />
-                          {isSunglasses && product.frameImageUrl && <Image className={`lens-preview-image${showTintFrame ? " active" : ""}`} src={product.frameImageUrl} alt={`${product.name} frame`} width={1000} height={460} unoptimized />}
-                          {isSunglasses && selectedTint && <LensTintOverlay src={tintFrameImage} color={tintCssColor(selectedTint)} strength={tintStrength} />}
+                          {isSunglasses && product.frameImageUrl && <Image className="lens-preview-image active" src={product.frameImageUrl} alt={`${product.name} frame`} width={1000} height={460} unoptimized />}
+                          {isSunglasses && <LensTintOverlay src={tintFrameImage} detailSrc={product.image} color={selectedTint ? tintCssColor(selectedTint) : "original"} strength={tintPreviewStrength} />}
                         </div>
                         <div className="mobile-expanded-product-details">
                           <h3>{product.name}</h3>

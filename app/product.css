@@ -967,7 +967,7 @@
 }
 
 .lens-preview-stage>.lens-preview-image:not(.lens-temples-base) {
-    z-index: 2;
+    z-index: 4;
 }
 
 .frame-lens-tint {
@@ -988,6 +988,7 @@ canvas.frame-lens-tint {
     transform: translateY(-50%);
     opacity: 1;
     mix-blend-mode: normal;
+    filter: blur(.45px);
 }
 
 .live-lens-tint {
@@ -1624,7 +1625,7 @@ svg.live-lens-tint .lens-shine.right {
 }
 
 .lens-customization .tint-swatches {
-    gap: 10px;
+    gap: 8px;
 }
 
 .tint-selected,
@@ -1636,12 +1637,19 @@ svg.live-lens-tint .lens-shine.right {
 }
 
 .tint-swatches button {
-    width: 22px;
-    height: 22px;
-    padding: 0;
-    border: 1px solid rgba(0, 0, 0, .08);
+    width: 25px;
+    height: 25px;
+    padding: 1px;
+    border: 2px solid rgba(255, 255, 255, .95);
     border-radius: 50%;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, .18);
+    box-shadow: 0 1px 6px rgba(15, 23, 42, .12);
+    cursor: pointer;
+    transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.tint-swatches button:hover {
+    transform: scale(1.06);
+    box-shadow: 0 3px 12px rgba(15, 23, 42, .18);
 }
 
 .tint-swatches button.selected {
@@ -2403,7 +2411,7 @@ svg.live-lens-tint .lens-shine.right {
     .sunglasses-lenses-step .mobile-tint-preview {
         display: grid;
         place-items: center;
-        min-height: 460px;
+        /* min-height: 460px; */
         margin: 18px -5px 22px;
     }
 
@@ -2415,6 +2423,15 @@ svg.live-lens-tint .lens-shine.right {
         width: 100%;
         height: auto;
         object-fit: contain;
+    }
+
+    .sunglasses-lenses-step .mobile-tint-preview .lens-temples-base {
+        opacity: 0;
+    }
+
+    .sunglasses-lenses-step .mobile-tint-preview canvas.frame-lens-tint {
+        left: 0;
+        width: 100%;
     }
 
     .sunglasses-lenses-step .lens-customization-shell.expanded .lens-customization {

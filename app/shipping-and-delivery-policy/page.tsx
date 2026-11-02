@@ -84,7 +84,7 @@ export default function ShippingInformationPage() {
         <h2>Delivery Issues</h2>
         <p>For assistance regarding an order or delivery:</p>
         <p><strong>Email:</strong> <a href="mailto:support@eyechamp.pk">support@eyechamp.pk</a><br />
-          <strong>Phone / WhatsApp:</strong> <a href="https://wa.me/923318099594">+92 331 8099594</a></p>
+          <strong>Phone / WhatsApp:</strong> <a href="https://wa.me/03201262434">03201262434</a></p>
         <p>Please provide your order number when contacting support.</p>
       </section>
     </article>

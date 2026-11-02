@@ -90,7 +90,7 @@ export default function CancelOrReturnOrderPage() {
         <h2>Contact</h2>
         <p>For cancellation, return, exchange, or refund requests:</p>
         <p><strong>Email:</strong> <a href="mailto:support@eyechamp.pk">support@eyechamp.pk</a><br />
-          <strong>Phone / WhatsApp:</strong> <a href="https://wa.me/923318099594">+92 331 8099594</a></p>
+          <strong>Phone / WhatsApp:</strong> <a href="https://wa.me/03201262434">03201262434</a></p>
       </section>
     </article>
   </main>;
